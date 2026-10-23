@@ -10,7 +10,10 @@ import 'package:neuroplay/features/auth/presentation/login_screen.dart';
 import 'package:neuroplay/features/auth/presentation/onboarding_screen.dart';
 import 'package:neuroplay/features/auth/presentation/register_screen.dart';
 import 'package:neuroplay/features/challenges/presentation/challenges_screen.dart';
+import 'package:neuroplay/features/games/presentation/focus_reactor/focus_reactor_screen.dart';
 import 'package:neuroplay/features/games/presentation/games_library_screen.dart';
+import 'package:neuroplay/features/games/presentation/memory_matrix/memory_matrix_screen.dart';
+import 'package:neuroplay/features/games/presentation/reflex_forge/reflex_forge_screen.dart';
 import 'package:neuroplay/features/home/presentation/home_screen.dart';
 import 'package:neuroplay/features/profile/presentation/profile_screen.dart';
 import 'package:neuroplay/features/progress/presentation/progress_screen.dart';
@@ -64,6 +67,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.memoryMatrix,
+        name: 'memory-matrix',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const MemoryMatrixScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.reflexForge,
+        name: 'reflex-forge',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ReflexForgeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.focusReactor,
+        name: 'focus-reactor',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const FocusReactorScreen(),
+      ),
       GoRoute(
         path: AppRoutes.login,
         name: 'login',

@@ -7,6 +7,9 @@ abstract final class AppRoutes {
   static const onboarding = '/onboarding';
   static const home = '/home';
   static const games = '/games';
+  static const memoryMatrix = '/games/memory-matrix';
+  static const reflexForge = '/games/reflex-forge';
+  static const focusReactor = '/games/focus-reactor';
   static const progress = '/progress';
   static const challenges = '/challenges';
   static const profile = '/profile';

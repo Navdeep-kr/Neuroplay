@@ -10,26 +10,24 @@ final class DummyCognitiveGameDefinition extends GameDefinition {
           description:
               'A mock attention cognitive game for app-layer contract verification.',
           category: 'attention',
-          version: const GameEngineVersion(1, 0, 0),
-          scoringRules: const StandardScoringRules(version: '1.0.0'),
+          version: GameEngineVersion.current,
+          scoringRules: const StandardScoringRules(),
         );
 
   @override
   GameConfig createDefaultConfig({
     GameDifficulty difficulty = GameDifficulty.medium,
     int? seed,
-  }) {
-    return GameConfig(
-      seed: seed ?? 1234,
-      difficulty: difficulty,
-      totalRounds: 2,
-    );
-  }
+  }) =>
+      GameConfig(
+        seed: seed ?? 1234,
+        difficulty: difficulty,
+        totalRounds: 2,
+      );
 
   @override
-  GameEngineBase createEngine({required GameConfig config}) {
-    return _DummyEngine(config: config);
-  }
+  GameEngineBase createEngine({required GameConfig config}) =>
+      _DummyEngine(config: config);
 }
 
 final class _DummyEngine extends GameEngineBase {
@@ -72,7 +70,7 @@ final class _DummyEngine extends GameEngineBase {
     final breakdown = rules.calculateScore(
       rawPoints: state.score,
       activeDuration: totalActiveDuration,
-      accuracy: 1.0,
+      accuracy: 1,
       difficulty: config.difficulty,
       streak: state.streak,
     );

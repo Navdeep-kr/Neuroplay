@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_breakpoints.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
@@ -242,10 +244,24 @@ class _GameCatalogCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               AppButton(
-                label: 'Play Preview',
+                label: 'Play',
                 icon: Icons.play_arrow_rounded,
-                variant: AppButtonVariant.secondary,
-                onPressed: () => _openPreviewModal(context),
+                onPressed: () {
+                  switch (game.slug) {
+                    case 'memory-matrix':
+                      context.push(AppRoutes.memoryMatrix);
+                      break;
+                    case 'reflex-forge':
+                      context.push(AppRoutes.reflexForge);
+                      break;
+                    case 'focus-reactor':
+                      context.push(AppRoutes.focusReactor);
+                      break;
+                    default:
+                      _openPreviewModal(context);
+                      break;
+                  }
+                },
               ),
             ],
           ),

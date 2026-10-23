@@ -33,37 +33,37 @@ class MockTrainingRepository implements ITrainingRepository {
     ),
     CognitiveGame(
       id: 'g-002',
-      slug: 'pattern-matrix',
-      title: 'Matrix Recall',
+      slug: 'memory-matrix',
+      title: 'Memory Matrix',
       domain: CognitiveDomain.memory,
       description:
-          'Remember increasingly complex grid sequences and reproduce them.',
+          'Memorize briefly illuminated spatial grid patterns and reproduce their positions.',
       instructions:
-          'Observe the illuminated tiles on the grid. Re-tap the identical positions in exact reverse order.',
+          'Observe the illuminated tiles on the grid. Reproduce the exact positions after the pattern clears.',
       durationMinutes: 3,
       difficulty: 'Intermediate',
     ),
     CognitiveGame(
       id: 'g-003',
-      slug: 'selective-focus',
-      title: 'Distractor Filter',
+      slug: 'focus-reactor',
+      title: 'Focus Reactor',
       domain: CognitiveDomain.attention,
       description:
-          'Identify target symbols amidst rapid visual noise and clutter.',
+          'Identify designated target symbols amidst visual distractors or signal absence.',
       instructions:
-          'Tap only when matching pairs appear on screen. Ignore flashing secondary symbols.',
+          'Scan the array for the target item. Select the matching slot or declare absence when missing.',
       durationMinutes: 3,
       difficulty: 'Advanced',
     ),
     CognitiveGame(
       id: 'g-004',
-      slug: 'rule-shifter',
-      title: 'Flexibility Shift',
+      slug: 'reflex-forge',
+      title: 'Reflex Forge',
       domain: CognitiveDomain.flexibility,
       description:
-          'Sort geometric tokens under dynamically alternating matching rules.',
+          'Match geometric symbols to dynamically shifting rules with speed and precision.',
       instructions:
-          'Sort items either by color or shape depending on the active header cue.',
+          'Match symbols by shape or pattern depending on the active rule. Adapt swiftly when the rule shifts.',
       durationMinutes: 4,
       difficulty: 'Intermediate',
     ),
