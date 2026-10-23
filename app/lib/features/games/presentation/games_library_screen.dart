@@ -257,6 +257,15 @@ class _GameCatalogCard extends StatelessWidget {
                     case 'focus-reactor':
                       context.push(AppRoutes.focusReactor);
                       break;
+                    case 'logic-labyrinth':
+                      context.push(AppRoutes.logicLabyrinth);
+                      break;
+                    case 'number-pulse':
+                      context.push(AppRoutes.numberPulse);
+                      break;
+                    case 'word-weaver':
+                      context.push(AppRoutes.wordWeaver);
+                      break;
                     default:
                       _openPreviewModal(context);
                       break;

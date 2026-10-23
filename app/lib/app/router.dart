@@ -12,8 +12,11 @@ import 'package:neuroplay/features/auth/presentation/register_screen.dart';
 import 'package:neuroplay/features/challenges/presentation/challenges_screen.dart';
 import 'package:neuroplay/features/games/presentation/focus_reactor/focus_reactor_screen.dart';
 import 'package:neuroplay/features/games/presentation/games_library_screen.dart';
+import 'package:neuroplay/features/games/presentation/logic_labyrinth/logic_labyrinth_screen.dart';
 import 'package:neuroplay/features/games/presentation/memory_matrix/memory_matrix_screen.dart';
+import 'package:neuroplay/features/games/presentation/number_pulse/number_pulse_screen.dart';
 import 'package:neuroplay/features/games/presentation/reflex_forge/reflex_forge_screen.dart';
+import 'package:neuroplay/features/games/presentation/word_weaver/word_weaver_screen.dart';
 import 'package:neuroplay/features/home/presentation/home_screen.dart';
 import 'package:neuroplay/features/profile/presentation/profile_screen.dart';
 import 'package:neuroplay/features/progress/presentation/progress_screen.dart';
@@ -84,6 +87,24 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'focus-reactor',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const FocusReactorScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.logicLabyrinth,
+        name: 'logic-labyrinth',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const LogicLabyrinthScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.numberPulse,
+        name: 'number-pulse',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const NumberPulseScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.wordWeaver,
+        name: 'word-weaver',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const WordWeaverScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,

@@ -199,6 +199,12 @@ class LocalTrainingRepository implements ITrainingRepository {
         return CognitiveDomain.flexibility;
       case 'focus-reactor':
         return CognitiveDomain.attention;
+      case 'logic-labyrinth':
+        return CognitiveDomain.problemSolving;
+      case 'number-pulse':
+        return CognitiveDomain.speed;
+      case 'word-weaver':
+        return CognitiveDomain.memory;
       default:
         return CognitiveDomain.memory;
     }

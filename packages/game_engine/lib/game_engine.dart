@@ -52,3 +52,32 @@ export 'src/games/focus_reactor/focus_reactor_engine.dart';
 export 'src/games/focus_reactor/focus_reactor_models.dart';
 export 'src/games/focus_reactor/focus_reactor_scoring.dart';
 export 'src/games/focus_reactor/focus_reactor_state.dart';
+
+// Cognitive Games: Logic Labyrinth
+export 'src/games/logic_labyrinth/logic_labyrinth_actions.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_config.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_definition.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_engine.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_models.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_scoring.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_solver.dart';
+export 'src/games/logic_labyrinth/logic_labyrinth_state.dart';
+
+// Cognitive Games: Number Pulse
+export 'src/games/number_pulse/number_pulse_actions.dart';
+export 'src/games/number_pulse/number_pulse_config.dart';
+export 'src/games/number_pulse/number_pulse_definition.dart';
+export 'src/games/number_pulse/number_pulse_engine.dart';
+export 'src/games/number_pulse/number_pulse_models.dart';
+export 'src/games/number_pulse/number_pulse_scoring.dart';
+export 'src/games/number_pulse/number_pulse_state.dart';
+
+// Cognitive Games: Word Weaver
+export 'src/games/word_weaver/word_weaver_actions.dart';
+export 'src/games/word_weaver/word_weaver_bank.dart';
+export 'src/games/word_weaver/word_weaver_config.dart';
+export 'src/games/word_weaver/word_weaver_definition.dart';
+export 'src/games/word_weaver/word_weaver_engine.dart';
+export 'src/games/word_weaver/word_weaver_models.dart';
+export 'src/games/word_weaver/word_weaver_scoring.dart';
+export 'src/games/word_weaver/word_weaver_state.dart';

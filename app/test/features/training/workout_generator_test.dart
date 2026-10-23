@@ -5,10 +5,10 @@ import 'package:neuroplay/features/training/domain/workout_generator.dart';
 void main() {
   group('WorkoutGenerator Unit Tests', () {
     test(
-        'catalog contains all three original playable games with distinct domains',
+        'catalog contains all six original playable games with distinct domains',
         () {
       final catalog = WorkoutGenerator.catalog;
-      expect(catalog.length, 3);
+      expect(catalog.length, 6);
 
       final gameIds = catalog.map((g) => g.id).toSet();
       expect(
@@ -17,6 +17,9 @@ void main() {
           'memory-matrix',
           'reflex-forge',
           'focus-reactor',
+          'logic-labyrinth',
+          'number-pulse',
+          'word-weaver',
         ]),
       );
 
@@ -24,6 +27,8 @@ void main() {
       expect(domains.contains(CognitiveDomain.memory), isTrue);
       expect(domains.contains(CognitiveDomain.flexibility), isTrue);
       expect(domains.contains(CognitiveDomain.attention), isTrue);
+      expect(domains.contains(CognitiveDomain.problemSolving), isTrue);
+      expect(domains.contains(CognitiveDomain.speed), isTrue);
     });
 
     test('generates deterministic daily workout for the same date', () {

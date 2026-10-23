@@ -44,6 +44,45 @@ abstract final class WorkoutGenerator {
       difficulty: 'Advanced',
       route: AppRoutes.focusReactor,
     ),
+    CognitiveGame(
+      id: 'logic-labyrinth',
+      slug: 'logic-labyrinth',
+      title: 'Logic Labyrinth',
+      domain: CognitiveDomain.problemSolving,
+      description:
+          'Plan and navigate optimal paths through spatial mazes with obstacles and checkpoints.',
+      instructions:
+          'Determine the shortest route to the exit. Collect the key checkpoint if present and reach the goal.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.logicLabyrinth,
+    ),
+    CognitiveGame(
+      id: 'number-pulse',
+      slug: 'number-pulse',
+      title: 'Number Pulse',
+      domain: CognitiveDomain.speed,
+      description:
+          'Rapid mental arithmetic and numerical sequence recognition under time pressure.',
+      instructions:
+          'Observe the numerical sequence. Calculate the missing number and choose the correct answer swiftly.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.numberPulse,
+    ),
+    CognitiveGame(
+      id: 'word-weaver',
+      slug: 'word-weaver',
+      title: 'Word Weaver',
+      domain: CognitiveDomain.memory,
+      description:
+          'Rapid semantic association and vocabulary organization under cognitive load.',
+      instructions:
+          'Inspect the anchor word. Identify the matching term from the same conceptual category.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.wordWeaver,
+    ),
   ];
 
   static const List<String> _workoutTitles = [

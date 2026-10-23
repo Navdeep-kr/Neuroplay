@@ -10,6 +10,9 @@ abstract final class AppRoutes {
   static const memoryMatrix = '/games/memory-matrix';
   static const reflexForge = '/games/reflex-forge';
   static const focusReactor = '/games/focus-reactor';
+  static const logicLabyrinth = '/games/logic-labyrinth';
+  static const numberPulse = '/games/number-pulse';
+  static const wordWeaver = '/games/word-weaver';
   static const progress = '/progress';
   static const challenges = '/challenges';
   static const profile = '/profile';

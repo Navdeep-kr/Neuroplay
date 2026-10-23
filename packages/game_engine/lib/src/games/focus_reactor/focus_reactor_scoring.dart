@@ -29,7 +29,9 @@ final class FocusReactorScoringRules extends ScoringRules {
     int penaltyCount = 0,
   }) {
     if (accuracy < 0.0 || accuracy > 1.0) {
-      throw const GameValidationException('Accuracy must be between 0.0 and 1.0');
+      throw const GameValidationException(
+        'Accuracy must be between 0.0 and 1.0',
+      );
     }
     if (rawPoints < 0) {
       throw const GameValidationException('rawPoints cannot be negative');
