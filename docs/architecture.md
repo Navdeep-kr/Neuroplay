@@ -141,6 +141,48 @@ flowchart TD
 - Flutter Web redirect URI: `https://neuroplay.app/` or `http://localhost:<port>/` in development.
 - PKCE flow ensures all authorization code exchanges occur over secure HTTPS without client credential leakage.
 
+### 2.5 Reusable Cognitive Game Framework (`packages/game_engine`)
+
+The game framework is encapsulated in a pure Dart package (`packages/game_engine`) with zero dependencies on Flutter UI presentation widgets:
+
+```mermaid
+flowchart TD
+    subgraph Framework["packages/game_engine (Headless Dart)"]
+        GD["GameDefinition<br/>(id, version, rules)"]
+        GC["GameConfig<br/>(seed, difficulty, rounds)"]
+        SR["SeededRandom<br/>(Deterministic PRNG)"]
+        MC["PausableMonotonicClock<br/>(Stopwatch / TestMonotonicClock)"]
+        EB["GameEngineBase<br/>(Deterministic State Machine)"]
+        GS["GameSession<br/>(Lifecycle Controller)"]
+        GR["GameResult<br/>(Validated Typed Metrics)"]
+    end
+    subgraph UI["Flutter App (Presentation Layer)"]
+        GP["GameView / Widgets<br/>(Listens to session.stateStream)"]
+        UI_ACTION["Dispatches GameAction<br/>(tap, select, pause)"]
+    end
+    subgraph Backend["Trusted Server"]
+        EF["submit-score<br/>(Grants XP, validates rules)"]
+    end
+
+    GD --> GC --> EB
+    SR --> EB
+    MC --> GS
+    EB --> GS
+    UI_ACTION --> GS
+    GS --> GP
+    GS -- "finish()" --> GR
+    GR -- "Server verification" --> EF
+```
+
+**Key Framework Guarantees:**
+1. **Explicit Versioning**: All games implement `GameDefinition` with semantic versions and target `minimumEngineVersion` (`GameEngineVersion`).
+2. **Deterministic State Transitions**: State transitions for a given seed and action sequence are 100% reproducible. Replaying action history on a fresh engine produces identical states and metrics.
+3. **Monotonic Timing Source**: Active duration is computed exclusively via a monotonic time source (`Stopwatch` / `MonotonicClock`), preventing tampering or corruption from device wall-clock jumps or NTP syncs.
+4. **Pause, Resume & Interruption Handling**: `PausableMonotonicClock` automatically freezes elapsed active timing during user pauses or operating system interruptions (phone calls, app backgrounding).
+5. **Typed Result Serialization**: `GameResult` validates all fields (non-negative scores, terminal completion phase, valid durations) and serializes cleanly to JSON.
+6. **Zero Entitlement/XP Authority**: `GameResult` is an immutable, client-side metric report. Games have no API, parameters, or authority to grant durable XP or alter subscription entitlements; server-side Edge Functions (`submit-score`) hold sole authority.
+7. **Offline Operability**: All game execution logic runs completely offline and locally, returning `isOffline: true` on the result payload when network is unavailable.
+
 ## 3. Database Architecture
 
 ### 3.1 Core Entity-Relationship Diagram

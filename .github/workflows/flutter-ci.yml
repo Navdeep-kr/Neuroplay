@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'app/**'
+      - 'packages/**'
       - '.github/workflows/flutter-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'app/**'
+      - 'packages/**'
       - '.github/workflows/flutter-ci.yml'
 
 concurrency:
@@ -33,6 +35,14 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Test Game Engine
+        run: |
+          cd ../packages/game_engine
+          dart pub get
+          dart analyze --fatal-infos
+          dart test
+        shell: bash
 
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .

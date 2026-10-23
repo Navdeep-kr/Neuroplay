@@ -27,6 +27,10 @@ dependencies:
   fl_chart: ^0.70.2
   google_fonts: ^6.2.1
 
+  # Cognitive Game Engine
+  game_engine:
+    path: ../packages/game_engine
+
   # Utilities
   flutter_secure_storage: ^9.2.4
   intl: ^0.20.2
