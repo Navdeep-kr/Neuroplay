@@ -6,5 +6,5 @@ import 'package:neuroplay/core/network/supabase_client.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseConfig.initialize();
-  runApp(const ProviderScope(child: NeuroplaApp()));
+  runApp(const ProviderScope(child: NeuroplayApp()));
 }

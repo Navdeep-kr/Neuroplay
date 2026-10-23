@@ -1,18 +1,8 @@
-import 'package:flutter/material.dart';
+/// Re-exports the complete NEUROPLAY design system theme.
+library;
 
-/// Application theme configuration (Material 3).
-abstract final class AppTheme {
-  static const _seedColor = Color(0xFF6750A4);
-
-  static ThemeData get light => ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: _seedColor,
-        brightness: Brightness.light,
-      );
-
-  static ThemeData get dark => ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: _seedColor,
-        brightness: Brightness.dark,
-      );
-}
+export 'package:neuroplay/core/theme/app_colors.dart';
+export 'package:neuroplay/core/theme/app_radii.dart';
+export 'package:neuroplay/core/theme/app_spacing.dart';
+export 'package:neuroplay/core/theme/app_theme.dart';
+export 'package:neuroplay/core/theme/app_typography.dart';

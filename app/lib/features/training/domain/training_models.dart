@@ -1,0 +1,142 @@
+import 'package:flutter/material.dart';
+
+/// Primary cognitive faculties targeted by NEUROPLAY exercises.
+enum CognitiveDomain {
+  memory(
+    'Memory',
+    Icons.grid_view_rounded,
+    'Retain and manipulate complex patterns',
+  ),
+  attention(
+    'Focus & Attention',
+    Icons.center_focus_strong_rounded,
+    'Sustain selective focus under distraction',
+  ),
+  speed(
+    'Processing Speed',
+    Icons.speed_rounded,
+    'Rapid sensory perception and motor response',
+  ),
+  flexibility(
+    'Cognitive Flexibility',
+    Icons.swap_horiz_rounded,
+    'Switch between conflicting rule systems',
+  ),
+  problemSolving(
+    'Problem Solving',
+    Icons.extension_rounded,
+    'Deductive reasoning and spatial strategy',
+  );
+
+  const CognitiveDomain(this.label, this.icon, this.description);
+  final String label;
+  final IconData icon;
+  final String description;
+}
+
+/// Metadata and configuration for a cognitive exercise.
+class CognitiveGame {
+  const CognitiveGame({
+    required this.id,
+    required this.slug,
+    required this.title,
+    required this.domain,
+    required this.description,
+    required this.instructions,
+    required this.durationMinutes,
+    required this.difficulty,
+    this.isPreview = true,
+  });
+
+  final String id;
+  final String slug;
+  final String title;
+  final CognitiveDomain domain;
+  final String description;
+  final String instructions;
+  final int durationMinutes;
+  final String difficulty;
+  final bool isPreview;
+}
+
+/// A structured daily routine containing 3-5 curated exercise modules.
+class DailyWorkout {
+  const DailyWorkout({
+    required this.id,
+    required this.date,
+    required this.title,
+    required this.subtitle,
+    required this.estimatedMinutes,
+    required this.games,
+    required this.domains,
+    this.isCompleted = false,
+  });
+
+  final String id;
+  final DateTime date;
+  final String title;
+  final String subtitle;
+  final int estimatedMinutes;
+  final List<CognitiveGame> games;
+  final List<CognitiveDomain> domains;
+  final bool isCompleted;
+}
+
+/// Single data point for weekly performance charts.
+class DailyScorePoint {
+  const DailyScorePoint({
+    required this.dayLabel,
+    required this.scoreIndex,
+    required this.date,
+    this.isCompletedDay = false,
+  });
+
+  final String dayLabel;
+  final int scoreIndex; // 0-100 scale
+  final DateTime date;
+  final bool isCompletedDay;
+}
+
+/// Category-level score breakdown for the progress dashboard.
+class DomainScore {
+  const DomainScore({
+    required this.domain,
+    required this.scoreIndex,
+    required this.trendPercentage,
+    required this.percentileRank,
+  });
+
+  final CognitiveDomain domain;
+  final int scoreIndex; // 0-100
+  final int trendPercentage; // e.g. +4%
+  final int percentileRank; // e.g. 78th percentile
+}
+
+/// Active cognitive goals or community challenges.
+class CognitiveChallenge {
+  const CognitiveChallenge({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.domain,
+    required this.currentProgress,
+    required this.targetProgress,
+    required this.unit,
+    required this.daysRemaining,
+    this.isCompleted = false,
+  });
+
+  final String id;
+  final String title;
+  final String description;
+  final CognitiveDomain domain;
+  final int currentProgress;
+  final int targetProgress;
+  final String unit;
+  final int daysRemaining;
+  final bool isCompleted;
+
+  double get progressRatio => targetProgress > 0
+      ? (currentProgress / targetProgress).clamp(0.0, 1.0)
+      : 0.0;
+}
