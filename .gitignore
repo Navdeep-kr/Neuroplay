@@ -1,0 +1,60 @@
+# ============================================================
+# NEUROPLAY — .gitignore
+# ============================================================
+
+# ----- Environment & Secrets -----
+.env
+.env.local
+.env.*.local
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.key
+
+# ----- Platform Secrets (Firebase/Google) -----
+google-services.json
+GoogleService-Info.plist
+
+# ----- Flutter / Dart -----
+app/.dart_tool/
+app/.packages
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.fvm/
+
+# General Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# ----- Node.js -----
+node_modules/
+.next/
+out/
+.vercel
+
+# ----- IDE -----
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ----- Supabase -----
+supabase/.branches
+supabase/.temp
+
+# ----- Coverage -----
+coverage/
+lcov.info

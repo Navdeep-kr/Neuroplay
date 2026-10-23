@@ -1,0 +1,11 @@
+-- ============================================================
+-- NEUROPLAY — Seed Data
+-- ============================================================
+-- This file is executed by `supabase db reset` after migrations.
+-- Add initial data for local development here.
+-- ============================================================
+
+-- Seed games table (created in Phase 2 migration)
+-- INSERT INTO public.games (id, slug, title, description, category, config, is_active)
+-- VALUES
+--   (gen_random_uuid(), 'reaction-time', 'Reaction Time', 'Test your reaction speed by tapping as fast as you can when the stimulus appears.', 'speed', '{"rounds": 5, "min_delay_ms": 1000, "max_delay_ms": 5000}', true);

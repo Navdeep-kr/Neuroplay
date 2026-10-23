@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "appTitle": "NEUROPLAY",
+  "@appTitle": {
+    "description": "The application title"
+  }
+}

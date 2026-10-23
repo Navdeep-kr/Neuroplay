@@ -1,0 +1,10 @@
+-- ============================================================
+-- NEUROPLAY — Migration: Create profiles table
+-- ============================================================
+-- Phase 1: Auth & User Profile
+-- This migration will be applied in Phase 1.
+-- Placeholder file to establish the migrations directory.
+-- ============================================================
+
+-- Migration will be created during Phase 1 implementation.
+-- See docs/implementation-plan.md for details.
