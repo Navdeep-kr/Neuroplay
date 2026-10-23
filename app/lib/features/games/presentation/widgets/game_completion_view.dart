@@ -13,6 +13,9 @@ class GameCompletionView extends StatelessWidget {
     required this.gameTitle,
     required this.onPlayAgain,
     required this.onBackToLibrary,
+    this.onNextInWorkout,
+    this.nextGameTitle,
+    this.isWorkoutCompleted = false,
     super.key,
   });
 
@@ -20,6 +23,9 @@ class GameCompletionView extends StatelessWidget {
   final String gameTitle;
   final VoidCallback onPlayAgain;
   final VoidCallback onBackToLibrary;
+  final VoidCallback? onNextInWorkout;
+  final String? nextGameTitle;
+  final bool isWorkoutCompleted;
 
   @override
   Widget build(BuildContext context) {
@@ -46,15 +52,19 @@ class GameCompletionView extends StatelessWidget {
                   color: AppColors.mint500.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.emoji_events_rounded,
+                child: Icon(
+                  isWorkoutCompleted
+                      ? Icons.celebration_rounded
+                      : Icons.emoji_events_rounded,
                   color: AppColors.mint500,
                   size: 36,
                 ),
               ),
               AppSpacing.gapH16,
               Text(
-                'Exercise Complete',
+                isWorkoutCompleted
+                    ? 'Daily Workout Complete!'
+                    : 'Exercise Complete',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -66,7 +76,13 @@ class GameCompletionView extends StatelessWidget {
                   color: AppColors.navy500,
                 ),
               ),
-              if (isPractice) ...[
+              if (isWorkoutCompleted) ...[
+                AppSpacing.gapH8,
+                const AppBadge(
+                  label: '🎉 All Routine Exercises Finished for Today',
+                  variant: AppBadgeVariant.mint,
+                ),
+              ] else if (isPractice) ...[
                 AppSpacing.gapH8,
                 const AppBadge(
                   label: 'Practice Mode — Results are not persisted',
@@ -177,14 +193,35 @@ class GameCompletionView extends StatelessWidget {
               ),
               AppSpacing.gapH24,
 
+              // Workout progression banner or standard navigation
+              if (onNextInWorkout != null && !isWorkoutCompleted) ...[
+                AppButton(
+                  label: nextGameTitle != null
+                      ? 'Continue: Next Exercise ($nextGameTitle)'
+                      : 'Continue to Next Exercise',
+                  icon: Icons.arrow_forward_rounded,
+                  isFullWidth: true,
+                  onPressed: onNextInWorkout,
+                ),
+                AppSpacing.gapH12,
+              ],
+
               // Navigation Actions
               Row(
                 children: [
                   Expanded(
                     child: AppButton(
-                      label: 'Play Again',
-                      icon: Icons.replay_rounded,
-                      onPressed: onPlayAgain,
+                      label: isWorkoutCompleted ? 'Return Home' : 'Play Again',
+                      icon: isWorkoutCompleted
+                          ? Icons.home_rounded
+                          : Icons.replay_rounded,
+                      variant: isWorkoutCompleted
+                          ? AppButtonVariant.primary
+                          : (onNextInWorkout != null
+                              ? AppButtonVariant.secondary
+                              : AppButtonVariant.primary),
+                      onPressed:
+                          isWorkoutCompleted ? onBackToLibrary : onPlayAgain,
                     ),
                   ),
                   AppSpacing.gapW12,
@@ -222,6 +259,7 @@ class _StatColumn extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        AppSpacing.gapH4,
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
@@ -248,16 +286,21 @@ class _BreakdownRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.textTheme.bodyMedium),
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.navy700,
+            ),
+          ),
           Text(
             value,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: isNegative ? AppColors.error : null,
+              color: isNegative ? AppColors.error : AppColors.navy800,
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
@@ -13,9 +14,11 @@ import 'package:neuroplay/features/games/presentation/widgets/game_completion_vi
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
+import 'package:neuroplay/features/training/data/training_repository.dart';
+import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
 /// Playable screen for the Focus Reactor selective attention exercise.
-class FocusReactorScreen extends StatefulWidget {
+class FocusReactorScreen extends ConsumerStatefulWidget {
   const FocusReactorScreen({
     super.key,
     this.initialDifficulty = GameDifficulty.medium,
@@ -28,10 +31,10 @@ class FocusReactorScreen extends StatefulWidget {
   final int? seed;
 
   @override
-  State<FocusReactorScreen> createState() => _FocusReactorScreenState();
+  ConsumerState<FocusReactorScreen> createState() => _FocusReactorScreenState();
 }
 
-class _FocusReactorScreenState extends State<FocusReactorScreen> {
+class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
   final FocusReactorDefinition _definition = FocusReactorDefinition();
   late GameSession _session;
   StreamSubscription<GameState>? _stateSubscription;
@@ -74,9 +77,19 @@ class _FocusReactorScreenState extends State<FocusReactorScreen> {
       setState(() {
         if (state.isCompleted) {
           _finalResult = _session.finish(isOffline: true);
+          _recordResult(_finalResult!);
         }
       });
     });
+  }
+
+  void _recordResult(GameResult result) {
+    final workoutState = ref.read(workoutSessionProvider);
+    if (workoutState != null) {
+      ref.read(workoutSessionProvider.notifier).recordGameResult(result);
+    } else {
+      ref.read(trainingRepositoryProvider).recordGameSession(result);
+    }
   }
 
   void _showTutorialDialog() {
@@ -168,6 +181,12 @@ class _FocusReactorScreenState extends State<FocusReactorScreen> {
     final theme = Theme.of(context);
 
     if (_finalResult != null) {
+      final workoutState = ref.watch(workoutSessionProvider);
+      final hasNext = workoutState != null &&
+          workoutState.nextGame != null &&
+          !workoutState.isCompleted;
+      final isWorkoutDone = workoutState?.isCompleted ?? false;
+
       return Scaffold(
         body: SafeArea(
           child: GameCompletionView(
@@ -181,7 +200,24 @@ class _FocusReactorScreenState extends State<FocusReactorScreen> {
               _session.start();
               setState(() {});
             },
-            onBackToLibrary: () => context.go(AppRoutes.games),
+            onBackToLibrary: () {
+              ref.read(workoutSessionProvider.notifier).endWorkout();
+              context.go(AppRoutes.games);
+            },
+            onNextInWorkout: hasNext
+                ? () {
+                    final next = ref
+                        .read(workoutSessionProvider.notifier)
+                        .advanceToNextGame();
+                    if (next != null && next.route.isNotEmpty) {
+                      context.go(next.route);
+                    } else {
+                      context.go(AppRoutes.home);
+                    }
+                  }
+                : null,
+            nextGameTitle: workoutState?.nextGame?.title,
+            isWorkoutCompleted: isWorkoutDone,
           ),
         ),
       );

@@ -21,4 +21,7 @@ abstract final class Tables {
   static const games = 'games';
   static const gameSessions = 'game_sessions';
   static const gameScores = 'game_scores';
+  static const dailyWorkouts = 'daily_workouts';
+  static const userStreaks = 'user_streaks';
+  static const cognitiveIndices = 'cognitive_indices';
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
@@ -12,9 +13,11 @@ import 'package:neuroplay/features/games/presentation/widgets/game_completion_vi
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
+import 'package:neuroplay/features/training/data/training_repository.dart';
+import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
 /// Interactive playable screen for the Memory Matrix cognitive game.
-class MemoryMatrixScreen extends StatefulWidget {
+class MemoryMatrixScreen extends ConsumerStatefulWidget {
   const MemoryMatrixScreen({
     super.key,
     this.initialDifficulty = GameDifficulty.medium,
@@ -27,10 +30,10 @@ class MemoryMatrixScreen extends StatefulWidget {
   final int? seed;
 
   @override
-  State<MemoryMatrixScreen> createState() => _MemoryMatrixScreenState();
+  ConsumerState<MemoryMatrixScreen> createState() => _MemoryMatrixScreenState();
 }
 
-class _MemoryMatrixScreenState extends State<MemoryMatrixScreen> {
+class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
   final MemoryMatrixDefinition _definition = MemoryMatrixDefinition();
   late GameSession _session;
   StreamSubscription<GameState>? _stateSubscription;
@@ -78,9 +81,19 @@ class _MemoryMatrixScreenState extends State<MemoryMatrixScreen> {
         if (state.isCompleted) {
           _previewTimer?.cancel();
           _finalResult = _session.finish(isOffline: true);
+          _recordResult(_finalResult!);
         }
       });
     });
+  }
+
+  void _recordResult(GameResult result) {
+    final workoutState = ref.read(workoutSessionProvider);
+    if (workoutState != null) {
+      ref.read(workoutSessionProvider.notifier).recordGameResult(result);
+    } else {
+      ref.read(trainingRepositoryProvider).recordGameSession(result);
+    }
   }
 
   void _showTutorialDialog() {
@@ -193,6 +206,12 @@ class _MemoryMatrixScreenState extends State<MemoryMatrixScreen> {
     final theme = Theme.of(context);
 
     if (_finalResult != null) {
+      final workoutState = ref.watch(workoutSessionProvider);
+      final hasNext = workoutState != null &&
+          workoutState.nextGame != null &&
+          !workoutState.isCompleted;
+      final isWorkoutDone = workoutState?.isCompleted ?? false;
+
       return Scaffold(
         body: SafeArea(
           child: GameCompletionView(
@@ -207,7 +226,24 @@ class _MemoryMatrixScreenState extends State<MemoryMatrixScreen> {
               _schedulePreviewTimer();
               setState(() {});
             },
-            onBackToLibrary: () => context.go(AppRoutes.games),
+            onBackToLibrary: () {
+              ref.read(workoutSessionProvider.notifier).endWorkout();
+              context.go(AppRoutes.games);
+            },
+            onNextInWorkout: hasNext
+                ? () {
+                    final next = ref
+                        .read(workoutSessionProvider.notifier)
+                        .advanceToNextGame();
+                    if (next != null && next.route.isNotEmpty) {
+                      context.go(next.route);
+                    } else {
+                      context.go(AppRoutes.home);
+                    }
+                  }
+                : null,
+            nextGameTitle: workoutState?.nextGame?.title,
+            isWorkoutCompleted: isWorkoutDone,
           ),
         ),
       );

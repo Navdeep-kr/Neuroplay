@@ -53,7 +53,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 ),
                 AppSpacing.gapH16,
 
-                // Prototype / Mock Data Notice
+                // Phase 4 Live Analytics Banner
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
@@ -70,12 +70,12 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                       Icon(
                         Icons.bar_chart_rounded,
                         size: 16,
-                        color: isDark ? AppColors.mint400 : AppColors.mint700,
+                        color: isDark ? AppColors.mint400 : AppColors.mint500,
                       ),
                       AppSpacing.gapW8,
                       Expanded(
                         child: Text(
-                          'Preview Metrics — Typed demo dataset simulating Phase 4 statistical aggregation.',
+                          'Cognitive Indices — Derived from verified session accuracy and reaction latency.',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: isDark
                                 ? AppColors.darkTextSecondary

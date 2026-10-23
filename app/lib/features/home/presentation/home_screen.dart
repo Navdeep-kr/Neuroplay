@@ -16,6 +16,7 @@ import 'package:neuroplay/core/widgets/game_container_preview.dart';
 import 'package:neuroplay/features/auth/data/auth_repository.dart';
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/domain/training_models.dart';
+import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
 /// Main Home Dashboard screen.
 class HomeScreen extends ConsumerWidget {
@@ -25,6 +26,10 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final workoutAsync = ref.watch(todayWorkoutProvider);
     final user = ref.watch(currentUserProvider);
+    final streak =
+        ref.watch(userStreakProvider).valueOrNull ?? UserStreak.empty;
+    final stats = ref.watch(overallStatsProvider).valueOrNull ??
+        OverallCognitiveStats.empty;
     final greetingName = user.displayName?.split(' ').first ?? 'Alex';
     final theme = Theme.of(context);
     final tokens = context.tokens;
@@ -40,7 +45,12 @@ class HomeScreen extends ConsumerWidget {
             title: 'Unable to load dashboard',
             message: 'An error occurred while loading your daily routine.',
             technicalDetails: err.toString(),
-            onRetry: () => ref.refresh(todayWorkoutProvider),
+            onRetry: () {
+              ref
+                ..invalidate(todayWorkoutProvider)
+                ..invalidate(userStreakProvider)
+                ..invalidate(overallStatsProvider);
+            },
           ),
           data: (workout) => SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
@@ -51,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- Demonstration Data Banner ---
+                  // --- Mode Status Banner ---
                   Container(
                     margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                     padding: const EdgeInsets.symmetric(
@@ -67,16 +77,22 @@ class HomeScreen extends ConsumerWidget {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.info_outline_rounded,
+                          user.isGuest
+                              ? Icons.info_outline_rounded
+                              : Icons.cloud_done_rounded,
                           size: 16,
                           color: isDark
                               ? AppColors.darkTextSecondary
-                              : AppColors.navy600,
+                              : (user.isGuest
+                                  ? AppColors.navy600
+                                  : AppColors.mint500),
                         ),
                         AppSpacing.gapW8,
                         Expanded(
                           child: Text(
-                            'Demonstration MVP Mode — Sample routine and training indicators displayed.',
+                            user.isGuest
+                                ? 'Guest Mode — Workouts and streaks tracked locally on this device. Sign in to sync.'
+                                : 'Synced Profile — Workouts and cognitive indices automatically persisted.',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: isDark
                                   ? AppColors.darkTextSecondary
@@ -88,7 +104,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // --- Header Greeting & Streak ---
+                  // --- Header Greeting & Live Streak ---
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final isNarrow = constraints.maxWidth < 500;
@@ -135,7 +151,7 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                                 AppSpacing.gapW4,
                                 Text(
-                                  '6 Day Streak',
+                                  '${streak.currentStreak} Day Streak',
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     color: tokens.onMintContainer,
                                     fontWeight: FontWeight.w700,
@@ -154,7 +170,9 @@ class HomeScreen extends ConsumerWidget {
                   AppCard(
                     backgroundColor: isDark
                         ? const Color(0xFF132230)
-                        : const Color(0xFFF0FDF4),
+                        : (workout.isCompleted
+                            ? const Color(0xFFF0FDF4)
+                            : const Color(0xFFF0FDF4)),
                     borderColor: isDark
                         ? const Color(0xFF1D3B47)
                         : const Color(0xFFBBF7D0),
@@ -168,7 +186,9 @@ class HomeScreen extends ConsumerWidget {
                           runSpacing: AppSpacing.xs,
                           children: [
                             AppBadge(
-                              label: "TODAY'S WORKOUT",
+                              label: workout.isCompleted
+                                  ? "TODAY'S WORKOUT COMPLETED"
+                                  : "TODAY'S WORKOUT",
                               variant: AppBadgeVariant.mint,
                             ),
                             Text(
@@ -177,6 +197,15 @@ class HomeScreen extends ConsumerWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+                            if (workout.completedGameIds.isNotEmpty &&
+                                !workout.isCompleted)
+                              Text(
+                                '•   ${workout.completedGameIds.length}/${workout.games.length} completed',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: AppColors.mint500,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                           ],
                         ),
                         AppSpacing.gapH12,
@@ -188,7 +217,9 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         AppSpacing.gapH8,
                         Text(
-                          workout.subtitle,
+                          workout.isCompleted
+                              ? "You've successfully finished all scheduled exercises for today! Well done keeping your cognitive streak alive."
+                              : workout.subtitle,
                           style: theme.textTheme.bodyLarge,
                         ),
                         AppSpacing.gapH16,
@@ -211,13 +242,19 @@ class HomeScreen extends ConsumerWidget {
 
                         // Clear, prominent CTA
                         AppButton(
-                          label: "Start Today's Workout",
-                          icon: Icons.play_arrow_rounded,
+                          label: workout.isCompleted
+                              ? 'Review Routine & Free Play'
+                              : (workout.completedGameIds.isNotEmpty
+                                  ? "Resume Today's Workout"
+                                  : "Start Today's Workout"),
+                          icon: workout.isCompleted
+                              ? Icons.check_circle_rounded
+                              : Icons.play_arrow_rounded,
                           isFullWidth: true,
                           semanticLabel:
                               "Start Today's Workout, 8 minutes routine",
                           onPressed: () {
-                            _showWorkoutModal(context, workout);
+                            _showWorkoutModal(context, ref, workout);
                           },
                         ),
                       ],
@@ -234,14 +271,21 @@ class HomeScreen extends ConsumerWidget {
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final cols = constraints.maxWidth > 600 ? 3 : 1;
+                      final brainIndex = stats.overallBrainIndex;
+                      final sessionCount = stats.totalSessions;
+                      final bestFacultyName =
+                          stats.bestFaculty?.domain.label ?? 'Memory';
+                      final bestFacultyRank =
+                          stats.bestFaculty?.percentileRank ?? 78;
+
                       if (cols == 3) {
                         return Row(
                           children: [
                             Expanded(
                               child: _MetricCard(
                                 title: 'Brain Index',
-                                value: '82.4',
-                                subtitle: '+4.2% this month',
+                                value: '$brainIndex',
+                                subtitle: 'Based on active domains',
                                 icon: Icons.bolt_rounded,
                               ),
                             ),
@@ -249,8 +293,8 @@ class HomeScreen extends ConsumerWidget {
                             Expanded(
                               child: _MetricCard(
                                 title: 'Consistency',
-                                value: '5 / 7',
-                                subtitle: 'Sessions this week',
+                                value: '$sessionCount',
+                                subtitle: 'Lifetime completed sessions',
                                 icon: Icons.calendar_today_rounded,
                               ),
                             ),
@@ -258,8 +302,9 @@ class HomeScreen extends ConsumerWidget {
                             Expanded(
                               child: _MetricCard(
                                 title: 'Best Faculty',
-                                value: 'Speed',
-                                subtitle: '84th percentile rank',
+                                value: bestFacultyName,
+                                subtitle:
+                                    '${bestFacultyRank}th percentile rank',
                                 icon: Icons.insights_rounded,
                               ),
                             ),
@@ -270,22 +315,22 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           _MetricCard(
                             title: 'Brain Index',
-                            value: '82.4',
-                            subtitle: '+4.2% this month',
+                            value: '$brainIndex',
+                            subtitle: 'Based on active domains',
                             icon: Icons.bolt_rounded,
                           ),
                           AppSpacing.gapH12,
                           _MetricCard(
                             title: 'Consistency',
-                            value: '5 / 7',
-                            subtitle: 'Sessions this week',
+                            value: '$sessionCount',
+                            subtitle: 'Lifetime completed sessions',
                             icon: Icons.calendar_today_rounded,
                           ),
                           AppSpacing.gapH12,
                           _MetricCard(
                             title: 'Best Faculty',
-                            value: 'Speed',
-                            subtitle: '84th percentile rank',
+                            value: bestFacultyName,
+                            subtitle: '${bestFacultyRank}th percentile rank',
                             icon: Icons.insights_rounded,
                           ),
                         ],
@@ -313,51 +358,77 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   AppSpacing.gapH12,
                   ...workout.games.map(
-                    (game) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: AppCard(
-                        onTap: () => _openGamePreview(context, game),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: tokens.subtleBackground,
-                                borderRadius: AppRadii.rMd,
-                                border: Border.all(color: tokens.cardBorder),
+                    (game) {
+                      final isDone = workout.completedGameIds.contains(game.id);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: AppCard(
+                          onTap: () {
+                            if (game.route.isNotEmpty) {
+                              context.go(game.route);
+                            } else {
+                              _openGamePreview(context, game);
+                            }
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: isDone
+                                      ? tokens.mintContainer
+                                      : tokens.subtleBackground,
+                                  borderRadius: AppRadii.rMd,
+                                  border: Border.all(color: tokens.cardBorder),
+                                ),
+                                child: Icon(
+                                  isDone
+                                      ? Icons.check_circle_rounded
+                                      : game.domain.icon,
+                                  color: isDone
+                                      ? tokens.onMintContainer
+                                      : theme.colorScheme.primary,
+                                  size: 22,
+                                ),
                               ),
-                              child: Icon(
-                                game.domain.icon,
-                                color: theme.colorScheme.primary,
-                                size: 22,
+                              AppSpacing.gapW16,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          game.title,
+                                          style: theme.textTheme.titleMedium,
+                                        ),
+                                        if (isDone) ...[
+                                          AppSpacing.gapW8,
+                                          const AppBadge(
+                                            label: 'Done',
+                                            variant: AppBadgeVariant.mint,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    AppSpacing.gapH4,
+                                    Text(
+                                      '${game.domain.label} • ${game.durationMinutes} min • ${game.difficulty}',
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            AppSpacing.gapW16,
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    game.title,
-                                    style: theme.textTheme.titleMedium,
-                                  ),
-                                  AppSpacing.gapH4,
-                                  Text(
-                                    '${game.domain.label} • ${game.durationMinutes} min • ${game.difficulty}',
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                ],
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                size: 20,
                               ),
-                            ),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              size: 20,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                   AppSpacing.gapH24,
 
@@ -401,7 +472,11 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showWorkoutModal(BuildContext context, DailyWorkout workout) {
+  void _showWorkoutModal(
+    BuildContext context,
+    WidgetRef ref,
+    DailyWorkout workout,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -431,7 +506,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             AppSpacing.gapH24,
             Text(
-              "Start Today's Workout",
+              "Today's Guided Routine",
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             AppSpacing.gapH8,
@@ -447,17 +522,27 @@ class HomeScreen extends ConsumerWidget {
                 separatorBuilder: (context, index) => AppSpacing.gapH12,
                 itemBuilder: (context, index) {
                   final game = workout.games[index];
+                  final isDone = workout.completedGameIds.contains(game.id);
+
                   return AppCard(
                     padding: AppSpacing.pMd,
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 14,
-                          backgroundColor: context.tokens.subtleBackground,
-                          child: Text(
-                            '${index + 1}',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
+                          backgroundColor: isDone
+                              ? context.tokens.mintContainer
+                              : context.tokens.subtleBackground,
+                          child: isDone
+                              ? Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: context.tokens.onMintContainer,
+                                )
+                              : Text(
+                                  '${index + 1}',
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
                         ),
                         AppSpacing.gapW12,
                         Expanded(
@@ -476,11 +561,17 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         ),
                         AppButton(
-                          label: 'Play',
-                          variant: AppButtonVariant.secondary,
+                          label: isDone ? 'Replay' : 'Play',
+                          variant: isDone
+                              ? AppButtonVariant.subtle
+                              : AppButtonVariant.secondary,
                           onPressed: () {
                             Navigator.of(context).pop();
-                            _openGamePreview(context, game);
+                            if (game.route.isNotEmpty) {
+                              context.go(game.route);
+                            } else {
+                              _openGamePreview(context, game);
+                            }
                           },
                         ),
                       ],
@@ -491,11 +582,20 @@ class HomeScreen extends ConsumerWidget {
             ),
             AppSpacing.gapH24,
             AppButton(
-              label: 'Launch Full Routine Preview',
+              label: workout.isCompleted
+                  ? 'Re-run Complete Routine'
+                  : 'Start Guided Daily Routine',
+              icon: Icons.play_arrow_rounded,
               isFullWidth: true,
               onPressed: () {
+                ref.read(workoutSessionProvider.notifier).startWorkout(workout);
                 Navigator.of(context).pop();
-                _openGamePreview(context, workout.games.first);
+                final firstGame = workout.games.first;
+                if (firstGame.route.isNotEmpty) {
+                  context.go(firstGame.route);
+                } else {
+                  _openGamePreview(context, firstGame);
+                }
               },
             ),
           ],
@@ -513,28 +613,12 @@ class HomeScreen extends ConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 620),
           child: Padding(
             padding: AppSpacing.pXl,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded),
-                        tooltip: 'Close game',
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ),
-                  GameContainerPreview(
-                    title: game.title,
-                    domain: game.domain.label,
-                    instructions: game.instructions,
-                    durationMinutes: game.durationMinutes,
-                  ),
-                ],
-              ),
+            child: GameContainerPreview(
+              title: game.title,
+              domain: game.domain.label,
+              instructions: game.instructions,
+              durationMinutes: game.durationMinutes,
+              onCompleted: () => Navigator.of(context).pop(),
             ),
           ),
         ),
@@ -559,7 +643,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = context.tokens;
+    final isDark = theme.brightness == Brightness.dark;
 
     return AppCard(
       child: Column(
@@ -570,7 +654,10 @@ class _MetricCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.labelMedium,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color:
+                      isDark ? AppColors.darkTextSecondary : AppColors.navy700,
+                ),
               ),
               Icon(
                 icon,
@@ -582,7 +669,7 @@ class _MetricCard extends StatelessWidget {
           AppSpacing.gapH12,
           Text(
             value,
-            style: theme.textTheme.displaySmall?.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -590,7 +677,7 @@ class _MetricCard extends StatelessWidget {
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: tokens.onMintContainer,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.navy700,
             ),
           ),
         ],

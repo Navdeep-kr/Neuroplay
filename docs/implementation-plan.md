@@ -182,11 +182,11 @@ flowchart TD
 
 ### Acceptance Criteria
 
-- [ ] Dashboard shows total games played, current streak, average scores.
-- [ ] Score trend chart displays correctly with real data.
-- [ ] Stats computed server-side via Edge Function.
-- [ ] Empty state handled gracefully (new user, no games played).
-- [ ] All tests pass.
+- [x] Dashboard shows total games played, current streak, average scores.
+- [x] Score trend chart displays correctly with real data.
+- [x] Stats computed server-side via Edge Function and database aggregation RPC.
+- [x] Empty state handled gracefully (new user, no games played).
+- [x] All tests pass.
 
 ---
 

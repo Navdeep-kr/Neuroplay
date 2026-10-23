@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
@@ -13,9 +14,11 @@ import 'package:neuroplay/features/games/presentation/widgets/game_completion_vi
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
+import 'package:neuroplay/features/training/data/training_repository.dart';
+import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
 /// Playable screen for the Reflex Forge cognitive task-switching exercise.
-class ReflexForgeScreen extends StatefulWidget {
+class ReflexForgeScreen extends ConsumerStatefulWidget {
   const ReflexForgeScreen({
     super.key,
     this.initialDifficulty = GameDifficulty.medium,
@@ -28,10 +31,10 @@ class ReflexForgeScreen extends StatefulWidget {
   final int? seed;
 
   @override
-  State<ReflexForgeScreen> createState() => _ReflexForgeScreenState();
+  ConsumerState<ReflexForgeScreen> createState() => _ReflexForgeScreenState();
 }
 
-class _ReflexForgeScreenState extends State<ReflexForgeScreen> {
+class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
   final ReflexForgeDefinition _definition = ReflexForgeDefinition();
   late GameSession _session;
   StreamSubscription<GameState>? _stateSubscription;
@@ -74,9 +77,19 @@ class _ReflexForgeScreenState extends State<ReflexForgeScreen> {
       setState(() {
         if (state.isCompleted) {
           _finalResult = _session.finish(isOffline: true);
+          _recordResult(_finalResult!);
         }
       });
     });
+  }
+
+  void _recordResult(GameResult result) {
+    final workoutState = ref.read(workoutSessionProvider);
+    if (workoutState != null) {
+      ref.read(workoutSessionProvider.notifier).recordGameResult(result);
+    } else {
+      ref.read(trainingRepositoryProvider).recordGameSession(result);
+    }
   }
 
   void _showTutorialDialog() {
@@ -159,6 +172,12 @@ class _ReflexForgeScreenState extends State<ReflexForgeScreen> {
     final theme = Theme.of(context);
 
     if (_finalResult != null) {
+      final workoutState = ref.watch(workoutSessionProvider);
+      final hasNext = workoutState != null &&
+          workoutState.nextGame != null &&
+          !workoutState.isCompleted;
+      final isWorkoutDone = workoutState?.isCompleted ?? false;
+
       return Scaffold(
         body: SafeArea(
           child: GameCompletionView(
@@ -172,7 +191,24 @@ class _ReflexForgeScreenState extends State<ReflexForgeScreen> {
               _session.start();
               setState(() {});
             },
-            onBackToLibrary: () => context.go(AppRoutes.games),
+            onBackToLibrary: () {
+              ref.read(workoutSessionProvider.notifier).endWorkout();
+              context.go(AppRoutes.games);
+            },
+            onNextInWorkout: hasNext
+                ? () {
+                    final next = ref
+                        .read(workoutSessionProvider.notifier)
+                        .advanceToNextGame();
+                    if (next != null && next.route.isNotEmpty) {
+                      context.go(next.route);
+                    } else {
+                      context.go(AppRoutes.home);
+                    }
+                  }
+                : null,
+            nextGameTitle: workoutState?.nextGame?.title,
+            isWorkoutCompleted: isWorkoutDone,
           ),
         ),
       );
