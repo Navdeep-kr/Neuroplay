@@ -13,6 +13,7 @@ import 'package:neuroplay/core/widgets/app_button.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/core/widgets/app_state_views.dart';
 import 'package:neuroplay/core/widgets/game_container_preview.dart';
+import 'package:neuroplay/features/auth/data/auth_repository.dart';
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/domain/training_models.dart';
 
@@ -23,6 +24,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final workoutAsync = ref.watch(todayWorkoutProvider);
+    final user = ref.watch(currentUserProvider);
+    final greetingName = user.displayName?.split(' ').first ?? 'Alex';
     final theme = Theme.of(context);
     final tokens = context.tokens;
     final isDark = theme.brightness == Brightness.dark;
@@ -107,7 +110,7 @@ class HomeScreen extends ConsumerWidget {
                               ),
                               AppSpacing.gapH4,
                               Text(
-                                'Welcome, Alex',
+                                'Welcome, $greetingName',
                                 style: theme.textTheme.displaySmall,
                               ),
                             ],

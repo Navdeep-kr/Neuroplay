@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:neuroplay/app/providers.dart';
+import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_breakpoints.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
+import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/theme/app_theme.dart';
 import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_button.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/core/widgets/app_dialog.dart';
+import 'package:neuroplay/features/auth/data/auth_repository.dart';
+import 'package:neuroplay/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:neuroplay/features/profile/data/profile_repository.dart';
+import 'package:neuroplay/features/profile/presentation/controllers/profile_controller.dart';
 
-/// User Profile and Application Settings screen.
+/// User profile and application preferences screen with guest and cloud account handling.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -19,11 +26,28 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final tokens = context.tokens;
     final isDark = theme.brightness == Brightness.dark;
+    final mediaQuery = MediaQuery.of(context);
+    final isReducedMotion = mediaQuery.disableAnimations;
+
+    final user = ref.watch(currentUserProvider);
+    final profileAsync = ref.watch(userProfileProvider);
     final themeMode = ref.watch(themeModeProvider);
-    final a11yPrefs = ref.watch(accessibilityPreferencesProvider);
-    final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
-    final isReducedMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final accessPrefs = ref.watch(accessibilityPreferencesProvider);
+    final authState = ref.watch(authControllerProvider);
+    final isAuthLoading = authState.isLoading;
+
+    final isGuest = user.isGuest || !user.isAuthenticated;
+    final displayName = user.displayName ?? 'Guest Player';
+    final email = user.email ?? 'Local In-Memory Session';
+    final initials = displayName.isNotEmpty
+        ? displayName
+            .trim()
+            .split(' ')
+            .map((s) => s.isNotEmpty ? s[0] : '')
+            .take(2)
+            .join()
+            .toUpperCase()
+        : 'GP';
 
     return Scaffold(
       body: SafeArea(
@@ -43,7 +67,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 AppSpacing.gapH4,
                 Text(
-                  'Manage account preferences, accessibility defaults, and application theme.',
+                  'Manage account credentials, appearance, and sensory preferences.',
                   style: theme.textTheme.bodyMedium,
                 ),
                 AppSpacing.gapH24,
@@ -51,57 +75,148 @@ class ProfileScreen extends ConsumerWidget {
                 // User Identity Card
                 AppCard(
                   padding: AppSpacing.pXl,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: tokens.mintContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            'AR',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: tokens.onMintContainer,
-                              fontWeight: FontWeight.w700,
+                      Row(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: tokens.mintContainer,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                initials,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: tokens.onMintContainer,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      AppSpacing.gapW16,
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: AppSpacing.sm,
-                              runSpacing: AppSpacing.xs,
+                          AppSpacing.gapW16,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Alex Rivera',
-                                  style: theme.textTheme.titleLarge,
+                                Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: AppSpacing.sm,
+                                  runSpacing: AppSpacing.xs,
+                                  children: [
+                                    Text(
+                                      profileAsync.value?.displayName ??
+                                          displayName,
+                                      style: theme.textTheme.titleLarge,
+                                    ),
+                                    AppBadge(
+                                      label: isGuest
+                                          ? 'GUEST MODE'
+                                          : 'VERIFIED ACCOUNT',
+                                      variant: isGuest
+                                          ? AppBadgeVariant.neutral
+                                          : AppBadgeVariant.info,
+                                    ),
+                                  ],
                                 ),
-                                const AppBadge(
-                                  label: 'PREVIEW USER',
+                                AppSpacing.gapH4,
+                                Text(
+                                  email,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                AppSpacing.gapH2,
+                                Text(
+                                  isGuest
+                                      ? 'Progress saved in memory only'
+                                      : 'Encrypted via Supabase Auth & PostgreSQL',
+                                  style: theme.textTheme.bodySmall,
                                 ),
                               ],
                             ),
-                            AppSpacing.gapH4,
-                            Text(
-                              'alex.rivera@example.com',
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            AppSpacing.gapH2,
-                            Text(
-                              'Member since October 2026',
-                              style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                      AppSpacing.gapH16,
+                      if (isGuest) ...[
+                        Container(
+                          padding: AppSpacing.pMd,
+                          decoration: BoxDecoration(
+                            color: tokens.subtleBackground,
+                            borderRadius: AppRadii.rMd,
+                            border: Border.all(color: tokens.cardBorder),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 18,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  AppSpacing.gapW8,
+                                  Expanded(
+                                    child: Text(
+                                      'Playing Without Registration',
+                                      style:
+                                          theme.textTheme.labelLarge?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              AppSpacing.gapH6,
+                              Text(
+                                'You are currently in guest mode. Note: Automatic guest-to-cloud account migration is not supported. Create an account to retain your scores across sessions.',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        AppSpacing.gapH16,
+                        AppButton(
+                          label: 'Sign In or Register',
+                          icon: Icons.login_rounded,
+                          isFullWidth: true,
+                          onPressed: () => context.go(AppRoutes.login),
+                        ),
+                      ] else ...[
+                        Wrap(
+                          spacing: AppSpacing.md,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            AppButton(
+                              label: 'Sign Out',
+                              icon: Icons.logout_rounded,
+                              variant: AppButtonVariant.secondary,
+                              isLoading: isAuthLoading,
+                              onPressed: () async {
+                                final confirm =
+                                    await AppDialog.showConfirmation(
+                                  context: context,
+                                  title: 'Sign Out',
+                                  message:
+                                      'Are you sure you want to sign out of your account on this device?',
+                                  confirmLabel: 'Sign Out',
+                                );
+                                if (confirm ?? false) {
+                                  await ref
+                                      .read(authControllerProvider.notifier)
+                                      .signOut();
+                                  if (context.mounted) {
+                                    context.go(AppRoutes.home);
+                                  }
+                                }
+                              },
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -120,42 +235,39 @@ class ProfileScreen extends ConsumerWidget {
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.palette_outlined),
-                        title: const Text('Theme Mode'),
+                        title: Text(
+                          'Interface Theme',
+                          style: theme.textTheme.titleMedium,
+                        ),
                         subtitle: Text(
-                          switch (themeMode) {
-                            ThemeMode.system => 'Following device system theme',
-                            ThemeMode.light => 'Light theme enabled',
-                            ThemeMode.dark => 'Dark theme enabled',
-                          },
+                          'Select light, dark, or follow device settings',
+                          style: theme.textTheme.bodySmall,
                         ),
                       ),
                       AppSpacing.gapH12,
                       SegmentedButton<ThemeMode>(
                         segments: const [
                           ButtonSegment(
+                            value: ThemeMode.system,
+                            label: Text('System'),
+                            icon: Icon(Icons.brightness_auto_rounded),
+                          ),
+                          ButtonSegment(
                             value: ThemeMode.light,
-                            icon: Icon(Icons.light_mode_outlined, size: 16),
                             label: Text('Light'),
+                            icon: Icon(Icons.light_mode_rounded),
                           ),
                           ButtonSegment(
                             value: ThemeMode.dark,
-                            icon: Icon(Icons.dark_mode_outlined, size: 16),
                             label: Text('Dark'),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.system,
-                            icon: Icon(
-                              Icons.settings_system_daydream,
-                              size: 16,
-                            ),
-                            label: Text('System'),
+                            icon: Icon(Icons.dark_mode_rounded),
                           ),
                         ],
                         selected: {themeMode},
-                        onSelectionChanged: (set) {
+                        onSelectionChanged: (selected) {
                           ref
-                              .read(themeModeProvider.notifier)
-                              .setThemeMode(set.first);
+                              .read(profileControllerProvider.notifier)
+                              .updateThemeMode(selected.first);
                         },
                       ),
                     ],
@@ -163,69 +275,62 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 AppSpacing.gapH24,
 
-                // Section 2: Accessibility & Interaction
+                // Section 2: Sensory & Accessibility
                 Text(
-                  'Accessibility & Interaction',
+                  'Sensory & Feedback',
                   style: theme.textTheme.headlineSmall,
                 ),
                 AppSpacing.gapH12,
                 AppCard(
                   child: Column(
                     children: [
-                      SwitchListTile(
+                      SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Sound Feedback'),
-                        subtitle: const Text(
-                          'Subtle audio tones during exercise cues',
+                        value: accessPrefs.soundEnabled,
+                        onChanged: (val) {
+                          ref
+                              .read(profileControllerProvider.notifier)
+                              .updateSound(enabled: val);
+                        },
+                        title: Text(
+                          'Auditory Feedback',
+                          style: theme.textTheme.titleMedium,
                         ),
-                        value: a11yPrefs.soundEnabled,
-                        onChanged: (v) => ref
-                            .read(accessibilityPreferencesProvider.notifier)
-                            .setSound(enabled: v),
-                      ),
-                      const Divider(),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Haptic Confirmation'),
-                        subtitle: const Text(
-                          'Tactile vibration pulse on mobile taps',
-                        ),
-                        value: a11yPrefs.hapticsEnabled,
-                        onChanged: (v) => ref
-                            .read(accessibilityPreferencesProvider.notifier)
-                            .setHaptics(enabled: v),
-                      ),
-                      const Divider(),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Daily Routine Reminder'),
-                        subtitle: const Text('Calm notification at 08:30 AM'),
-                        value: a11yPrefs.dailyReminders,
-                        onChanged: (v) => ref
-                            .read(accessibilityPreferencesProvider.notifier)
-                            .setReminders(enabled: v),
-                      ),
-                      const Divider(),
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.text_fields_rounded),
-                        title: const Text('System Text Scaling'),
                         subtitle: Text(
-                          'Current scale factor: ${textScale.toStringAsFixed(2)}x',
+                          'Calm acoustic chimes on stimulus response and completion',
+                          style: theme.textTheme.bodySmall,
                         ),
-                        trailing: AppBadge(
-                          label: textScale > 1.0 ? 'SCALED' : 'STANDARD',
+                      ),
+                      const Divider(),
+                      SwitchListTile.adaptive(
+                        contentPadding: EdgeInsets.zero,
+                        value: accessPrefs.hapticsEnabled,
+                        onChanged: (val) {
+                          ref
+                              .read(profileControllerProvider.notifier)
+                              .updateHaptics(enabled: val);
+                        },
+                        title: Text(
+                          'Tactile Vibrations',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        subtitle: Text(
+                          'Subtle haptic pulses on supported mobile devices',
+                          style: theme.textTheme.bodySmall,
                         ),
                       ),
                       const Divider(),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.motion_photos_off_outlined),
-                        title: const Text('Reduced Motion Preference'),
+                        title: Text(
+                          'System Reduced Motion',
+                          style: theme.textTheme.titleMedium,
+                        ),
                         subtitle: Text(
                           isReducedMotion
-                              ? 'Enabled by OS settings (animations disabled)'
-                              : 'Standard motion enabled',
+                              ? 'Active (Respecting system accessibility setting)'
+                              : 'Standard transitions enabled',
+                          style: theme.textTheme.bodySmall,
                         ),
                         trailing: AppBadge(
                           label: isReducedMotion ? 'ACTIVE' : 'DEFAULT',
@@ -250,7 +355,9 @@ class ProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Your cognitive training history is stored encrypted under Row-Level Security in PostgreSQL.',
+                        isGuest
+                            ? 'In guest mode, sessions are volatile and kept only in your local session cache.'
+                            : 'Your cognitive training history is stored encrypted under Row-Level Security in PostgreSQL.',
                         style: theme.textTheme.bodySmall,
                       ),
                       AppSpacing.gapH16,
@@ -272,21 +379,32 @@ class ProfileScreen extends ConsumerWidget {
                               );
                             },
                           ),
-                          AppButton(
-                            label: 'Delete Account',
-                            icon: Icons.delete_outline_rounded,
-                            variant: AppButtonVariant.danger,
-                            onPressed: () {
-                              AppDialog.showConfirmation(
-                                context: context,
-                                title: 'Delete Account and Data',
-                                message:
-                                    'Are you sure you want to permanently erase your NEUROPLAY profile and all associated cognitive records? This action cannot be reversed.',
-                                confirmLabel: 'Delete Permanently',
-                                isDestructive: true,
-                              );
-                            },
-                          ),
+                          if (!isGuest)
+                            AppButton(
+                              label: 'Delete Account',
+                              icon: Icons.delete_outline_rounded,
+                              variant: AppButtonVariant.danger,
+                              isLoading: isAuthLoading,
+                              onPressed: () async {
+                                final confirm =
+                                    await AppDialog.showConfirmation(
+                                  context: context,
+                                  title: 'Delete Account and Data',
+                                  message:
+                                      'Are you sure you want to permanently erase your NEUROPLAY profile and all associated cognitive records? This action executes a server-side cascade that cannot be reversed.',
+                                  confirmLabel: 'Delete Permanently',
+                                  isDestructive: true,
+                                );
+                                if (confirm ?? false) {
+                                  final deleted = await ref
+                                      .read(authControllerProvider.notifier)
+                                      .deleteAccount();
+                                  if (context.mounted && deleted) {
+                                    context.go(AppRoutes.home);
+                                  }
+                                }
+                              },
+                            ),
                         ],
                       ),
                     ],

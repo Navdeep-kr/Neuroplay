@@ -14,6 +14,7 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.keyboardType,
+    this.textInputAction,
     this.obscureText = false,
     this.enabled = true,
     this.readOnly = false,
@@ -29,9 +30,10 @@ class AppTextField extends StatelessWidget {
   final String? errorText;
   final TextEditingController? controller;
   final String? initialValue;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
+  final dynamic prefixIcon;
+  final dynamic suffixIcon;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final bool obscureText;
   final bool enabled;
   final bool readOnly;
@@ -39,6 +41,13 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final FormFieldValidator<String>? validator;
   final FocusNode? focusNode;
+
+  Widget? _resolveIcon(dynamic icon) {
+    if (icon == null) return null;
+    if (icon is Widget) return icon;
+    if (icon is IconData) return Icon(icon, size: 20);
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +74,11 @@ class AppTextField extends StatelessWidget {
             hintText: hint,
             helperText: helperText,
             errorText: errorText,
-            prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
+            prefixIcon: _resolveIcon(prefixIcon),
+            suffixIcon: _resolveIcon(suffixIcon),
           ),
           keyboardType: keyboardType,
+          textInputAction: textInputAction,
           obscureText: obscureText,
           enabled: enabled,
           readOnly: readOnly,

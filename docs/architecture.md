@@ -1,6 +1,6 @@
 # NEUROPLAY — Architecture
 
-> **Status**: Living document · Last updated: 2026-10-22
+> **Status**: Living document · Last updated: 2026-10-23
 
 ## 1. System Overview
 
@@ -40,146 +40,115 @@ flowchart LR
 
 ### 2.1 Layered Architecture
 
-The app follows a **feature-first** structure with a clean separation into three layers per feature:
+The app follows a **feature-first** structure with a clean separation into three layers per feature (Data, Domain, Presentation):
 
 ```
-lib/
+app/lib/
 ├── main.dart
 ├── app/
-│   ├── app.dart                  # MaterialApp.router setup
-│   ├── router.dart               # GoRouter configuration
-│   ├── theme.dart                # ThemeData (Material 3)
-│   └── providers.dart            # App-wide Riverpod providers
-├── features/
-│   ├── auth/
-│   │   ├── data/
-│   │   │   ├── auth_repository.dart
-│   │   │   └── auth_dto.dart
-│   │   ├── domain/
-│   │   │   ├── user_entity.dart
-│   │   │   └── auth_state.dart
-│   │   └── presentation/
-│   │       ├── login_screen.dart
-│   │       ├── register_screen.dart
-│   │       └── auth_provider.dart
-│   ├── onboarding/
-│   ├── home/
-│   ├── games/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   │       ├── game_list_screen.dart
-│   │       ├── game_play_screen.dart
-│   │       └── game_result_screen.dart
-│   └── profile/
+│   ├── app.dart                  # MaterialApp.router setup & ThemeMode binding
+│   ├── router.dart               # GoRouter configuration & AuthRouterListenable
+│   └── theme.dart                # Material 3 design tokens & theme data
 ├── core/
-│   ├── constants.dart
-│   ├── extensions/
+│   ├── constants.dart            # Route constants & table names
 │   ├── exceptions/
-│   │   ├── app_exception.dart    # Sealed exception hierarchy
-│   │   └── failure.dart          # Result type / Failure class
+│   │   ├── app_exception.dart    # Sealed AppException hierarchy
+│   │   └── failure.dart          # Equatable Failure value objects
 │   ├── network/
-│   │   └── supabase_client.dart  # Singleton Supabase init
-│   └── utils/
-│       ├── logger.dart
-│       └── validators.dart
-└── l10n/
-    ├── app_en.arb
-    └── l10n.dart
+│   │   └── supabase_client.dart  # Supabase initialization & PKCE client singleton
+│   ├── theme/
+│   │   ├── app_colors.dart       # Design system color tokens
+│   │   ├── app_spacing.dart      # Spacing, padding, and radii tokens
+│   │   ├── app_typography.dart   # Heading, title, and body styles
+│   │   └── app_breakpoints.dart  # Mobile, tablet, desktop responsive breakpoints
+│   ├── utils/
+│   │   ├── logger.dart           # AppLogger wrapper
+│   │   └── validators.dart       # Email and password form validation
+│   └── widgets/                  # Reusable components (buttons, cards, inputs, dialogs)
+└── features/
+    ├── auth/
+    │   ├── data/
+    │   │   └── auth_repository.dart        # IAuthRepository & SupabaseAuthRepository
+    │   ├── domain/
+    │   │   └── auth_user.dart              # AuthUser entity & AuthStatus enum
+    │   └── presentation/
+    │       ├── controllers/
+    │       │   └── auth_controller.dart    # AuthStateNotifier & auth providers
+    │       ├── login_screen.dart
+    │       ├── register_screen.dart
+    │       ├── forgot_password_screen.dart
+    │       └── onboarding_screen.dart
+    ├── home/
+    │   └── presentation/home_screen.dart
+    ├── games/
+    │   ├── data/
+    │   ├── domain/
+    │   └── presentation/games_screen.dart
+    ├── progress/
+    │   └── presentation/progress_screen.dart
+    ├── challenges/
+    │   └── presentation/challenges_screen.dart
+    └── profile/
+        ├── data/
+        │   └── profile_repository.dart     # IProfileRepository & SupabaseProfileRepository
+        ├── domain/
+        │   └── profile_models.dart         # UserProfile & UserPreferences
+        └── presentation/
+            ├── controllers/
+            │   └── profile_controller.dart # ProfileController & PreferencesController
+            └── profile_screen.dart
 ```
 
-### 2.2 State Management (Riverpod)
+### 2.2 State Management & Auth Reactivity (Riverpod)
 
 ```mermaid
 flowchart TD
-    subgraph Providers
-        A["authStateProvider<br/>(StreamProvider)"]
-        B["userProfileProvider<br/>(FutureProvider)"]
-        C["gameListProvider<br/>(FutureProvider.family)"]
-        D["gameSessionProvider<br/>(StateNotifierProvider)"]
+    subgraph AuthLayer
+        A["authStateStreamProvider<br/>(Supabase authStateChange)"]
+        B["currentUserProvider<br/>(AuthUser: unauthenticated | guest | authenticated)"]
+        C["authControllerProvider<br/>(StateNotifier<AsyncValue<void>>)"]
     end
-    subgraph Repositories
-        E["AuthRepository"]
-        F["ProfileRepository"]
-        G["GameRepository"]
+    subgraph ProfileLayer
+        D["userProfileProvider<br/>(FutureProvider)"]
+        E["userPreferencesProvider<br/>(StateNotifierProvider)"]
     end
-    subgraph DataSources
-        H["Supabase Auth"]
-        I["Supabase DB"]
+    subgraph RouterLayer
+        F["AuthRouterListenable"]
+        G["GoRouter redirect guard"]
     end
 
-    A --> E --> H
-    B --> F --> I
-    C --> G --> I
-    D --> G
+    A --> B
+    B --> F --> G
+    C -. "Invalidates on Sign-Out" .-> D
+    C -. "Invalidates on Sign-Out" .-> E
 ```
 
-**Conventions:**
-- `Provider` — immutable computed value.
-- `FutureProvider` / `StreamProvider` — async data from repositories.
-- `StateNotifierProvider` / `AsyncNotifierProvider` — mutable state with business logic.
-- `Provider.family` — parameterized providers.
-- All providers are declared in `<feature>/presentation/<feature>_provider.dart`.
-- Providers depend on repository providers, never on other feature providers directly (use a shared `core` provider or pass via constructor).
+**Key Principles:**
+- **Single Source of Truth**: `currentUserProvider` determines whether the user is `unauthenticated`, `guest`, or `authenticated`.
+- **Guest Mode Isolation**: Guests have a local in-memory identity without fake records in `auth.users`. Unauthenticated RLS blocks remote queries.
+- **Cache Invalidation**: Upon sign-out or account deletion, `authControllerProvider` invalidates `userProfileProvider` and `userPreferencesProvider` to prevent stale memory leaks.
 
-### 2.3 Navigation (GoRouter)
+### 2.3 Navigation & Guarded Routing (GoRouter)
 
-```dart
-// Simplified route structure
-GoRouter(
-  initialLocation: '/home',
-  redirect: (context, state) => /* auth guard */,
-  routes: [
-    GoRoute(path: '/login', builder: ...),
-    GoRoute(path: '/register', builder: ...),
-    GoRoute(path: '/onboarding', builder: ...),
-    ShellRoute(
-      builder: /* AppShell with bottom nav */,
-      routes: [
-        GoRoute(path: '/home', builder: ...),
-        GoRoute(path: '/games', builder: ...,
-          routes: [
-            GoRoute(path: ':gameId', builder: /* GamePlay */),
-            GoRoute(path: ':gameId/result', builder: /* GameResult */),
-          ],
-        ),
-        GoRoute(path: '/profile', builder: ...),
-      ],
-    ),
-  ],
-);
-```
+- Routes are organized into public auth routes (`/login`, `/register`, `/forgot-password`, `/onboarding`) and authenticated/guest app shell tabs (`/home`, `/games`, `/progress`, `/challenges`, `/profile`).
+- `AuthRouterListenable` notifies `GoRouter` whenever `currentUserProvider` transitions.
+- Authenticated or guest users attempting to access `/login` or `/register` are automatically redirected to `/home`.
+- Unauthenticated users attempting to access shell routes are redirected to `/login`.
 
-**Rules:**
-- All routes defined in `app/router.dart`.
-- Route paths are constants in `core/constants.dart`.
-- Auth guard redirects unauthenticated users to `/login`.
-- Deep linking is supported for all routes.
+### 2.4 Deep Linking & URL Handling
 
-### 2.4 Data Flow
-
-```mermaid
-sequenceDiagram
-    participant UI as Screen / Widget
-    participant P as Riverpod Provider
-    participant R as Repository
-    participant S as Supabase Client
-
-    UI->>P: ref.watch(provider)
-    P->>R: repository.getData()
-    R->>S: supabase.from('table').select()
-    S-->>R: PostgrestResponse
-    R-->>P: Entity / Failure
-    P-->>UI: AsyncValue<T>
-```
+- Native Scheme: `neuroplay://auth-callback` configured in Android (`AndroidManifest.xml`) and iOS (`Info.plist`).
+- Flutter Web redirect URI: `https://neuroplay.app/` or `http://localhost:<port>/` in development.
+- PKCE flow ensures all authorization code exchanges occur over secure HTTPS without client credential leakage.
 
 ## 3. Database Architecture
 
-### 3.1 Core Tables
+### 3.1 Core Entity-Relationship Diagram
 
 ```mermaid
 erDiagram
-    auth_users ||--o{ profiles : "has"
+    auth_users ||--|| profiles : "has (1:1)"
+    auth_users ||--|| user_preferences : "configures (1:1)"
     profiles ||--o{ game_sessions : "plays"
     games ||--o{ game_sessions : "played_in"
     game_sessions ||--o{ game_scores : "produces"
@@ -190,11 +159,21 @@ erDiagram
         timestamp created_at
     }
     profiles {
-        uuid id PK "FK → auth.users.id"
+        uuid id PK "FK → auth.users.id ON DELETE CASCADE"
         text display_name
         text avatar_url
-        date date_of_birth
         timestamp created_at
+        timestamp updated_at
+    }
+    user_preferences {
+        uuid id PK
+        uuid user_id FK "FK → auth.users.id ON DELETE CASCADE"
+        text theme_mode
+        boolean sound_enabled
+        boolean haptics_enabled
+        boolean daily_reminder_enabled
+        time reminder_time
+        boolean onboarding_completed
         timestamp updated_at
     }
     games {
@@ -209,8 +188,8 @@ erDiagram
     }
     game_sessions {
         uuid id PK
-        uuid user_id "FK → profiles.id"
-        uuid game_id "FK → games.id"
+        uuid user_id FK "FK → profiles.id ON DELETE CASCADE"
+        uuid game_id FK "FK → games.id"
         integer score
         integer duration_seconds
         jsonb metadata
@@ -219,7 +198,7 @@ erDiagram
     }
     game_scores {
         uuid id PK
-        uuid session_id "FK → game_sessions.id"
+        uuid session_id FK "FK → game_sessions.id ON DELETE CASCADE"
         text metric_name
         numeric metric_value
         timestamp recorded_at
@@ -228,37 +207,37 @@ erDiagram
 
 ### 3.2 Row-Level Security (RLS)
 
-Every table has RLS enabled. Core policies:
+All tables have RLS enabled. Core access matrix:
 
 | Table | SELECT | INSERT | UPDATE | DELETE |
 |-------|--------|--------|--------|--------|
-| `profiles` | Own row only | Auto via trigger | Own row only | Never |
-| `games` | All (public) | Admin only | Admin only | Admin only |
-| `game_sessions` | Own rows | Own rows | Own rows | Never |
+| `profiles` | Own row only (`auth.uid() = id`) | Trigger only | Own row only | Never (via cascade) |
+| `user_preferences` | Own row only (`auth.uid() = user_id`) | Trigger only | Own row only | Never (via cascade) |
+| `games` | All (public active) | Admin only | Admin only | Admin only |
+| `game_sessions` | Own rows (`auth.uid() = user_id`) | Own rows | Own rows | Never |
 | `game_scores` | Own rows (via session) | Via Edge Function | Never | Never |
 
 ### 3.3 Migrations
 
-- All schema changes go through numbered migrations in `supabase/migrations/`.
-- Naming: `YYYYMMDDHHMMSS_descriptive_name.sql`.
-- Migrations are idempotent where possible.
-- Seed data lives in `supabase/seed.sql`.
+- Migrations live in `supabase/migrations/` (e.g. `20261023000001_create_profiles_and_preferences.sql`).
+- Automatically provisions `profiles` and `user_preferences` via `public.handle_new_user()` trigger on `auth.users AFTER INSERT`.
 
 ## 4. Supabase Edge Functions
 
-Edge Functions handle trusted server-side operations:
+Trusted server-side operations deployed via Deno runtime:
 
-| Function | Purpose | Auth Required |
-|----------|---------|---------------|
-| `submit-score` | Validates and records game scores | Yes (JWT) |
-| `compute-stats` | Aggregates user performance stats | Yes (JWT) |
-| `delete-account` | GDPR-compliant account deletion | Yes (JWT) |
+| Function | Purpose | Auth Required | Service Role |
+|----------|---------|---------------|--------------|
+| `delete-account` | Verifies JWT and triggers `auth.admin.deleteUser(id)` | Yes (JWT) | Yes |
+| `submit-score` | Validates game rules and records scores securely | Yes (JWT) | Yes |
+| `compute-stats` | Computes aggregate percentile and cognitive domain radar | Yes (JWT) | Yes |
 
-**Conventions:**
-- Each function lives in `supabase/functions/<name>/index.ts`.
-- Functions validate JWT, extract user ID, perform operations with service role key.
-- Consistent error response shape: `{ "error": { "code": "VALIDATION_ERROR", "message": "..." } }`.
-- Functions are stateless and idempotent.
+### 4.1 Account Deletion Flow
+1. Client requests deletion via `SupabaseAuthRepository.deleteAccount()`.
+2. Edge Function `supabase/functions/delete-account` extracts and verifies user JWT via `supabase.auth.getUser()`.
+3. Server executes `auth.admin.deleteUser(user.id)`.
+4. PostgreSQL cascades delete to `public.profiles`, `public.user_preferences`, and all child game session rows.
+5. Client clears all Riverpod in-memory state and redirects to `/login`.
 
 ## 5. Marketing Website Architecture
 
@@ -278,84 +257,12 @@ website/
 │   │   ├── layout/             # Header, Footer, Nav
 │   │   └── sections/           # Landing page sections
 │   └── lib/
-│       ├── supabase.ts         # Supabase server client
+│       ├── supabase.ts         # Supabase client
 │       └── utils.ts
-├── public/
-│   └── images/
-├── tailwind.config.ts
-├── next.config.ts
-├── tsconfig.json
-└── package.json
 ```
 
-**Conventions:**
-- Server Components by default; `"use client"` only when needed.
-- Tailwind CSS for styling.
-- SEO metadata in each page's `generateMetadata`.
-- Images optimized with `next/image`.
+## 6. Verification and Acceptance
 
-## 6. Cross-Cutting Concerns
-
-### 6.1 Error Handling Strategy
-
-```mermaid
-flowchart TD
-    A["Error occurs"] --> B{"Expected?"}
-    B -- Yes --> C["Return Result.failure()"]
-    B -- No --> D["Catch & log"]
-    C --> E["UI shows user-friendly message"]
-    D --> F["UI shows generic error"]
-    D --> G["Log to structured logger"]
-```
-
-- **Dart**: Sealed `AppException` class hierarchy with `Result<T, Failure>` pattern.
-- **TypeScript (Edge Functions)**: Try-catch with typed error codes.
-- **TypeScript (Website)**: Next.js error boundaries + `error.tsx` per route.
-
-### 6.2 Logging
-- **App**: Structured logger wrapping `dart:developer` (debug) / future crash reporting (production).
-- **Edge Functions**: `console.log` with JSON structure; Supabase captures logs.
-- **Website**: Next.js built-in logging + structured console output.
-
-### 6.3 Environment Configuration
-- All secrets via `.env` files (never committed).
-- `.env.example` files committed with placeholder key names.
-- Runtime config read once at startup and injected via providers/config objects.
-- Supabase anon key (public) is the only key permitted in client bundles.
-
-## 7. Deployment Architecture
-
-```mermaid
-flowchart LR
-    subgraph CI["GitHub Actions"]
-        A["PR / Push"] --> B["Lint + Test"]
-        B --> C["Build"]
-    end
-    subgraph Deploy
-        C --> D["Flutter Web → Hosting TBD"]
-        C --> E["Android → Play Store"]
-        C --> F["iOS → App Store"]
-        C --> G["Website → Vercel"]
-    end
-    subgraph Supabase["Supabase Cloud"]
-        H["Migrations via CLI"]
-        I["Edge Functions via CLI"]
-    end
-```
-
-- **Flutter Web**: Static hosting (Vercel, Firebase Hosting, or Cloudflare Pages).
-- **Android/iOS**: Built in CI, distributed via stores.
-- **Website**: Vercel (automatic from `main` branch).
-- **Supabase**: Migrations deployed via `supabase db push`; functions via `supabase functions deploy`.
-
-## 8. Design Decisions Log
-
-| # | Decision | Rationale | Date |
-|---|----------|-----------|------|
-| 1 | Feature-first folder structure | Scales better than layer-first as features grow | 2026-10-22 |
-| 2 | Riverpod over Bloc/Provider | Compile-safe, testable, no BuildContext dependency | 2026-10-22 |
-| 3 | GoRouter over Navigator 2.0 | Declarative, deep linking support, maintained by Flutter team | 2026-10-22 |
-| 4 | Supabase over Firebase | Open-source, PostgreSQL, generous free tier, RLS | 2026-10-22 |
-| 5 | Edge Functions for score submission | Prevents client-side score tampering | 2026-10-22 |
-| 6 | pnpm over npm/yarn | Faster installs, strict dependency resolution, disk efficient | 2026-10-22 |
-| 7 | Next.js App Router | Server components, streaming, latest stable patterns | 2026-10-22 |
+- All database policies validated via `supabase/tests/rls_unauthorized_access_test.sql`.
+- Unit and widget tests maintain 100% pass rate in `app/test/`.
+- Zero analyzer warnings under strict `flutter_lints` ruleset.
