@@ -50,7 +50,7 @@ void main() {
       final toggleButton = find.byTooltip('Switch to Accessible Table');
       expect(toggleButton, findsOneWidget);
       await tester.tap(toggleButton);
-      await tester.pumpAndSettle();
+      await pumpTransition(tester);
 
       expect(find.text('Day'), findsOneWidget);
       expect(find.text('Score Index'), findsOneWidget);
