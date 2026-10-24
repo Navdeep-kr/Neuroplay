@@ -32,7 +32,8 @@ class GameSessionRecord extends Equatable {
     }
 
     return GameSessionRecord(
-      id: json['id'] as String? ?? 'session-${DateTime.now().millisecondsSinceEpoch}',
+      id: json['id'] as String? ??
+          'session-${DateTime.now().millisecondsSinceEpoch}',
       gameId: json['game_id'] as String,
       gameVersion: json['game_version'] as String? ?? '1.0.0',
       score: (json['score'] as num?)?.toInt() ?? 0,

@@ -115,9 +115,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
                   tabAlignment: TabAlignment.start,
                   indicatorColor: theme.colorScheme.primary,
                   labelColor: theme.colorScheme.primary,
-                  unselectedLabelColor: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.navy500,
+                  unselectedLabelColor:
+                      isDark ? AppColors.darkTextSecondary : AppColors.navy500,
                   tabs: const [
                     Tab(
                       icon: Icon(Icons.insights_rounded, size: 20),
@@ -184,8 +183,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
 
         // 7-Day Performance Trend Chart
         weeklyTrendAsync.when(
-          loading: () =>
-              const AppLoadingView(message: 'Calculating trend...'),
+          loading: () => const AppLoadingView(message: 'Calculating trend...'),
           error: (err, stack) => AppErrorView(
             title: 'Chart Error',
             message: 'Could not compute trend data.',
@@ -344,7 +342,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
 
         // Personal Bests Banner
         personalBestAsync.when(
-          loading: () => const AppLoadingView(message: 'Loading personal bests...'),
+          loading: () =>
+              const AppLoadingView(message: 'Loading personal bests...'),
           error: (_, __) => const SizedBox.shrink(),
           data: (pb) => _PersonalBestCard(
             personalBest: pb,
@@ -355,14 +354,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen>
 
         // Accuracy History Chart
         sessionsAsync.when(
-          loading: () => const AppLoadingView(message: 'Loading session data...'),
+          loading: () =>
+              const AppLoadingView(message: 'Loading session data...'),
           error: (e, _) => AppErrorView(
             title: 'History Error',
             message: 'Could not load sessions: $e',
           ),
           data: (sessions) {
-            final validSessions =
-                sessions.where((s) => !s.isPractice).toList();
+            final validSessions = sessions.where((s) => !s.isPractice).toList();
 
             if (validSessions.isEmpty) {
               return AppCard(
@@ -801,7 +800,8 @@ class _PersonalBestCard extends StatelessWidget {
                 value: '${(personalBest.highestAccuracy * 100).round()}%',
                 color: tokens.mintContainer,
               ),
-              if (supportsReactionTime && personalBest.fastestMedianRtMs != null)
+              if (supportsReactionTime &&
+                  personalBest.fastestMedianRtMs != null)
                 _MetricBox(
                   icon: Icons.bolt_rounded,
                   label: 'Fastest Median RT',
@@ -1004,7 +1004,8 @@ class _AccessibleAccuracyChart extends StatelessWidget {
     final summary = recent
         .asMap()
         .entries
-        .map((e) => 'Session ${e.key + 1}: ${(e.value.accuracy * 100).round()}%')
+        .map(
+            (e) => 'Session ${e.key + 1}: ${(e.value.accuracy * 100).round()}%')
         .join(', ');
 
     return Semantics(
@@ -1073,7 +1074,8 @@ class _AccessibleAccuracyTable extends StatelessWidget {
       children: [
         TableRow(
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: context.tokens.cardBorder)),
+            border:
+                Border(bottom: BorderSide(color: context.tokens.cardBorder)),
           ),
           children: [
             Padding(
@@ -1115,7 +1117,8 @@ class _AccessibleAccuracyTable extends StatelessWidget {
                   ),
                   Padding(
                     padding: AppSpacing.pSm,
-                    child: Text('${s.score}', style: theme.textTheme.bodyMedium),
+                    child:
+                        Text('${s.score}', style: theme.textTheme.bodyMedium),
                   ),
                   Padding(
                     padding: AppSpacing.pSm,
@@ -1233,7 +1236,8 @@ class _AccessibleRtTable extends StatelessWidget {
       children: [
         TableRow(
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: context.tokens.cardBorder)),
+            border:
+                Border(bottom: BorderSide(color: context.tokens.cardBorder)),
           ),
           children: [
             Padding(
@@ -1275,7 +1279,8 @@ class _AccessibleRtTable extends StatelessWidget {
               ),
               Padding(
                 padding: AppSpacing.pSm,
-                child: Text('${s.errorCount}', style: theme.textTheme.bodyMedium),
+                child:
+                    Text('${s.errorCount}', style: theme.textTheme.bodyMedium),
               ),
               Padding(
                 padding: AppSpacing.pSm,
@@ -1668,7 +1673,8 @@ class _AccessibleTrendTable extends StatelessWidget {
       children: [
         TableRow(
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: context.tokens.cardBorder)),
+            border:
+                Border(bottom: BorderSide(color: context.tokens.cardBorder)),
           ),
           children: [
             Padding(

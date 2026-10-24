@@ -120,8 +120,7 @@ class UserPreferences extends Equatable {
         hapticsEnabled: json['haptics_enabled'] as bool? ?? true,
         dailyReminderEnabled: json['daily_reminder_enabled'] as bool? ?? false,
         reminderTime: json['reminder_time'] as String? ?? '09:00',
-        preferredDifficulty:
-            json['preferred_difficulty'] as String? ?? 'auto',
+        preferredDifficulty: json['preferred_difficulty'] as String? ?? 'auto',
         reducedMotion: json['reduced_motion'] as bool? ?? false,
         languageCode: json['language_code'] as String? ?? 'en',
         createdAt: json['created_at'] != null
@@ -138,7 +137,8 @@ class UserPreferences extends Equatable {
   final bool hapticsEnabled;
   final bool dailyReminderEnabled;
   final String reminderTime;
-  final String preferredDifficulty; // 'auto', 'easy', 'medium', 'hard', 'expert'
+  final String
+      preferredDifficulty; // 'auto', 'easy', 'medium', 'hard', 'expert'
   final bool reducedMotion;
   final String languageCode; // 'en', 'es', 'fr', 'de', 'ja'
   final DateTime? createdAt;

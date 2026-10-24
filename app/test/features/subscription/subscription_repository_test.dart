@@ -18,7 +18,8 @@ void main() {
         const AuthUser(id: 'usr_test_1', status: AuthStatus.guest),
       );
       when(() => mockAuthRepo.authStateChanges).thenAnswer(
-        (_) => Stream.value(const AuthUser(id: 'usr_test_1', status: AuthStatus.guest)),
+        (_) => Stream.value(
+            const AuthUser(id: 'usr_test_1', status: AuthStatus.guest)),
       );
       repository = LocalSubscriptionRepository(authRepo: mockAuthRepo);
     });
@@ -27,7 +28,8 @@ void main() {
       repository.dispose();
     });
 
-    test('Initializes with default Free Community tier for guest user', () async {
+    test('Initializes with default Free Community tier for guest user',
+        () async {
       final entitlement = await repository.getEntitlement();
       expect(entitlement.tier, SubscriptionTier.free);
       expect(entitlement.isFree, isTrue);
@@ -36,7 +38,8 @@ void main() {
       expect(entitlement.canAccess(SubscriptionFeature.cloudSync), isFalse);
     });
 
-    test('Expired simulated entitlement automatically downgrades to Free tier', () async {
+    test('Expired simulated entitlement automatically downgrades to Free tier',
+        () async {
       final expiredPro = SubscriptionEntitlement(
         userId: 'usr_test_1',
         tier: SubscriptionTier.pro,

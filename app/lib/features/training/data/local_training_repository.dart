@@ -96,7 +96,8 @@ class LocalTrainingRepository implements ITrainingRepository {
         id: 'ach-02',
         code: 'streak_3',
         title: 'Consistency Pioneer',
-        description: 'Train for 3 consecutive days without missing a calendar day.',
+        description:
+            'Train for 3 consecutive days without missing a calendar day.',
         category: 'streaks',
         badgeIcon: 'local_fire_department',
         xpReward: 100,
@@ -399,7 +400,8 @@ class LocalTrainingRepository implements ITrainingRepository {
       } else if (a.code == 'speed_demon' &&
           medianRt != null &&
           medianRt < 450 &&
-          (result.gameId == 'reflex-forge' || result.gameId == 'focus-reactor')) {
+          (result.gameId == 'reflex-forge' ||
+              result.gameId == 'focus-reactor')) {
         unlock = true;
       } else if (a.code == 'streak_3' && _streak.currentStreak >= 3) {
         unlock = true;
@@ -632,7 +634,8 @@ class LocalTrainingRepository implements ITrainingRepository {
       List.unmodifiable(_achievements);
 
   @override
-  Future<List<WorkoutSummaryRecord>> getWorkoutSummaries({int limit = 14}) async =>
+  Future<List<WorkoutSummaryRecord>> getWorkoutSummaries(
+          {int limit = 14}) async =>
       _workoutSummaries.take(limit).toList();
 
   @override

@@ -8,7 +8,9 @@ import 'package:neuroplay/features/subscription/data/subscription_repository.dar
 import 'package:neuroplay/features/subscription/domain/entitlement_models.dart';
 import 'package:neuroplay/features/subscription/presentation/subscription_screen.dart';
 
-class MockSubscriptionRepository extends Mock implements ISubscriptionRepository {}
+class MockSubscriptionRepository extends Mock
+    implements ISubscriptionRepository {}
+
 class MockAuthRepository extends Mock implements IAuthRepository {}
 
 void main() {
@@ -24,10 +26,12 @@ void main() {
         const AuthUser(id: 'usr_screen_test', status: AuthStatus.guest),
       );
       when(() => mockAuthRepo.authStateChanges).thenAnswer(
-        (_) => Stream.value(const AuthUser(id: 'usr_screen_test', status: AuthStatus.guest)),
+        (_) => Stream.value(
+            const AuthUser(id: 'usr_screen_test', status: AuthStatus.guest)),
       );
 
-      when(() => mockSubRepo.getEntitlement(forceRefresh: any(named: 'forceRefresh')))
+      when(() => mockSubRepo.getEntitlement(
+              forceRefresh: any(named: 'forceRefresh')))
           .thenAnswer((_) async => SubscriptionEntitlement.defaultFree());
 
       when(() => mockSubRepo.watchEntitlement()).thenAnswer(
@@ -64,7 +68,8 @@ void main() {
           ),
         );
 
-    testWidgets('Renders subscription screen headers, pre-release banner, and feature matrix',
+    testWidgets(
+        'Renders subscription screen headers, pre-release banner, and feature matrix',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1.0;
@@ -80,15 +85,18 @@ void main() {
       expect(find.text('Free Community'), findsOneWidget);
 
       // Verify Pre-Release Banner
-      expect(find.text('Monetization Status: Pre-Release Free Access'), findsOneWidget);
+      expect(find.text('Monetization Status: Pre-Release Free Access'),
+          findsOneWidget);
 
       // Verify Product Card
       expect(find.text('NEUROPLAY Plus (Monthly)'), findsOneWidget);
-      expect(find.text('Locked'), findsOneWidget); // Because paid checkout is disabled
+      expect(find.text('Locked'),
+          findsOneWidget); // Because paid checkout is disabled
 
       // Verify Feature Matrix
       expect(find.text('Entitlement Access Matrix'), findsOneWidget);
-      expect(find.text('Access to all 6 core cognitive exercises'), findsOneWidget);
+      expect(find.text('Access to all 6 core cognitive exercises'),
+          findsOneWidget);
       expect(find.text('Cross-device cloud synchronization'), findsOneWidget);
 
       // Verify Action Buttons
@@ -114,7 +122,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Manage Subscription'), findsOneWidget);
-      expect(find.textContaining('https://apps.apple.com/account/subscriptions'), findsOneWidget);
+      expect(
+          find.textContaining('https://apps.apple.com/account/subscriptions'),
+          findsOneWidget);
 
       final closeButton = find.text('Close');
       await tester.tap(closeButton);
@@ -124,7 +134,8 @@ void main() {
       expect(find.text('Manage Subscription'), findsNothing);
     });
 
-    testWidgets('Tapping Restore Purchases triggers restore action and displays feedback',
+    testWidgets(
+        'Tapping Restore Purchases triggers restore action and displays feedback',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1.0;
@@ -142,7 +153,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       verify(() => mockSubRepo.restorePurchases()).called(1);
-      expect(find.text('No active subscription was found for this store account.'), findsOneWidget);
+      expect(
+          find.text('No active subscription was found for this store account.'),
+          findsOneWidget);
     });
   });
 }

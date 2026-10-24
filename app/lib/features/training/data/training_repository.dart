@@ -112,7 +112,8 @@ final difficultyAdjustmentsProvider =
 
 /// Provider for historical game sessions.
 final gameSessionsProvider =
-    FutureProvider.family<List<GameSessionRecord>, String?>((ref, gameId) async {
+    FutureProvider.family<List<GameSessionRecord>, String?>(
+        (ref, gameId) async {
   final repo = ref.watch(trainingRepositoryProvider);
   return repo.getGameSessions(gameId: gameId);
 });
@@ -126,7 +127,8 @@ final gamePersonalBestProvider =
 
 /// Provider for monthly training activity calendar.
 final monthlyActivityProvider =
-    FutureProvider.family<List<ActivityDayRecord>, DateTime>((ref, month) async {
+    FutureProvider.family<List<ActivityDayRecord>, DateTime>(
+        (ref, month) async {
   final repo = ref.watch(trainingRepositoryProvider);
   return repo.getMonthlyActivity(month);
 });

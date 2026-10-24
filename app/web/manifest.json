@@ -1,11 +1,11 @@
 {
-    "name": "neuroplay",
-    "short_name": "neuroplay",
+    "name": "NEUROPLAY — Cognitive Training",
+    "short_name": "NEUROPLAY",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0B0F19",
+    "theme_color": "#6750A4",
+    "description": "Science-informed, engaging cognitive training with personalized daily workouts and transparent tracking.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

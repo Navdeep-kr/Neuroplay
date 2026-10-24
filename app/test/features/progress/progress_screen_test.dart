@@ -141,8 +141,7 @@ void main() {
       expect(find.text('Cognitive Velocity'), findsOneWidget);
     });
 
-    testWidgets(
-        'opens explicit streak rules dialog with transparent rules',
+    testWidgets('opens explicit streak rules dialog with transparent rules',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1.0;
@@ -167,7 +166,8 @@ void main() {
 
       expect(find.text('Transparent Streak Rules'), findsOneWidget);
       expect(
-        find.textContaining('Complete at least one training session or workout'),
+        find.textContaining(
+            'Complete at least one training session or workout'),
         findsOneWidget,
       );
       expect(

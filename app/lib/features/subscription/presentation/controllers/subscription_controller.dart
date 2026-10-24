@@ -53,7 +53,8 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   SubscriptionController({
     required ISubscriptionRepository repository,
   })  : _repository = repository,
-        super(SubscriptionState(entitlement: SubscriptionEntitlement.defaultFree())) {
+        super(SubscriptionState(
+            entitlement: SubscriptionEntitlement.defaultFree())) {
     _init();
   }
 
@@ -90,7 +91,8 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
       state = state.copyWith(
         isRestoring: false,
         entitlement: result.entitlement!,
-        restoreMessage: 'Subscription restored successfully! Welcome to NEUROPLAY Plus.',
+        restoreMessage:
+            'Subscription restored successfully! Welcome to NEUROPLAY Plus.',
       );
     } else {
       state = state.copyWith(

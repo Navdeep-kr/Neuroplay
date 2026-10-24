@@ -24,7 +24,8 @@ class SubscriptionScreen extends ConsumerWidget {
 
     // Listen for feedback messages
     ref.listen<SubscriptionState>(subscriptionControllerProvider, (prev, next) {
-      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
+      if (next.errorMessage != null &&
+          next.errorMessage != prev?.errorMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
@@ -32,7 +33,8 @@ class SubscriptionScreen extends ConsumerWidget {
           ),
         );
       }
-      if (next.restoreMessage != null && next.restoreMessage != prev?.restoreMessage) {
+      if (next.restoreMessage != null &&
+          next.restoreMessage != prev?.restoreMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.restoreMessage!),
@@ -120,7 +122,8 @@ class SubscriptionScreen extends ConsumerWidget {
                 AppSpacing.gapW12,
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => unawaited(_showManagementDialog(context, ref)),
+                    onPressed: () =>
+                        unawaited(_showManagementDialog(context, ref)),
                     icon: const Icon(Icons.open_in_new),
                     label: const Text('Manage Billing'),
                   ),
@@ -225,7 +228,8 @@ class _CurrentStatusCard extends StatelessWidget {
                       style: theme.textTheme.labelSmall?.copyWith(
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.bold,
-                        color: isPaid ? tokens.onMintContainer : AppColors.navy500,
+                        color:
+                            isPaid ? tokens.onMintContainer : AppColors.navy500,
                       ),
                     ),
                     AppSpacing.gapH4,
@@ -233,14 +237,17 @@ class _CurrentStatusCard extends StatelessWidget {
                       entitlement.tier.displayName,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isPaid ? tokens.onMintContainer : theme.colorScheme.onSurface,
+                        color: isPaid
+                            ? tokens.onMintContainer
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isPaid ? AppColors.mint700 : AppColors.slate200,
                   borderRadius: AppRadii.rFull,
@@ -467,7 +474,8 @@ class _FeatureMatrixCard extends StatelessWidget {
                     Icon(
                       userHasAccess ? Icons.check_circle : Icons.lock_outline,
                       size: 18,
-                      color: userHasAccess ? AppColors.mint600 : AppColors.navy500,
+                      color:
+                          userHasAccess ? AppColors.mint600 : AppColors.navy500,
                     ),
                     AppSpacing.gapW12,
                     Expanded(
@@ -483,7 +491,9 @@ class _FeatureMatrixCard extends StatelessWidget {
                     Text(
                       freeIncluded ? 'Free Tier' : 'Plus Required',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: freeIncluded ? AppColors.mint700 : AppColors.navy500,
+                        color: freeIncluded
+                            ? AppColors.mint700
+                            : AppColors.navy500,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

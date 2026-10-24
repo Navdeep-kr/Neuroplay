@@ -1,0 +1,7 @@
+# Production keystore configuration template for Google Play release
+# Copy this file to key.properties and replace the placeholders with your actual values.
+# DO NOT commit key.properties or the release.jks file to git!
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=neuroplay-release
+storeFile=../neuroplay-release.jks

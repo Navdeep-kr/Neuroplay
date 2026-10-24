@@ -12,7 +12,8 @@ class LocalSubscriptionRepository implements ISubscriptionRepository {
   LocalSubscriptionRepository({
     required IAuthRepository authRepo,
   }) : _authRepo = authRepo {
-    _entitlementController = StreamController<SubscriptionEntitlement>.broadcast(
+    _entitlementController =
+        StreamController<SubscriptionEntitlement>.broadcast(
       onListen: () {
         _entitlementController.add(_currentEntitlement);
       },
@@ -23,7 +24,8 @@ class LocalSubscriptionRepository implements ISubscriptionRepository {
       if (!user.isAuthenticated && !user.isGuest) {
         _currentEntitlement = SubscriptionEntitlement.defaultFree();
       } else {
-        _currentEntitlement = SubscriptionEntitlement.defaultFree(userId: user.id);
+        _currentEntitlement =
+            SubscriptionEntitlement.defaultFree(userId: user.id);
       }
       _entitlementController.add(_currentEntitlement);
     });
@@ -41,7 +43,8 @@ class LocalSubscriptionRepository implements ISubscriptionRepository {
       id: 'app.neuroplay.plus.monthly',
       tier: SubscriptionTier.pro,
       title: 'NEUROPLAY Plus (Monthly)',
-      description: 'Full cloud synchronization, longitudinal analytics, and index distribution.',
+      description:
+          'Full cloud synchronization, longitudinal analytics, and index distribution.',
       priceString: r'$4.99 / month',
       periodMonths: 1,
     ),
@@ -49,7 +52,8 @@ class LocalSubscriptionRepository implements ISubscriptionRepository {
       id: 'app.neuroplay.plus.annual',
       tier: SubscriptionTier.pro,
       title: 'NEUROPLAY Plus (Annual)',
-      description: 'Annual training pass with 14-day free trial and ~33% savings.',
+      description:
+          'Annual training pass with 14-day free trial and ~33% savings.',
       priceString: r'$39.99 / year',
       periodMonths: 12,
       freeTrialDays: 14,
@@ -57,7 +61,8 @@ class LocalSubscriptionRepository implements ISubscriptionRepository {
   ];
 
   @override
-  Future<SubscriptionEntitlement> getEntitlement({bool forceRefresh = false}) async {
+  Future<SubscriptionEntitlement> getEntitlement(
+      {bool forceRefresh = false}) async {
     // Check if current cached entitlement has expired
     final now = DateTime.now().toUtc();
     if (_currentEntitlement.isExpiredAt(now)) {

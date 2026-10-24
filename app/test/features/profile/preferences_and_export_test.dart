@@ -7,7 +7,9 @@ import 'package:neuroplay/features/training/data/local_training_repository.dart'
 
 void main() {
   group('UserPreferences Domain and Repository Tests', () {
-    test('default preferences initializes with standard accessibility and language settings', () {
+    test(
+        'default preferences initializes with standard accessibility and language settings',
+        () {
       final prefs = UserPreferences.defaultPreferences('test-user');
 
       expect(prefs.userId, equals('test-user'));
@@ -50,7 +52,9 @@ void main() {
       expect(restored.languageCode, equals('ja'));
     });
 
-    test('LocalTrainingRepository exportUserDataJson produces complete schema v1.0.0 payload', () async {
+    test(
+        'LocalTrainingRepository exportUserDataJson produces complete schema v1.0.0 payload',
+        () async {
       final repo = LocalTrainingRepository();
       final export = await repo.exportUserDataJson();
 
@@ -87,7 +91,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
     }
 
-    testWidgets('renders all preference controls: difficulty, reduced motion, reminders, and language', (tester) async {
+    testWidgets(
+        'renders all preference controls: difficulty, reduced motion, reminders, and language',
+        (tester) async {
       tester.view.physicalSize = const Size(800, 1400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -131,7 +137,9 @@ void main() {
       expect(find.text('Export Data (JSON)'), findsOneWidget);
     });
 
-    testWidgets('tapping Export Data (JSON) opens interactive export preview dialog', (tester) async {
+    testWidgets(
+        'tapping Export Data (JSON) opens interactive export preview dialog',
+        (tester) async {
       tester.view.physicalSize = const Size(800, 1400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);

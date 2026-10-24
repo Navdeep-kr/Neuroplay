@@ -52,9 +52,12 @@ enum SubscriptionFeature {
   standardGames('standard_games', 'Access to all 6 core cognitive exercises'),
   dailyWorkout('daily_workout', 'Daily 3-game workout generation'),
   cloudSync('cloud_sync', 'Cross-device cloud synchronization'),
-  deepAnalytics('deep_analytics', 'Multi-year reaction time and accuracy analytics'),
-  facultyDistribution('faculty_distribution', 'Deep cognitive faculty index breakdown'),
-  prioritySupport('priority_support', 'Priority technical and accessibility support'),
+  deepAnalytics(
+      'deep_analytics', 'Multi-year reaction time and accuracy analytics'),
+  facultyDistribution(
+      'faculty_distribution', 'Deep cognitive faculty index breakdown'),
+  prioritySupport(
+      'priority_support', 'Priority technical and accessibility support'),
   familySharing('family_sharing', 'Family sharing access for up to 5 members');
 
   const SubscriptionFeature(this.key, this.description);
@@ -105,7 +108,8 @@ class SubscriptionEntitlement extends Equatable {
 
     final rawStatus = json['status'] as String? ?? 'active';
     final status = SubscriptionStatus.values.firstWhere(
-      (s) => s.name.toLowerCase() == rawStatus.replaceAll('_', '').toLowerCase(),
+      (s) =>
+          s.name.toLowerCase() == rawStatus.replaceAll('_', '').toLowerCase(),
       orElse: () => SubscriptionStatus.active,
     );
 
@@ -136,7 +140,10 @@ class SubscriptionEntitlement extends Equatable {
       tier: tier,
       status: status,
       features: features.isEmpty
-          ? const [SubscriptionFeature.standardGames, SubscriptionFeature.dailyWorkout]
+          ? const [
+              SubscriptionFeature.standardGames,
+              SubscriptionFeature.dailyWorkout
+            ]
           : features,
       validUntil: validUntil,
       autoRenew: json['auto_renew'] as bool? ?? false,
@@ -287,7 +294,8 @@ class RestoreResult extends Equatable {
   factory RestoreResult.notFound() => const RestoreResult(
         isSuccess: false,
         conflictReason: 'NO_ACTIVE_SUBSCRIPTION_FOUND',
-        errorMessage: 'No active subscription was found for this store account.',
+        errorMessage:
+            'No active subscription was found for this store account.',
       );
 
   factory RestoreResult.ownershipConflict({required String maskedOwner}) =>

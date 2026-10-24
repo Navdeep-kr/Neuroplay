@@ -3,7 +3,9 @@ import 'package:neuroplay/features/subscription/domain/entitlement_models.dart';
 
 void main() {
   group('SubscriptionEntitlement Domain Unit Tests', () {
-    test('Default free tier grants core exercises and daily workout independently of billing', () {
+    test(
+        'Default free tier grants core exercises and daily workout independently of billing',
+        () {
       final free = SubscriptionEntitlement.defaultFree();
 
       expect(free.isFree, isTrue);
@@ -21,7 +23,8 @@ void main() {
       expect(free.canAccess(SubscriptionFeature.facultyDistribution), isFalse);
     });
 
-    test('Active Pro tier grants all features within valid expiration window', () {
+    test('Active Pro tier grants all features within valid expiration window',
+        () {
       final pro = SubscriptionEntitlement(
         userId: 'user_123',
         tier: SubscriptionTier.pro,
@@ -51,7 +54,9 @@ void main() {
       expect(pro.canAccess(SubscriptionFeature.familySharing), isFalse);
     });
 
-    test('Expired Pro tier cleanly revokes premium features without blocking core games', () {
+    test(
+        'Expired Pro tier cleanly revokes premium features without blocking core games',
+        () {
       final expiredPro = SubscriptionEntitlement(
         userId: 'user_expired',
         tier: SubscriptionTier.pro,
@@ -76,7 +81,9 @@ void main() {
       expect(expiredPro.canAccess(SubscriptionFeature.cloudSync), isFalse);
     });
 
-    test('Past-due status within grace period preserves access while retrying payment', () {
+    test(
+        'Past-due status within grace period preserves access while retrying payment',
+        () {
       final gracePro = SubscriptionEntitlement(
         userId: 'user_grace',
         tier: SubscriptionTier.pro,
@@ -129,14 +136,16 @@ void main() {
     });
 
     test('RestoreResult models success, notFound, and ownershipConflict', () {
-      final success = RestoreResult.success(SubscriptionEntitlement.defaultFree());
+      final success =
+          RestoreResult.success(SubscriptionEntitlement.defaultFree());
       expect(success.isSuccess, isTrue);
 
       final notFound = RestoreResult.notFound();
       expect(notFound.isSuccess, isFalse);
       expect(notFound.conflictReason, 'NO_ACTIVE_SUBSCRIPTION_FOUND');
 
-      final conflict = RestoreResult.ownershipConflict(maskedOwner: 'abc12345...');
+      final conflict =
+          RestoreResult.ownershipConflict(maskedOwner: 'abc12345...');
       expect(conflict.isSuccess, isFalse);
       expect(conflict.conflictReason, 'OWNERSHIP_CONFLICT');
       expect(conflict.errorMessage, contains('abc12345...'));

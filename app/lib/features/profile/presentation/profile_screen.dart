@@ -546,8 +546,8 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       Text(
                         isGuest
-                          ? 'In guest mode, sessions are volatile and kept only in your local session cache.'
-                          : 'Your cognitive training history is stored encrypted under Row-Level Security in PostgreSQL.',
+                            ? 'In guest mode, sessions are volatile and kept only in your local session cache.'
+                            : 'Your cognitive training history is stored encrypted under Row-Level Security in PostgreSQL.',
                         style: theme.textTheme.bodySmall,
                       ),
                       AppSpacing.gapH16,

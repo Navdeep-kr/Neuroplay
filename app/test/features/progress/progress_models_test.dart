@@ -5,7 +5,9 @@ import 'package:neuroplay/features/training/domain/training_models.dart';
 
 void main() {
   group('Progress Models Unit Tests', () {
-    test('GameSessionRecord correctly parses JSON metrics and cloud verification', () {
+    test(
+        'GameSessionRecord correctly parses JSON metrics and cloud verification',
+        () {
       final json = {
         'id': 'sess-123',
         'game_id': 'reflex-forge',
@@ -63,7 +65,8 @@ void main() {
       expect(pb.toJson()['highest_score'], equals(950));
     });
 
-    test('UserXpState calculates levels, thresholds, and titles accurately', () {
+    test('UserXpState calculates levels, thresholds, and titles accurately',
+        () {
       // 0 XP -> Level 1 Novice
       final initial = UserXpState.fromSummary(totalXp: 0);
       expect(initial.currentLevel, equals(1));
@@ -121,7 +124,9 @@ void main() {
       expect(updated.totalSessionsCompleted, equals(1));
     });
 
-    test('activity on the same calendar day preserves streak count without double-incrementing', () {
+    test(
+        'activity on the same calendar day preserves streak count without double-incrementing',
+        () {
       final nowMorning = DateTime.utc(2026, 10, 20, 8, 30);
       final nowEvening = DateTime.utc(2026, 10, 20, 20, 45);
 
@@ -136,7 +141,8 @@ void main() {
         current: streakMorning,
         now: nowEvening,
       );
-      expect(streakEvening.currentStreak, equals(1), reason: 'Multiple sessions same day must not inflate streak');
+      expect(streakEvening.currentStreak, equals(1),
+          reason: 'Multiple sessions same day must not inflate streak');
       expect(streakEvening.totalSessionsCompleted, equals(2));
     });
 
@@ -181,11 +187,15 @@ void main() {
         now: day4,
       );
 
-      expect(streak4.currentStreak, equals(1), reason: 'Missed day must reset current streak to 1');
-      expect(streak4.longestStreak, equals(7), reason: 'Longest streak record must be preserved');
+      expect(streak4.currentStreak, equals(1),
+          reason: 'Missed day must reset current streak to 1');
+      expect(streak4.longestStreak, equals(7),
+          reason: 'Longest streak record must be preserved');
     });
 
-    test('effectiveStreakAt correctly reports 0 when passive view has lapsed >= 2 days', () {
+    test(
+        'effectiveStreakAt correctly reports 0 when passive view has lapsed >= 2 days',
+        () {
       final lastDate = DateTime.utc(2026, 10, 20);
       final streak = UserStreak(
         currentStreak: 4,
@@ -218,11 +228,14 @@ void main() {
           now: DateTime.utc(2026, 10, 22, 10),
         ),
         equals(0),
-        reason: 'Passive view after full missed calendar day must not show false continuity',
+        reason:
+            'Passive view after full missed calendar day must not show false continuity',
       );
     });
 
-    test('calendarDaysBetween handles daylight saving time 23h and 25h boundaries accurately', () {
+    test(
+        'calendarDaysBetween handles daylight saving time 23h and 25h boundaries accurately',
+        () {
       // 23-hour DST transition day
       final preDst = DateTime(2026, 3, 28, 14);
       final postDst = DateTime(2026, 3, 29, 14);
@@ -231,7 +244,8 @@ void main() {
       // 25-hour DST fall-back transition day
       final preFall = DateTime(2026, 10, 24, 10);
       final postFall = DateTime(2026, 10, 25, 10);
-      expect(StreakCalculator.calendarDaysBetween(preFall, postFall), equals(1));
+      expect(
+          StreakCalculator.calendarDaysBetween(preFall, postFall), equals(1));
     });
   });
 }

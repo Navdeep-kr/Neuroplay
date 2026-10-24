@@ -572,10 +572,7 @@ class SupabaseTrainingRepository implements ITrainingRepository {
     }
 
     try {
-      var query = c
-          .from(Tables.gameSessions)
-          .select()
-          .eq('user_id', uid);
+      var query = c.from(Tables.gameSessions).select().eq('user_id', uid);
 
       if (gameId != null) {
         query = query.eq('game_id', gameId);
@@ -588,9 +585,7 @@ class SupabaseTrainingRepository implements ITrainingRepository {
         return await _fallback.getGameSessions(gameId: gameId, limit: limit);
       }
 
-      return rows
-          .map(GameSessionRecord.fromJson)
-          .toList();
+      return rows.map(GameSessionRecord.fromJson).toList();
     } on Object catch (e) {
       AppLogger.warning('Failed to load game sessions: $e');
       return _fallback.getGameSessions(gameId: gameId, limit: limit);
@@ -768,10 +763,8 @@ class SupabaseTrainingRepository implements ITrainingRepository {
       final allAchievements =
           await c.from(Tables.achievements).select().order('sort_order');
 
-      final userUnlocked = await c
-          .from(Tables.userAchievements)
-          .select()
-          .eq('user_id', uid);
+      final userUnlocked =
+          await c.from(Tables.userAchievements).select().eq('user_id', uid);
 
       final unlockedMap = <String, DateTime>{};
       for (final u in userUnlocked) {
@@ -835,15 +828,42 @@ class SupabaseTrainingRepository implements ITrainingRepository {
     }
 
     try {
-      final profile = await c.from(Tables.profiles).select().eq('id', uid).maybeSingle();
-      final preferences = await c.from(Tables.userPreferences).select().eq('user_id', uid).maybeSingle();
-      final streak = await c.from(Tables.userStreaks).select().eq('user_id', uid).maybeSingle();
-      final cognitiveIndices = await c.from(Tables.cognitiveIndices).select().eq('user_id', uid);
-      final skills = await c.from(Tables.userGameSkills).select().eq('user_id', uid);
-      final workouts = await c.from(Tables.dailyWorkouts).select().eq('user_id', uid).order('workout_date', ascending: false);
-      final sessions = await c.from(Tables.gameSessions).select().eq('user_id', uid).order('created_at', ascending: false);
-      final xpSummary = await c.from(Tables.userXpSummary).select().eq('user_id', uid).maybeSingle();
-      final xpEvents = await c.from(Tables.userXpEvents).select().eq('user_id', uid).order('created_at', ascending: false);
+      final profile =
+          await c.from(Tables.profiles).select().eq('id', uid).maybeSingle();
+      final preferences = await c
+          .from(Tables.userPreferences)
+          .select()
+          .eq('user_id', uid)
+          .maybeSingle();
+      final streak = await c
+          .from(Tables.userStreaks)
+          .select()
+          .eq('user_id', uid)
+          .maybeSingle();
+      final cognitiveIndices =
+          await c.from(Tables.cognitiveIndices).select().eq('user_id', uid);
+      final skills =
+          await c.from(Tables.userGameSkills).select().eq('user_id', uid);
+      final workouts = await c
+          .from(Tables.dailyWorkouts)
+          .select()
+          .eq('user_id', uid)
+          .order('workout_date', ascending: false);
+      final sessions = await c
+          .from(Tables.gameSessions)
+          .select()
+          .eq('user_id', uid)
+          .order('created_at', ascending: false);
+      final xpSummary = await c
+          .from(Tables.userXpSummary)
+          .select()
+          .eq('user_id', uid)
+          .maybeSingle();
+      final xpEvents = await c
+          .from(Tables.userXpEvents)
+          .select()
+          .eq('user_id', uid)
+          .order('created_at', ascending: false);
       final achievements = await getAchievements();
 
       return {

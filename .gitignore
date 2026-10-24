@@ -7,10 +7,14 @@
 .env.local
 .env.*.local
 !.env.example
-*.keystore
+*.key
+key.properties
+*.mobileprovisionstore
 *.jks
 *.p12
 *.key
+key.properties
+*.mobileprovision
 
 # ----- Platform Secrets (Firebase/Google) -----
 google-services.json
