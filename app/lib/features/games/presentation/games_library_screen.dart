@@ -10,6 +10,7 @@ import 'package:neuroplay/core/widgets/app_button.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/core/widgets/app_state_views.dart';
 import 'package:neuroplay/core/widgets/app_text_field.dart';
+import 'package:neuroplay/core/widgets/game_art_illustration.dart';
 import 'package:neuroplay/core/widgets/game_container_preview.dart';
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/domain/training_models.dart';
@@ -196,83 +197,99 @@ class _GameCatalogCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: [
-              AppBadge(
-                label: game.domain.label,
-                icon: game.domain.icon,
-              ),
-              Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
-                children: [
-                  AppBadge(
-                    label: '${game.durationMinutes} min',
-                    variant: AppBadgeVariant.outline,
-                  ),
-                  AppBadge(
-                    label: game.difficulty,
-                    variant: AppBadgeVariant.outline,
-                  ),
-                ],
-              ),
-            ],
+          // Visual Game Art Illustration
+          GameArtworkIllustration(
+            slug: game.slug,
+            height: 120,
+            borderRadius: 0,
           ),
-          AppSpacing.gapH12,
-          Text(
-            game.title,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+          Padding(
+            padding: AppSpacing.pLg,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    AppBadge(
+                      label: game.domain.label,
+                      icon: game.domain.icon,
+                      variant: AppBadgeVariant.mint,
+                    ),
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        AppBadge(
+                          label: '${game.durationMinutes} min',
+                          variant: AppBadgeVariant.outline,
+                        ),
+                        AppBadge(
+                          label: game.difficulty,
+                          variant: AppBadgeVariant.outline,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                AppSpacing.gapH12,
+                Text(
+                  game.title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                AppSpacing.gapH4,
+                Text(
+                  game.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                AppSpacing.gapH12,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    AppButton(
+                      label: 'Play',
+                      icon: Icons.play_arrow_rounded,
+                      onPressed: () {
+                        switch (game.slug) {
+                          case 'memory-matrix':
+                            context.push(AppRoutes.memoryMatrix);
+                            break;
+                          case 'reflex-forge':
+                            context.push(AppRoutes.reflexForge);
+                            break;
+                          case 'focus-reactor':
+                            context.push(AppRoutes.focusReactor);
+                            break;
+                          case 'logic-labyrinth':
+                            context.push(AppRoutes.logicLabyrinth);
+                            break;
+                          case 'number-pulse':
+                            context.push(AppRoutes.numberPulse);
+                            break;
+                          case 'word-weaver':
+                            context.push(AppRoutes.wordWeaver);
+                            break;
+                          default:
+                            _openPreviewModal(context);
+                            break;
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          AppSpacing.gapH4,
-          Text(
-            game.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium,
-          ),
-          AppSpacing.gapH12,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              AppButton(
-                label: 'Play',
-                icon: Icons.play_arrow_rounded,
-                onPressed: () {
-                  switch (game.slug) {
-                    case 'memory-matrix':
-                      context.push(AppRoutes.memoryMatrix);
-                      break;
-                    case 'reflex-forge':
-                      context.push(AppRoutes.reflexForge);
-                      break;
-                    case 'focus-reactor':
-                      context.push(AppRoutes.focusReactor);
-                      break;
-                    case 'logic-labyrinth':
-                      context.push(AppRoutes.logicLabyrinth);
-                      break;
-                    case 'number-pulse':
-                      context.push(AppRoutes.numberPulse);
-                      break;
-                    case 'word-weaver':
-                      context.push(AppRoutes.wordWeaver);
-                      break;
-                    default:
-                      _openPreviewModal(context);
-                      break;
-                  }
-                },
-              ),
-            ],
           ),
         ],
       ),

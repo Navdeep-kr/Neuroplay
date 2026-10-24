@@ -12,6 +12,7 @@ import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_button.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/core/widgets/app_state_views.dart';
+import 'package:neuroplay/core/widgets/game_art_illustration.dart';
 import 'package:neuroplay/core/widgets/game_container_preview.dart';
 import 'package:neuroplay/features/auth/data/auth_repository.dart';
 import 'package:neuroplay/features/training/data/training_repository.dart';
@@ -167,95 +168,166 @@ class HomeScreen extends ConsumerWidget {
                   AppSpacing.gapH24,
 
                   // --- Prominent Hero: START TODAY'S WORKOUT ---
-                  AppCard(
-                    backgroundColor: isDark
-                        ? const Color(0xFF0F2320)
-                        : const Color(0xFFECFDF5),
-                    borderColor: isDark
-                        ? const Color(0xFF047857)
-                        : const Color(0xFFA7F3D0),
-                    padding: AppSpacing.pXl,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.xs,
-                          children: [
-                            AppBadge(
-                              label: workout.isCompleted
-                                  ? "TODAY'S WORKOUT COMPLETED"
-                                  : "TODAY'S WORKOUT",
-                              variant: AppBadgeVariant.mint,
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: isDark
+                          ? const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF0F172A),
+                                Color(0xFF064E3B),
+                                Color(0xFF022C22),
+                              ],
+                            )
+                          : const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF064E3B),
+                                Color(0xFF065F46),
+                                Color(0xFF0F766E),
+                              ],
                             ),
-                            Text(
-                              '•   ${workout.estimatedMinutes} min',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            if (workout.completedGameIds.isNotEmpty &&
-                                !workout.isCompleted)
-                              Text(
-                                '•   ${workout.completedGameIds.length}/${workout.games.length} completed',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: AppColors.mint500,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                          ],
-                        ),
-                        AppSpacing.gapH12,
-                        Text(
-                          workout.title,
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        AppSpacing.gapH8,
-                        Text(
-                          workout.isCompleted
-                              ? "You've successfully finished all scheduled exercises for today! Well done keeping your cognitive streak alive."
-                              : workout.subtitle,
-                          style: theme.textTheme.bodyLarge,
-                        ),
-                        AppSpacing.gapH16,
-
-                        // Targeted cognitive domains pills
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.xs,
-                          children: workout.domains
-                              .map(
-                                (d) => Chip(
-                                  avatar: Icon(d.icon, size: 14),
-                                  label: Text(d.label),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                              )
-                              .toList(),
-                        ),
-                        AppSpacing.gapH24,
-
-                        // Clear, prominent CTA
-                        AppButton(
-                          label: workout.isCompleted
-                              ? 'Review Routine & Free Play'
-                              : (workout.isPartiallyCompleted
-                                  ? "Resume Today's Workout (${workout.resumeGameIndex + 1}/${workout.games.length})"
-                                  : "Start Today's Workout"),
-                          icon: workout.isCompleted
-                              ? Icons.check_circle_rounded
-                              : Icons.play_arrow_rounded,
-                          isFullWidth: true,
-                          semanticLabel:
-                              "Start Today's Workout, 8 minutes routine",
-                          onPressed: () {
-                            _showWorkoutModal(context, ref, workout);
-                          },
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0x5910B981),
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x2610B981),
+                          blurRadius: 20,
+                          offset: Offset(0, 6),
                         ),
                       ],
+                    ),
+                    padding: AppSpacing.pXl,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isWide = constraints.maxWidth > 520;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Wrap(
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        spacing: AppSpacing.sm,
+                                        runSpacing: AppSpacing.xs,
+                                        children: [
+                                          AppBadge(
+                                            label: workout.isCompleted
+                                                ? "TODAY'S WORKOUT COMPLETED"
+                                                : "TODAY'S WORKOUT",
+                                            variant: AppBadgeVariant.mint,
+                                          ),
+                                          Text(
+                                            '•   ${workout.estimatedMinutes} min',
+                                            style: theme.textTheme.labelMedium
+                                                ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFFE2E8F0),
+                                            ),
+                                          ),
+                                          if (workout.completedGameIds
+                                                  .isNotEmpty &&
+                                              !workout.isCompleted)
+                                            Text(
+                                              '•   ${workout.completedGameIds.length}/${workout.games.length} completed',
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                color: const Color(0xFF6EE7B7),
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      AppSpacing.gapH12,
+                                      Text(
+                                        workout.title,
+                                        style: theme.textTheme.headlineMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      AppSpacing.gapH8,
+                                      Text(
+                                        workout.isCompleted
+                                            ? "You've successfully finished all scheduled exercises for today! Well done keeping your cognitive streak alive."
+                                            : workout.subtitle,
+                                        style:
+                                            theme.textTheme.bodyLarge?.copyWith(
+                                          color: const Color(0xFFCBD5E1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isWide) ...[
+                                  AppSpacing.gapW16,
+                                  const NeuralCortexHeroIllustration(size: 100),
+                                ],
+                              ],
+                            ),
+                            AppSpacing.gapH16,
+                            // Targeted cognitive domains pills
+                            Wrap(
+                              spacing: AppSpacing.sm,
+                              runSpacing: AppSpacing.xs,
+                              children: workout.domains
+                                  .map(
+                                    (d) => Chip(
+                                      backgroundColor: const Color(0x990F172A),
+                                      side: const BorderSide(
+                                        color: Color(0x5910B981),
+                                      ),
+                                      avatar: Icon(
+                                        d.icon,
+                                        size: 14,
+                                        color: const Color(0xFF34D399),
+                                      ),
+                                      label: Text(
+                                        d.label,
+                                        style: const TextStyle(
+                                          color: Color(0xFFF8FAFC),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            AppSpacing.gapH24,
+                            // Clear, prominent CTA
+                            AppButton(
+                              label: workout.isCompleted
+                                  ? 'Review Routine & Free Play'
+                                  : (workout.isPartiallyCompleted
+                                      ? "Resume Today's Workout (${workout.resumeGameIndex + 1}/${workout.games.length})"
+                                      : "Start Today's Workout"),
+                              icon: workout.isCompleted
+                                  ? Icons.check_circle_rounded
+                                  : Icons.play_arrow_rounded,
+                              isFullWidth: true,
+                              semanticLabel:
+                                  "Start Today's Workout, 8 minutes routine",
+                              onPressed: () {
+                                _showWorkoutModal(context, ref, workout);
+                              },
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   AppSpacing.gapH32,
@@ -370,25 +442,11 @@ class HomeScreen extends ConsumerWidget {
                           },
                           child: Row(
                             children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: isDone
-                                      ? tokens.mintContainer
-                                      : tokens.subtleBackground,
-                                  borderRadius: AppRadii.rMd,
-                                  border: Border.all(color: tokens.cardBorder),
-                                ),
-                                child: Icon(
-                                  isDone
-                                      ? Icons.check_circle_rounded
-                                      : game.domain.icon,
-                                  color: isDone
-                                      ? tokens.onMintContainer
-                                      : theme.colorScheme.primary,
-                                  size: 22,
-                                ),
+                              GameArtworkIllustration(
+                                slug: game.slug,
+                                height: 48,
+                                width: 48,
+                                borderRadius: 10,
                               ),
                               AppSpacing.gapW16,
                               Expanded(
@@ -714,6 +772,19 @@ class _MetricCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    Color iconColor;
+    Color iconBg;
+    if (title.contains('Brain')) {
+      iconColor = const Color(0xFF818CF8);
+      iconBg = const Color(0x40312E81);
+    } else if (title.contains('Consistency')) {
+      iconColor = const Color(0xFF10B981);
+      iconBg = const Color(0x40064E3B);
+    } else {
+      iconColor = const Color(0xFFFBBF24);
+      iconBg = const Color(0x4078350F);
+    }
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -724,14 +795,22 @@ class _MetricCard extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                   color:
                       isDark ? AppColors.darkTextSecondary : AppColors.navy700,
                 ),
               ),
-              Icon(
-                icon,
-                size: 18,
-                color: theme.colorScheme.primary,
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  size: 16,
+                  color: iconColor,
+                ),
               ),
             ],
           ),
@@ -739,14 +818,15 @@ class _MetricCard extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
           AppSpacing.gapH4,
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.navy700,
+              color: isDark ? AppColors.darkTextMuted : AppColors.navy500,
             ),
           ),
         ],
