@@ -174,10 +174,13 @@ class SupabaseSubscriptionRepository implements ISubscriptionRepository {
 
       return RestoreResult.notFound();
     } on Object catch (e) {
-      AppLogger.error('Failed to restore purchases: $e',
-          tag: 'SubscriptionRepo');
+      AppLogger.error(
+        'Failed to restore purchases: $e',
+        tag: 'SubscriptionRepo',
+      );
       return RestoreResult.error(
-          'Unable to reach verification server. Please retry later.');
+        'Unable to reach verification server. Please retry later.',
+      );
     }
   }
 

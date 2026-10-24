@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/app/providers.dart';
 import 'package:neuroplay/core/theme/app_breakpoints.dart';
+import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/theme/app_theme.dart';
 
@@ -118,16 +119,21 @@ class AppShell extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       color: tokens.mintContainer,
                       borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0x3310B981)
+                            : const Color(0xFFA7F3D0),
+                      ),
                     ),
                     child: Icon(
                       Icons.psychology_rounded,
                       color: tokens.onMintContainer,
-                      size: 22,
+                      size: 24,
                     ),
                   ),
                   if (isExpanded) ...[
@@ -136,8 +142,10 @@ class AppShell extends ConsumerWidget {
                       'NEUROPLAY',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                        color: theme.colorScheme.primary,
+                        letterSpacing: 1.2,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.navy900,
                       ),
                     ),
                   ],

@@ -1005,7 +1005,8 @@ class _AccessibleAccuracyChart extends StatelessWidget {
         .asMap()
         .entries
         .map(
-            (e) => 'Session ${e.key + 1}: ${(e.value.accuracy * 100).round()}%')
+          (e) => 'Session ${e.key + 1}: ${(e.value.accuracy * 100).round()}%',
+        )
         .join(', ');
 
     return Semantics(

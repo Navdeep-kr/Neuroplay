@@ -45,6 +45,13 @@ class _AppCardState extends State<AppCard> {
           color: _isFocused ? tokens.focusRingColor : border,
           width: _isFocused ? 2 : 1,
         ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x080F172A),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,

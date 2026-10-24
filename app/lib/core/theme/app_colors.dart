@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 /// Design tokens for NEUROPLAY colors.
 ///
 /// Palette direction:
-/// - Neutral surfaces (soft slates and crisp whites).
-/// - Deep navy typography and structural elements.
-/// - Single restrained mint accent for key actions and completion cues.
+/// - Neutral surfaces (crisp slate50 canvas and pure white cards).
+/// - Deep navy typography and structural elements (navy900, navy800).
+/// - Signature radiant Emerald / Mint accent for focused actions, progress, and badges.
 /// - Calibrated for high-contrast accessibility (WCAG AA/AAA).
 abstract final class AppColors {
   // --- Navy & Slates (Structure & Hierarchy) ---
@@ -24,17 +24,18 @@ abstract final class AppColors {
   static const Color slate200 = Color(0xFFE2E8F0);
   static const Color slate300 = Color(0xFFCBD5E1);
 
-  // --- Restrained Mint Accent ---
-  static const Color mint50 = Color(0xFFF0FDFA);
-  static const Color mint100 = Color(0xFFCCFBF1);
-  static const Color mint200 = Color(0xFF99F6E4);
-  static const Color mint400 = Color(0xFF2DD4BF);
-  static const Color mint500 = Color(0xFF14B8A6);
-  static const Color mint600 = Color(0xFF0D9488); // WCAG AA on white
-  static const Color mint700 = Color(0xFF0F766E);
-  static const Color mint800 = Color(0xFF115E59);
-  static const Color mint900 = Color(0xFF134E4A);
-  static const Color mint950 = Color(0xFF042F2E);
+  // --- Signature Emerald / Mint Accent (Unified with Marketing Website) ---
+  static const Color mint50 = Color(0xFFECFDF5);
+  static const Color mint100 = Color(0xFFD1FAE5);
+  static const Color mint200 = Color(0xFFA7F3D0);
+  static const Color mint400 = Color(0xFF34D399);
+  static const Color mint500 = Color(0xFF10B981); // Emerald 500
+  static const Color mint600 =
+      Color(0xFF059669); // Emerald 600 (WCAG AA on white)
+  static const Color mint700 = Color(0xFF047857);
+  static const Color mint800 = Color(0xFF065F46);
+  static const Color mint900 = Color(0xFF064E3B);
+  static const Color mint950 = Color(0xFF022C22);
 
   // --- Functional Status Colors ---
   static const Color success = Color(0xFF15803D);
@@ -46,18 +47,18 @@ abstract final class AppColors {
   static const Color info = Color(0xFF1D4ED8);
   static const Color infoContainer = Color(0xFFDBEAFE);
 
-  // --- Dark Mode Foundations ---
-  static const Color darkCanvas = Color(0xFF0A0E17);
+  // --- Dark Mode Foundations (Exact Match with Marketing Theme) ---
+  static const Color darkCanvas = Color(0xFF0B0F17);
   static const Color darkSurface = Color(0xFF111827);
-  static const Color darkCard = Color(0xFF1A2234);
-  static const Color darkBorder = Color(0xFF2A344A);
+  static const Color darkCard = Color(0xFF131B2A);
+  static const Color darkBorder = Color(0xFF243048);
   static const Color darkTextPrimary = Color(0xFFF8FAFC);
   static const Color darkTextSecondary = Color(0xFF94A3B8);
   static const Color darkTextMuted = Color(0xFF64748B);
 
   // --- Focus & Accessibility ---
-  static const Color focusRing = Color(0xFF0D9488);
-  static const Color focusRingDark = Color(0xFF2DD4BF);
+  static const Color focusRing = Color(0xFF059669);
+  static const Color focusRingDark = Color(0xFF10B981);
 
   /// Material 3 Light ColorScheme.
   static const ColorScheme lightScheme = ColorScheme(

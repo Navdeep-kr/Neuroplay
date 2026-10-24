@@ -141,8 +141,11 @@ void main() {
         current: streakMorning,
         now: nowEvening,
       );
-      expect(streakEvening.currentStreak, equals(1),
-          reason: 'Multiple sessions same day must not inflate streak');
+      expect(
+        streakEvening.currentStreak,
+        equals(1),
+        reason: 'Multiple sessions same day must not inflate streak',
+      );
       expect(streakEvening.totalSessionsCompleted, equals(2));
     });
 
@@ -187,10 +190,16 @@ void main() {
         now: day4,
       );
 
-      expect(streak4.currentStreak, equals(1),
-          reason: 'Missed day must reset current streak to 1');
-      expect(streak4.longestStreak, equals(7),
-          reason: 'Longest streak record must be preserved');
+      expect(
+        streak4.currentStreak,
+        equals(1),
+        reason: 'Missed day must reset current streak to 1',
+      );
+      expect(
+        streak4.longestStreak,
+        equals(7),
+        reason: 'Longest streak record must be preserved',
+      );
     });
 
     test(
@@ -245,7 +254,9 @@ void main() {
       final preFall = DateTime(2026, 10, 24, 10);
       final postFall = DateTime(2026, 10, 25, 10);
       expect(
-          StreakCalculator.calendarDaysBetween(preFall, postFall), equals(1));
+        StreakCalculator.calendarDaysBetween(preFall, postFall),
+        equals(1),
+      );
     });
   });
 }

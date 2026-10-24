@@ -53,8 +53,11 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   SubscriptionController({
     required ISubscriptionRepository repository,
   })  : _repository = repository,
-        super(SubscriptionState(
-            entitlement: SubscriptionEntitlement.defaultFree())) {
+        super(
+          SubscriptionState(
+            entitlement: SubscriptionEntitlement.defaultFree(),
+          ),
+        ) {
     _init();
   }
 

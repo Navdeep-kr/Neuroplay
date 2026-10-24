@@ -53,11 +53,17 @@ enum SubscriptionFeature {
   dailyWorkout('daily_workout', 'Daily 3-game workout generation'),
   cloudSync('cloud_sync', 'Cross-device cloud synchronization'),
   deepAnalytics(
-      'deep_analytics', 'Multi-year reaction time and accuracy analytics'),
+    'deep_analytics',
+    'Multi-year reaction time and accuracy analytics',
+  ),
   facultyDistribution(
-      'faculty_distribution', 'Deep cognitive faculty index breakdown'),
+    'faculty_distribution',
+    'Deep cognitive faculty index breakdown',
+  ),
   prioritySupport(
-      'priority_support', 'Priority technical and accessibility support'),
+    'priority_support',
+    'Priority technical and accessibility support',
+  ),
   familySharing('family_sharing', 'Family sharing access for up to 5 members');
 
   const SubscriptionFeature(this.key, this.description);
@@ -142,7 +148,7 @@ class SubscriptionEntitlement extends Equatable {
       features: features.isEmpty
           ? const [
               SubscriptionFeature.standardGames,
-              SubscriptionFeature.dailyWorkout
+              SubscriptionFeature.dailyWorkout,
             ]
           : features,
       validUntil: validUntil,

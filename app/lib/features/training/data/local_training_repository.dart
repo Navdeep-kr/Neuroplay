@@ -634,8 +634,9 @@ class LocalTrainingRepository implements ITrainingRepository {
       List.unmodifiable(_achievements);
 
   @override
-  Future<List<WorkoutSummaryRecord>> getWorkoutSummaries(
-          {int limit = 14}) async =>
+  Future<List<WorkoutSummaryRecord>> getWorkoutSummaries({
+    int limit = 14,
+  }) async =>
       _workoutSummaries.take(limit).toList();
 
   @override

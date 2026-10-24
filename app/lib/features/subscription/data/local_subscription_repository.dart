@@ -61,8 +61,9 @@ class LocalSubscriptionRepository implements ISubscriptionRepository {
   ];
 
   @override
-  Future<SubscriptionEntitlement> getEntitlement(
-      {bool forceRefresh = false}) async {
+  Future<SubscriptionEntitlement> getEntitlement({
+    bool forceRefresh = false,
+  }) async {
     // Check if current cached entitlement has expired
     final now = DateTime.now().toUtc();
     if (_currentEntitlement.isExpiredAt(now)) {

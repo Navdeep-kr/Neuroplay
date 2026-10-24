@@ -19,7 +19,8 @@ void main() {
       );
       when(() => mockAuthRepo.authStateChanges).thenAnswer(
         (_) => Stream.value(
-            const AuthUser(id: 'usr_test_1', status: AuthStatus.guest)),
+          const AuthUser(id: 'usr_test_1', status: AuthStatus.guest),
+        ),
       );
       repository = LocalSubscriptionRepository(authRepo: mockAuthRepo);
     });

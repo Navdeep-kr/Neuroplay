@@ -169,13 +169,11 @@ class HomeScreen extends ConsumerWidget {
                   // --- Prominent Hero: START TODAY'S WORKOUT ---
                   AppCard(
                     backgroundColor: isDark
-                        ? const Color(0xFF132230)
-                        : (workout.isCompleted
-                            ? const Color(0xFFF0FDF4)
-                            : const Color(0xFFF0FDF4)),
+                        ? const Color(0xFF0F2320)
+                        : const Color(0xFFECFDF5),
                     borderColor: isDark
-                        ? const Color(0xFF1D3B47)
-                        : const Color(0xFFBBF7D0),
+                        ? const Color(0xFF047857)
+                        : const Color(0xFFA7F3D0),
                     padding: AppSpacing.pXl,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

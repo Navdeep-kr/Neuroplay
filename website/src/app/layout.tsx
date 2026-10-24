@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrganizationJsonLd, SoftwareAppJsonLd } from "@/components/StructuredData";
 import { SITE_CONFIG } from "@/lib/constants";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-plus-jakarta",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -59,12 +67,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full scroll-smooth">
+    <html lang="en" className={`h-full scroll-smooth ${plusJakartaSans.variable}`}>
       <head>
         <OrganizationJsonLd />
         <SoftwareAppJsonLd />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 font-sans antialiased">
         <Header />
         <main id="main-content" className="flex-1 focus:outline-none">
           {children}

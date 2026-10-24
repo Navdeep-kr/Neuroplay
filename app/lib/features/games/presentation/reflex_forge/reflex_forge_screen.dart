@@ -368,30 +368,31 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
   }
 
   Widget _buildStimulusCard(ThemeData theme, ReflexSymbol symbol) => AppCard(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'TARGET',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: AppColors.navy500,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'TARGET',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: AppColors.navy500,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
               ),
-              AppSpacing.gapH16,
-              _SymbolGraphic(symbol: symbol, size: 84),
-              AppSpacing.gapH12,
-              Text(
-                symbol.label,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            ),
+            AppSpacing.gapH12,
+            _SymbolGraphic(symbol: symbol, size: 80),
+            AppSpacing.gapH8,
+            Text(
+              symbol.label,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
 

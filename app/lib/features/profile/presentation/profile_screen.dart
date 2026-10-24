@@ -737,13 +737,14 @@ class _ExportDataDialogState extends State<_ExportDataDialog> {
                   ),
                 )
               else ...[
-                Row(
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
                   children: [
                     AppBadge(
                       label: '$_sessionCount Sessions Included',
                       variant: AppBadgeVariant.mint,
                     ),
-                    AppSpacing.gapW8,
                     const AppBadge(
                       label: 'Zero Secrets Exported',
                       variant: AppBadgeVariant.outline,

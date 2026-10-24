@@ -33,6 +33,9 @@ class AppBadge extends StatelessWidget {
       case AppBadgeVariant.mint:
         background = tokens.mintContainer;
         foreground = tokens.onMintContainer;
+        borderSide = BorderSide(
+          color: isDark ? const Color(0x4010B981) : const Color(0xFFA7F3D0),
+        );
       case AppBadgeVariant.neutral:
         background = isDark ? AppColors.darkCard : AppColors.slate100;
         foreground = isDark ? AppColors.darkTextSecondary : AppColors.navy700;
@@ -63,21 +66,22 @@ class AppBadge extends StatelessWidget {
             : null,
       ),
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + 2,
-        vertical: AppSpacing.xs,
+        horizontal: AppSpacing.sm + 4,
+        vertical: AppSpacing.xs + 1,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 12, color: foreground),
+            Icon(icon, size: 13, color: foreground),
             AppSpacing.gapW4,
           ],
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
               color: foreground,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
             ),
           ),
         ],

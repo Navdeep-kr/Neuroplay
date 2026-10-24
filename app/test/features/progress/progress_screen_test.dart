@@ -167,7 +167,8 @@ void main() {
       expect(find.text('Transparent Streak Rules'), findsOneWidget);
       expect(
         find.textContaining(
-            'Complete at least one training session or workout'),
+          'Complete at least one training session or workout',
+        ),
         findsOneWidget,
       );
       expect(
