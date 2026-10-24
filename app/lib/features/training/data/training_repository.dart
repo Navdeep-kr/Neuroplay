@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:game_engine/game_engine.dart';
 import 'package:neuroplay/core/network/supabase_client.dart';
 import 'package:neuroplay/features/auth/data/auth_repository.dart';
+import 'package:neuroplay/features/progress/domain/progress_models.dart';
 import 'package:neuroplay/features/training/data/local_training_repository.dart';
 import 'package:neuroplay/features/training/data/supabase_training_repository.dart';
 import 'package:neuroplay/features/training/domain/training_models.dart';
@@ -23,6 +24,16 @@ abstract interface class ITrainingRepository {
     String? gameId,
     int limit = 20,
   });
+  Future<List<GameSessionRecord>> getGameSessions({
+    String? gameId,
+    int limit = 30,
+  });
+  Future<GamePersonalBest> getGamePersonalBest(String gameId);
+  Future<List<ActivityDayRecord>> getMonthlyActivity(DateTime month);
+  Future<UserXpState> getUserXpState();
+  Future<List<AchievementItem>> getAchievements();
+  Future<List<WorkoutSummaryRecord>> getWorkoutSummaries({int limit = 14});
+  Future<Map<String, dynamic>> exportUserDataJson();
 }
 
 /// Fallback singleton local repository instance for persistent guest sessions.
@@ -97,4 +108,45 @@ final difficultyAdjustmentsProvider =
         (ref, gameId) async {
   final repo = ref.watch(trainingRepositoryProvider);
   return repo.getDifficultyAdjustmentHistory(gameId: gameId);
+});
+
+/// Provider for historical game sessions.
+final gameSessionsProvider =
+    FutureProvider.family<List<GameSessionRecord>, String?>((ref, gameId) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getGameSessions(gameId: gameId);
+});
+
+/// Provider for game personal best metrics.
+final gamePersonalBestProvider =
+    FutureProvider.family<GamePersonalBest, String>((ref, gameId) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getGamePersonalBest(gameId);
+});
+
+/// Provider for monthly training activity calendar.
+final monthlyActivityProvider =
+    FutureProvider.family<List<ActivityDayRecord>, DateTime>((ref, month) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getMonthlyActivity(month);
+});
+
+/// Provider for XP progression state.
+final userXpStateProvider = FutureProvider<UserXpState>((ref) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getUserXpState();
+});
+
+/// Provider for achievements catalog and unlock status.
+final achievementsListProvider =
+    FutureProvider<List<AchievementItem>>((ref) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getAchievements();
+});
+
+/// Provider for historical workout summaries.
+final workoutSummariesProvider =
+    FutureProvider<List<WorkoutSummaryRecord>>((ref) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getWorkoutSummaries();
 });

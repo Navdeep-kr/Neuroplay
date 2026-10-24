@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuroplay/app/providers.dart';
 import 'package:neuroplay/features/auth/data/auth_repository.dart';
 import 'package:neuroplay/features/profile/data/profile_repository.dart';
+import 'package:neuroplay/features/training/data/training_repository.dart';
 
 /// Controller coordinating profile preferences updates with UI theme and local storage.
 class ProfileController extends StateNotifier<AsyncValue<void>> {
@@ -69,6 +70,84 @@ class ProfileController extends StateNotifier<AsyncValue<void>> {
         );
         _ref.invalidate(userPreferencesProvider);
       } on Object catch (_) {}
+    }
+  }
+
+  Future<void> updateDifficulty(String difficulty) async {
+    final user = _ref.read(currentUserProvider);
+    if (user.isAuthenticated) {
+      try {
+        final prefs = await _profileRepository.getPreferences(user.id);
+        await _profileRepository.updatePreferences(
+          prefs.copyWith(preferredDifficulty: difficulty),
+        );
+        _ref.invalidate(userPreferencesProvider);
+      } on Object catch (_) {}
+    }
+  }
+
+  Future<void> updateReducedMotion({required bool enabled}) async {
+    final user = _ref.read(currentUserProvider);
+    if (user.isAuthenticated) {
+      try {
+        final prefs = await _profileRepository.getPreferences(user.id);
+        await _profileRepository.updatePreferences(
+          prefs.copyWith(reducedMotion: enabled),
+        );
+        _ref.invalidate(userPreferencesProvider);
+      } on Object catch (_) {}
+    }
+  }
+
+  Future<void> updateLanguage(String languageCode) async {
+    final user = _ref.read(currentUserProvider);
+    if (user.isAuthenticated) {
+      try {
+        final prefs = await _profileRepository.getPreferences(user.id);
+        await _profileRepository.updatePreferences(
+          prefs.copyWith(languageCode: languageCode),
+        );
+        _ref.invalidate(userPreferencesProvider);
+      } on Object catch (_) {}
+    }
+  }
+
+  Future<void> updateReminders({
+    required bool enabled,
+    String? reminderTime,
+  }) async {
+    _ref
+        .read(accessibilityPreferencesProvider.notifier)
+        .setReminders(enabled: enabled);
+
+    final user = _ref.read(currentUserProvider);
+    if (user.isAuthenticated) {
+      try {
+        final prefs = await _profileRepository.getPreferences(user.id);
+        await _profileRepository.updatePreferences(
+          prefs.copyWith(
+            dailyReminderEnabled: enabled,
+            reminderTime: reminderTime ?? prefs.reminderTime,
+          ),
+        );
+        _ref.invalidate(userPreferencesProvider);
+      } on Object catch (_) {}
+    }
+  }
+
+  Future<Map<String, dynamic>> exportUserData() async {
+    final trainingRepo = _ref.read(trainingRepositoryProvider);
+    return trainingRepo.exportUserDataJson();
+  }
+
+  Future<void> deleteAccount() async {
+    state = const AsyncValue.loading();
+    try {
+      await _ref.read(authRepositoryProvider).deleteAccount();
+      state = const AsyncValue.data(null);
+    } on Object catch (e, st) {
+      state = AsyncValue.error('Could not delete account: $e', st);
+      rethrow;
     }
   }
 

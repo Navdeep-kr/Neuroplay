@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/network/supabase_client.dart';
 import 'package:neuroplay/core/utils/logger.dart';
+import 'package:neuroplay/features/progress/domain/progress_models.dart';
 import 'package:neuroplay/features/training/data/local_training_repository.dart';
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/domain/cognitive_index_calculator.dart';
@@ -556,6 +557,314 @@ class SupabaseTrainingRepository implements ITrainingRepository {
         gameId: gameId,
         limit: limit,
       );
+    }
+  }
+
+  @override
+  Future<List<GameSessionRecord>> getGameSessions({
+    String? gameId,
+    int limit = 30,
+  }) async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) {
+      return _fallback.getGameSessions(gameId: gameId, limit: limit);
+    }
+
+    try {
+      var query = c
+          .from(Tables.gameSessions)
+          .select()
+          .eq('user_id', uid);
+
+      if (gameId != null) {
+        query = query.eq('game_id', gameId);
+      }
+
+      final rows =
+          await query.order('created_at', ascending: false).limit(limit);
+
+      if (rows.isEmpty) {
+        return await _fallback.getGameSessions(gameId: gameId, limit: limit);
+      }
+
+      return rows
+          .map(GameSessionRecord.fromJson)
+          .toList();
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load game sessions: $e');
+      return _fallback.getGameSessions(gameId: gameId, limit: limit);
+    }
+  }
+
+  @override
+  Future<GamePersonalBest> getGamePersonalBest(String gameId) async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) {
+      return _fallback.getGamePersonalBest(gameId);
+    }
+
+    try {
+      final rows = await c
+          .from(Tables.gameSessions)
+          .select()
+          .eq('user_id', uid)
+          .eq('game_id', gameId)
+          .eq('is_practice', false)
+          .order('score', ascending: false)
+          .limit(100);
+
+      if (rows.isEmpty) {
+        return await _fallback.getGamePersonalBest(gameId);
+      }
+
+      final game = WorkoutGenerator.catalog.firstWhere(
+        (g) => g.id == gameId,
+        orElse: () => WorkoutGenerator.catalog.first,
+      );
+
+      var highestScore = 0;
+      var highestAccuracy = 0.0;
+      int? fastestRt;
+      DateTime? lastPlayed;
+
+      for (final r in rows) {
+        final score = (r['score'] as num?)?.toInt() ?? 0;
+        final accuracy = (r['accuracy'] as num?)?.toDouble() ?? 0.0;
+        final metrics = (r['metrics'] as Map<String, dynamic>?) ?? {};
+        final createdAt = r['created_at'] != null
+            ? DateTime.parse(r['created_at'] as String)
+            : null;
+
+        if (score > highestScore) highestScore = score;
+        if (accuracy > highestAccuracy) highestAccuracy = accuracy;
+
+        int? rt;
+        if (metrics['medianReactionTimeMs'] != null) {
+          rt = (metrics['medianReactionTimeMs'] as num).toInt();
+        } else if (metrics['medianResponseTimeMs'] != null) {
+          rt = (metrics['medianResponseTimeMs'] as num).toInt();
+        }
+
+        if (rt != null && (fastestRt == null || rt < fastestRt)) {
+          fastestRt = rt;
+        }
+
+        if (createdAt != null) {
+          if (lastPlayed == null || createdAt.isAfter(lastPlayed)) {
+            lastPlayed = createdAt;
+          }
+        }
+      }
+
+      return GamePersonalBest(
+        gameId: gameId,
+        gameTitle: game.title,
+        highestScore: highestScore,
+        highestAccuracy: highestAccuracy,
+        fastestMedianRtMs: fastestRt,
+        totalSessions: rows.length,
+        lastPlayedAt: lastPlayed,
+      );
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load personal best for $gameId: $e');
+      return _fallback.getGamePersonalBest(gameId);
+    }
+  }
+
+  @override
+  Future<List<ActivityDayRecord>> getMonthlyActivity(DateTime month) async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) {
+      return _fallback.getMonthlyActivity(month);
+    }
+
+    try {
+      final startStr =
+          '${month.year}-${month.month.toString().padLeft(2, '0')}-01';
+      final lastDay = DateTime(month.year, month.month + 1, 0).day;
+      final endStr =
+          '${month.year}-${month.month.toString().padLeft(2, '0')}-${lastDay.toString().padLeft(2, '0')}';
+
+      final rows = await c
+          .from(Tables.userDailyActivity)
+          .select()
+          .eq('user_id', uid)
+          .gte('activity_date', startStr)
+          .lte('activity_date', endStr);
+
+      if (rows.isEmpty) {
+        return await _fallback.getMonthlyActivity(month);
+      }
+
+      final map = <int, ActivityDayRecord>{};
+      for (final r in rows) {
+        final rec = ActivityDayRecord.fromJson(r);
+        map[rec.date.day] = rec;
+      }
+
+      final result = <ActivityDayRecord>[];
+      for (var d = 1; d <= lastDay; d++) {
+        result.add(
+          map[d] ??
+              ActivityDayRecord(
+                date: DateTime(month.year, month.month, d),
+                sessionsCount: 0,
+                durationMinutes: 0,
+                xpEarned: 0,
+              ),
+        );
+      }
+      return result;
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load monthly activity: $e');
+      return _fallback.getMonthlyActivity(month);
+    }
+  }
+
+  @override
+  Future<UserXpState> getUserXpState() async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) return _fallback.getUserXpState();
+
+    try {
+      final summaryRow = await c
+          .from(Tables.userXpSummary)
+          .select()
+          .eq('user_id', uid)
+          .maybeSingle();
+
+      final totalXp = (summaryRow?['total_xp'] as num?)?.toInt() ?? 0;
+
+      final eventRows = await c
+          .from(Tables.userXpEvents)
+          .select()
+          .eq('user_id', uid)
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      final events = eventRows.map(XpEventRecord.fromJson).toList();
+
+      return UserXpState.fromSummary(
+        totalXp: totalXp,
+        recentEvents: events,
+      );
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load XP state from Supabase: $e');
+      return _fallback.getUserXpState();
+    }
+  }
+
+  @override
+  Future<List<AchievementItem>> getAchievements() async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) return _fallback.getAchievements();
+
+    try {
+      final allAchievements =
+          await c.from(Tables.achievements).select().order('sort_order');
+
+      final userUnlocked = await c
+          .from(Tables.userAchievements)
+          .select()
+          .eq('user_id', uid);
+
+      final unlockedMap = <String, DateTime>{};
+      for (final u in userUnlocked) {
+        final code = u['achievement_code'] as String;
+        final date = u['unlocked_at'] != null
+            ? DateTime.parse(u['unlocked_at'] as String)
+            : DateTime.now();
+        unlockedMap[code] = date;
+      }
+
+      return allAchievements.map((a) {
+        final code = a['code'] as String;
+        final isUnlocked = unlockedMap.containsKey(code);
+        return AchievementItem.fromJson(
+          a,
+          isUnlocked: isUnlocked,
+          unlockedAt: unlockedMap[code],
+        );
+      }).toList();
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load achievements from Supabase: $e');
+      return _fallback.getAchievements();
+    }
+  }
+
+  @override
+  Future<List<WorkoutSummaryRecord>> getWorkoutSummaries({
+    int limit = 14,
+  }) async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) {
+      return _fallback.getWorkoutSummaries(limit: limit);
+    }
+
+    try {
+      final rows = await c
+          .from(Tables.dailyWorkouts)
+          .select()
+          .eq('user_id', uid)
+          .order('workout_date', ascending: false)
+          .limit(limit);
+
+      if (rows.isEmpty) {
+        return await _fallback.getWorkoutSummaries(limit: limit);
+      }
+
+      return rows.map(WorkoutSummaryRecord.fromJson).toList();
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load workout summaries: $e');
+      return _fallback.getWorkoutSummaries(limit: limit);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> exportUserDataJson() async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) {
+      return _fallback.exportUserDataJson();
+    }
+
+    try {
+      final profile = await c.from(Tables.profiles).select().eq('id', uid).maybeSingle();
+      final preferences = await c.from(Tables.userPreferences).select().eq('user_id', uid).maybeSingle();
+      final streak = await c.from(Tables.userStreaks).select().eq('user_id', uid).maybeSingle();
+      final cognitiveIndices = await c.from(Tables.cognitiveIndices).select().eq('user_id', uid);
+      final skills = await c.from(Tables.userGameSkills).select().eq('user_id', uid);
+      final workouts = await c.from(Tables.dailyWorkouts).select().eq('user_id', uid).order('workout_date', ascending: false);
+      final sessions = await c.from(Tables.gameSessions).select().eq('user_id', uid).order('created_at', ascending: false);
+      final xpSummary = await c.from(Tables.userXpSummary).select().eq('user_id', uid).maybeSingle();
+      final xpEvents = await c.from(Tables.userXpEvents).select().eq('user_id', uid).order('created_at', ascending: false);
+      final achievements = await getAchievements();
+
+      return {
+        'export_schema_version': '1.0.0',
+        'exported_at': DateTime.now().toUtc().toIso8601String(),
+        'mode': 'authenticated_cloud_account',
+        'user_profile': profile,
+        'user_preferences': preferences,
+        'user_streak': streak,
+        'cognitive_indices': cognitiveIndices,
+        'skill_estimates': skills,
+        'workout_history': workouts,
+        'game_sessions_count': sessions.length,
+        'game_sessions': sessions,
+        'xp_summary': xpSummary,
+        'xp_events': xpEvents,
+        'achievements': achievements.map((a) => a.toJson()).toList(),
+      };
+    } on Object catch (e) {
+      AppLogger.warning('Failed cloud export, falling back to local: $e');
+      return _fallback.exportUserDataJson();
     }
   }
 }

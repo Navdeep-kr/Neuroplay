@@ -21,6 +21,7 @@ abstract final class AppRoutes {
 /// Supabase table names.
 abstract final class Tables {
   static const profiles = 'profiles';
+  static const userPreferences = 'user_preferences';
   static const games = 'games';
   static const gameSessions = 'game_sessions';
   static const gameScores = 'game_scores';

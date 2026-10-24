@@ -101,6 +101,9 @@ class UserPreferences extends Equatable {
     this.hapticsEnabled = true,
     this.dailyReminderEnabled = false,
     this.reminderTime = '09:00',
+    this.preferredDifficulty = 'auto',
+    this.reducedMotion = false,
+    this.languageCode = 'en',
     this.createdAt,
     this.updatedAt,
   });
@@ -117,6 +120,10 @@ class UserPreferences extends Equatable {
         hapticsEnabled: json['haptics_enabled'] as bool? ?? true,
         dailyReminderEnabled: json['daily_reminder_enabled'] as bool? ?? false,
         reminderTime: json['reminder_time'] as String? ?? '09:00',
+        preferredDifficulty:
+            json['preferred_difficulty'] as String? ?? 'auto',
+        reducedMotion: json['reduced_motion'] as bool? ?? false,
+        languageCode: json['language_code'] as String? ?? 'en',
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'] as String)
             : null,
@@ -131,6 +138,9 @@ class UserPreferences extends Equatable {
   final bool hapticsEnabled;
   final bool dailyReminderEnabled;
   final String reminderTime;
+  final String preferredDifficulty; // 'auto', 'easy', 'medium', 'hard', 'expert'
+  final bool reducedMotion;
+  final String languageCode; // 'en', 'es', 'fr', 'de', 'ja'
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -141,6 +151,9 @@ class UserPreferences extends Equatable {
         'haptics_enabled': hapticsEnabled,
         'daily_reminder_enabled': dailyReminderEnabled,
         'reminder_time': reminderTime,
+        'preferred_difficulty': preferredDifficulty,
+        'reduced_motion': reducedMotion,
+        'language_code': languageCode,
       };
 
   UserPreferences copyWith({
@@ -150,6 +163,9 @@ class UserPreferences extends Equatable {
     bool? hapticsEnabled,
     bool? dailyReminderEnabled,
     String? reminderTime,
+    String? preferredDifficulty,
+    bool? reducedMotion,
+    String? languageCode,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) =>
@@ -160,6 +176,9 @@ class UserPreferences extends Equatable {
         hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
         dailyReminderEnabled: dailyReminderEnabled ?? this.dailyReminderEnabled,
         reminderTime: reminderTime ?? this.reminderTime,
+        preferredDifficulty: preferredDifficulty ?? this.preferredDifficulty,
+        reducedMotion: reducedMotion ?? this.reducedMotion,
+        languageCode: languageCode ?? this.languageCode,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
@@ -172,6 +191,9 @@ class UserPreferences extends Equatable {
         hapticsEnabled,
         dailyReminderEnabled,
         reminderTime,
+        preferredDifficulty,
+        reducedMotion,
+        languageCode,
         createdAt,
         updatedAt,
       ];
