@@ -1,5 +1,7 @@
+import 'package:game_engine/game_engine.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/features/training/domain/training_models.dart';
+import 'package:neuroplay/features/training/domain/workout_selection_policy.dart';
 
 /// Pure domain generator for structured daily workout routines.
 abstract final class WorkoutGenerator {
@@ -104,29 +106,26 @@ abstract final class WorkoutGenerator {
   static DailyWorkout generateDailyWorkout(
     DateTime date, {
     Set<String> completedGameIds = const {},
+    Map<String, SkillEstimate> skillProfiles = const {},
+    List<Set<String>> recentCombinations = const [],
+    Set<CognitiveDomain> preferredDomains = const {},
   }) {
     final daySeed = date.year * 10000 + date.month * 100 + date.day;
     final titleIndex = daySeed % _workoutTitles.length;
     final subtitleIndex = daySeed % _workoutSubtitles.length;
 
-    // Deterministically order the 3 games based on date
-    final permutationIndex = daySeed % 3;
-    final List<CognitiveGame> orderedGames;
-    switch (permutationIndex) {
-      case 0:
-        orderedGames = [catalog[0], catalog[1], catalog[2]];
-        break;
-      case 1:
-        orderedGames = [catalog[2], catalog[0], catalog[1]];
-        break;
-      case 2:
-      default:
-        orderedGames = [catalog[1], catalog[2], catalog[0]];
-        break;
-    }
+    final assignments = WorkoutSelectionPolicy.selectWorkoutGames(
+      catalog: catalog,
+      date: date,
+      skillProfiles: skillProfiles,
+      recentCombinations: recentCombinations,
+      preferredDomains: preferredDomains,
+      completedGameIds: completedGameIds,
+    );
 
+    final orderedGames = assignments.map((a) => a.game).toList();
     final domains = orderedGames.map((g) => g.domain).toSet().toList();
-    final isFullyCompleted =
+    final isFullyCompleted = orderedGames.isNotEmpty &&
         orderedGames.every((g) => completedGameIds.contains(g.id));
 
     return DailyWorkout(
@@ -137,6 +136,7 @@ abstract final class WorkoutGenerator {
       estimatedMinutes: 9,
       games: orderedGames,
       domains: domains,
+      assignments: assignments,
       completedGameIds: completedGameIds,
       isCompleted: isFullyCompleted,
     );

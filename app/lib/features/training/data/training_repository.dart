@@ -17,6 +17,12 @@ abstract interface class ITrainingRepository {
   Future<OverallCognitiveStats> getOverallStats();
   Future<void> recordGameSession(GameResult result, {String? workoutId});
   Future<void> markWorkoutCompleted(String workoutId);
+  Future<SkillEstimate> getSkillEstimate(String gameId);
+  Future<Map<String, SkillEstimate>> getAllSkillEstimates();
+  Future<List<DifficultyAdjustment>> getDifficultyAdjustmentHistory({
+    String? gameId,
+    int limit = 20,
+  });
 }
 
 /// Fallback singleton local repository instance for persistent guest sessions.
@@ -76,4 +82,19 @@ final activeChallengesProvider =
     FutureProvider<List<CognitiveChallenge>>((ref) async {
   final repo = ref.watch(trainingRepositoryProvider);
   return repo.getActiveChallenges();
+});
+
+/// Provider for user skill estimates across games.
+final userSkillEstimatesProvider =
+    FutureProvider<Map<String, SkillEstimate>>((ref) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getAllSkillEstimates();
+});
+
+/// Provider for difficulty adjustment audit logs.
+final difficultyAdjustmentsProvider =
+    FutureProvider.family<List<DifficultyAdjustment>, String?>(
+        (ref, gameId) async {
+  final repo = ref.watch(trainingRepositoryProvider);
+  return repo.getDifficultyAdjustmentHistory(gameId: gameId);
 });

@@ -65,15 +65,16 @@ void main() {
     test('marks isCompleted true only when all playlist games are finished',
         () {
       final date = DateTime(2026, 10, 23);
+      final sample = WorkoutGenerator.generateDailyWorkout(date);
       final workoutIncomplete = WorkoutGenerator.generateDailyWorkout(
         date,
-        completedGameIds: {'memory-matrix', 'reflex-forge'},
+        completedGameIds: {sample.games[0].id, sample.games[1].id},
       );
       expect(workoutIncomplete.isCompleted, isFalse);
 
       final workoutComplete = WorkoutGenerator.generateDailyWorkout(
         date,
-        completedGameIds: {'memory-matrix', 'reflex-forge', 'focus-reactor'},
+        completedGameIds: sample.games.map((g) => g.id).toSet(),
       );
       expect(workoutComplete.isCompleted, isTrue);
     });

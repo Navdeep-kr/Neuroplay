@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game_engine/game_engine.dart';
 
 /// Primary cognitive faculties targeted by NEUROPLAY exercises.
 enum CognitiveDomain {
@@ -79,6 +80,34 @@ class CognitiveGame {
   final bool isPreview;
 }
 
+/// Assignment of an individual game within a daily workout routine.
+class WorkoutGameAssignment {
+  const WorkoutGameAssignment({
+    required this.game,
+    required this.assignedDifficulty,
+    required this.selectionReason,
+    this.isCompleted = false,
+  });
+
+  final CognitiveGame game;
+  final GameDifficulty assignedDifficulty;
+  final String selectionReason;
+  final bool isCompleted;
+
+  WorkoutGameAssignment copyWith({
+    CognitiveGame? game,
+    GameDifficulty? assignedDifficulty,
+    String? selectionReason,
+    bool? isCompleted,
+  }) =>
+      WorkoutGameAssignment(
+        game: game ?? this.game,
+        assignedDifficulty: assignedDifficulty ?? this.assignedDifficulty,
+        selectionReason: selectionReason ?? this.selectionReason,
+        isCompleted: isCompleted ?? this.isCompleted,
+      );
+}
+
 /// A structured daily routine containing curated exercise modules.
 class DailyWorkout {
   const DailyWorkout({
@@ -89,6 +118,7 @@ class DailyWorkout {
     required this.estimatedMinutes,
     required this.games,
     required this.domains,
+    this.assignments = const [],
     this.completedGameIds = const {},
     this.isCompleted = false,
   });
@@ -100,8 +130,20 @@ class DailyWorkout {
   final int estimatedMinutes;
   final List<CognitiveGame> games;
   final List<CognitiveDomain> domains;
+  final List<WorkoutGameAssignment> assignments;
   final Set<String> completedGameIds;
   final bool isCompleted;
+
+  /// Index of the first uncompleted game for resuming progress.
+  int get resumeGameIndex {
+    for (var i = 0; i < games.length; i++) {
+      if (!completedGameIds.contains(games[i].id)) return i;
+    }
+    return 0;
+  }
+
+  /// Whether the workout has been partially started but not yet completed.
+  bool get isPartiallyCompleted => completedGameIds.isNotEmpty && !isCompleted;
 
   DailyWorkout copyWith({
     String? id,
@@ -111,6 +153,7 @@ class DailyWorkout {
     int? estimatedMinutes,
     List<CognitiveGame>? games,
     List<CognitiveDomain>? domains,
+    List<WorkoutGameAssignment>? assignments,
     Set<String>? completedGameIds,
     bool? isCompleted,
   }) =>
@@ -122,6 +165,7 @@ class DailyWorkout {
         estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
         games: games ?? this.games,
         domains: domains ?? this.domains,
+        assignments: assignments ?? this.assignments,
         completedGameIds: completedGameIds ?? this.completedGameIds,
         isCompleted: isCompleted ?? this.isCompleted,
       );

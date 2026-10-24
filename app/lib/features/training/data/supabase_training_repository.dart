@@ -42,9 +42,33 @@ class SupabaseTrainingRepository implements ITrainingRepository {
           .eq('workout_date', dateStr)
           .maybeSingle();
 
+      // Fetch user's skill profiles for adaptive difficulty
+      final skillProfiles = await getAllSkillEstimates();
+
+      // Fetch recent workout history to prevent repetitive combinations
+      final recentRows = await c
+          .from(Tables.dailyWorkouts)
+          .select('game_ids')
+          .eq('user_id', uid)
+          .order('workout_date', ascending: false)
+          .limit(4);
+
+      final recentCombos = <Set<String>>[];
+      for (final r in recentRows) {
+        final gIds =
+            (r['game_ids'] as List<dynamic>?)?.map((e) => e.toString()).toSet();
+        if (gIds != null && gIds.isNotEmpty) {
+          recentCombos.add(gIds);
+        }
+      }
+
       if (row == null) {
         // Generate and persist today's workout
-        final generated = WorkoutGenerator.generateDailyWorkout(today);
+        final generated = WorkoutGenerator.generateDailyWorkout(
+          today,
+          skillProfiles: skillProfiles,
+          recentCombinations: recentCombos,
+        );
         await c.from(Tables.dailyWorkouts).insert({
           'user_id': uid,
           'workout_date': dateStr,
@@ -63,9 +87,56 @@ class SupabaseTrainingRepository implements ITrainingRepository {
               .toSet() ??
           <String>{};
 
+      final savedGameIds = (row['game_ids'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          <String>[];
+
+      if (savedGameIds.isNotEmpty) {
+        final games = savedGameIds
+            .map(
+              (id) => WorkoutGenerator.catalog.firstWhere(
+                (g) => g.id == id,
+                orElse: () => WorkoutGenerator.catalog.first,
+              ),
+            )
+            .toList();
+        final domains = games.map((g) => g.domain).toSet().toList();
+        final assignments = games
+            .map(
+              (g) => WorkoutGameAssignment(
+                game: g,
+                assignedDifficulty:
+                    skillProfiles[g.id]?.recommendedDifficulty ??
+                        GameDifficulty.medium,
+                selectionReason: 'Scheduled routine activity',
+                isCompleted: completedList.contains(g.id),
+              ),
+            )
+            .toList();
+
+        final isFullyCompleted = games.isNotEmpty &&
+            games.every((g) => completedList.contains(g.id));
+
+        return DailyWorkout(
+          id: row['id'] as String? ?? 'workout-$dateStr',
+          date: today,
+          title: row['title'] as String? ?? 'Daily Cognitive Routine',
+          subtitle: row['subtitle'] as String? ?? '',
+          estimatedMinutes: (row['estimated_minutes'] as num?)?.toInt() ?? 9,
+          games: games,
+          domains: domains,
+          assignments: assignments,
+          completedGameIds: completedList,
+          isCompleted: isFullyCompleted,
+        );
+      }
+
       return WorkoutGenerator.generateDailyWorkout(
         today,
         completedGameIds: completedList,
+        skillProfiles: skillProfiles,
+        recentCombinations: recentCombos,
       );
     } on Object catch (e) {
       AppLogger.warning(
@@ -234,6 +305,49 @@ class SupabaseTrainingRepository implements ITrainingRepository {
       return;
     }
 
+    // Adaptive difficulty calculation
+    final currentSkill = await getSkillEstimate(result.gameId);
+    final eval = AdaptiveDifficultyEngine.evaluate(
+      existingEstimate: currentSkill,
+      result: result,
+    );
+
+    try {
+      // Upsert updated skill estimate
+      await c.from(Tables.userGameSkills).upsert({
+        'user_id': uid,
+        'game_id': result.gameId,
+        'continuous_rating': eval.updatedEstimate.continuousRating,
+        'recommended_difficulty':
+            eval.updatedEstimate.recommendedDifficulty.name,
+        'sample_count': eval.updatedEstimate.sampleCount,
+        'consecutive_strong_sessions':
+            eval.updatedEstimate.consecutiveStrongSessions,
+        'consecutive_weak_sessions':
+            eval.updatedEstimate.consecutiveWeakSessions,
+        'last_adjustment_reason': eval.updatedEstimate.lastAdjustmentReason,
+        'algorithm_version': eval.updatedEstimate.algorithmVersion,
+        'last_updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+
+      // Insert difficulty adjustment audit entry
+      await c.from(Tables.difficultyAdjustments).insert({
+        'user_id': uid,
+        'game_id': result.gameId,
+        'previous_difficulty': eval.adjustment.previousDifficulty.name,
+        'new_difficulty': eval.adjustment.newDifficulty.name,
+        'previous_rating': eval.adjustment.previousRating,
+        'new_rating': eval.adjustment.newRating,
+        'rating_delta': eval.adjustment.ratingDelta,
+        'is_damped': eval.adjustment.isDamped,
+        'reason': eval.adjustment.reason,
+        'algorithm_version': eval.adjustment.algorithmVersion,
+        'metrics_snapshot': eval.adjustment.metricsSnapshot,
+      });
+    } on Object catch (e) {
+      AppLogger.warning('Failed to persist adaptive skill estimate: $e');
+    }
+
     try {
       final isPractice = (result.metrics['isPractice'] as bool?) ?? false;
       final accuracy = (result.metrics['accuracy'] as num?)?.toDouble() ?? 1.0;
@@ -307,6 +421,141 @@ class SupabaseTrainingRepository implements ITrainingRepository {
     } on Object catch (e) {
       AppLogger.warning('Failed to mark workout complete in Supabase: $e');
       await _fallback.markWorkoutCompleted(workoutId);
+    }
+  }
+
+  @override
+  Future<SkillEstimate> getSkillEstimate(String gameId) async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) return _fallback.getSkillEstimate(gameId);
+
+    try {
+      final row = await c
+          .from(Tables.userGameSkills)
+          .select()
+          .eq('user_id', uid)
+          .eq('game_id', gameId)
+          .maybeSingle();
+
+      if (row == null) {
+        return SkillEstimate.initial(gameId);
+      }
+
+      return SkillEstimate(
+        gameId: row['game_id'] as String,
+        continuousRating: (row['continuous_rating'] as num).toDouble(),
+        recommendedDifficulty: GameDifficulty.fromJson(
+          row['recommended_difficulty'] as String,
+        ),
+        sampleCount: (row['sample_count'] as num).toInt(),
+        consecutiveStrongSessions:
+            (row['consecutive_strong_sessions'] as num).toInt(),
+        consecutiveWeakSessions:
+            (row['consecutive_weak_sessions'] as num).toInt(),
+        lastAdjustmentReason:
+            (row['last_adjustment_reason'] as String?) ?? 'Calibrated rating',
+        algorithmVersion: row['algorithm_version'] as String? ?? '1.0.0',
+        lastUpdatedAt: row['last_updated_at'] != null
+            ? DateTime.parse(row['last_updated_at'] as String)
+            : null,
+      );
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load skill estimate for $gameId: $e');
+      return _fallback.getSkillEstimate(gameId);
+    }
+  }
+
+  @override
+  Future<Map<String, SkillEstimate>> getAllSkillEstimates() async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) return _fallback.getAllSkillEstimates();
+
+    try {
+      final rows =
+          await c.from(Tables.userGameSkills).select().eq('user_id', uid);
+
+      final result = <String, SkillEstimate>{};
+      for (final row in rows) {
+        final gId = row['game_id'] as String;
+        result[gId] = SkillEstimate(
+          gameId: gId,
+          continuousRating: (row['continuous_rating'] as num).toDouble(),
+          recommendedDifficulty: GameDifficulty.fromJson(
+            row['recommended_difficulty'] as String,
+          ),
+          sampleCount: (row['sample_count'] as num).toInt(),
+          consecutiveStrongSessions:
+              (row['consecutive_strong_sessions'] as num).toInt(),
+          consecutiveWeakSessions:
+              (row['consecutive_weak_sessions'] as num).toInt(),
+          lastAdjustmentReason:
+              (row['last_adjustment_reason'] as String?) ?? 'Calibrated rating',
+          algorithmVersion: row['algorithm_version'] as String? ?? '1.0.0',
+          lastUpdatedAt: row['last_updated_at'] != null
+              ? DateTime.parse(row['last_updated_at'] as String)
+              : null,
+        );
+      }
+      return result;
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load all skill estimates: $e');
+      return _fallback.getAllSkillEstimates();
+    }
+  }
+
+  @override
+  Future<List<DifficultyAdjustment>> getDifficultyAdjustmentHistory({
+    String? gameId,
+    int limit = 20,
+  }) async {
+    final uid = _userId;
+    final c = client;
+    if (uid == null || c == null) {
+      return _fallback.getDifficultyAdjustmentHistory(
+        gameId: gameId,
+        limit: limit,
+      );
+    }
+
+    try {
+      var query =
+          c.from(Tables.difficultyAdjustments).select().eq('user_id', uid);
+
+      if (gameId != null) {
+        query = query.eq('game_id', gameId);
+      }
+
+      final rows =
+          await query.order('created_at', ascending: false).limit(limit);
+
+      return rows
+          .map(
+            (r) => DifficultyAdjustment(
+              gameId: r['game_id'] as String,
+              previousDifficulty:
+                  GameDifficulty.fromJson(r['previous_difficulty'] as String),
+              newDifficulty:
+                  GameDifficulty.fromJson(r['new_difficulty'] as String),
+              previousRating: (r['previous_rating'] as num).toDouble(),
+              newRating: (r['new_rating'] as num).toDouble(),
+              ratingDelta: (r['rating_delta'] as num).toDouble(),
+              isDamped: r['is_damped'] as bool? ?? false,
+              reason: r['reason'] as String,
+              algorithmVersion: r['algorithm_version'] as String? ?? '1.0.0',
+              metricsSnapshot:
+                  (r['metrics_snapshot'] as Map<String, dynamic>?) ?? const {},
+              timestamp: DateTime.parse(r['created_at'] as String),
+            ),
+          )
+          .toList();
+    } on Object catch (e) {
+      AppLogger.warning('Failed to load difficulty adjustments: $e');
+      return _fallback.getDifficultyAdjustmentHistory(
+        gameId: gameId,
+        limit: limit,
+      );
     }
   }
 }

@@ -81,3 +81,8 @@ export 'src/games/word_weaver/word_weaver_engine.dart';
 export 'src/games/word_weaver/word_weaver_models.dart';
 export 'src/games/word_weaver/word_weaver_scoring.dart';
 export 'src/games/word_weaver/word_weaver_state.dart';
+
+// Adaptive Difficulty Engine
+export 'src/adaptive/adaptive_difficulty_engine.dart';
+export 'src/adaptive/adaptive_models.dart';
+export 'src/adaptive/adaptive_rules.dart';

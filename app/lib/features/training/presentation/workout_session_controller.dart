@@ -21,15 +21,22 @@ class WorkoutSessionState {
       ? workout.games[currentGameIndex]
       : null;
 
+  WorkoutGameAssignment? get currentAssignment =>
+      currentGameIndex < workout.assignments.length
+          ? workout.assignments[currentGameIndex]
+          : null;
+
   CognitiveGame? get nextGame => (currentGameIndex + 1) < workout.games.length
       ? workout.games[currentGameIndex + 1]
       : null;
 
   int get totalGames => workout.games.length;
   int get currentStep => currentGameIndex + 1;
-  double get progressRatio => totalGames > 0
-      ? (completedResults.length / totalGames).clamp(0.0, 1.0)
-      : 0.0;
+  int get totalCompletedCount =>
+      workout.completedGameIds.length.clamp(0, totalGames);
+
+  double get progressRatio =>
+      totalGames > 0 ? (totalCompletedCount / totalGames).clamp(0.0, 1.0) : 0.0;
 }
 
 /// Controller managing sequential progression through the daily workout playlist.
@@ -38,9 +45,18 @@ class WorkoutSessionNotifier extends StateNotifier<WorkoutSessionState?> {
 
   final Ref _ref;
 
-  /// Begins a new guided daily workout session.
-  void startWorkout(DailyWorkout workout) {
-    state = WorkoutSessionState(workout: workout);
+  /// Begins or resumes a guided daily workout session.
+  void startWorkout(DailyWorkout workout, {int? startAtIndex}) {
+    final initialIndex = startAtIndex ?? workout.resumeGameIndex;
+    state = WorkoutSessionState(
+      workout: workout,
+      currentGameIndex: initialIndex,
+    );
+  }
+
+  /// Convenience method to explicitly resume an interrupted workout.
+  void resumeWorkout(DailyWorkout workout) {
+    startWorkout(workout, startAtIndex: workout.resumeGameIndex);
   }
 
   /// Records a completed game result within the workout playlist.
@@ -51,26 +67,37 @@ class WorkoutSessionNotifier extends StateNotifier<WorkoutSessionState?> {
     final repo = _ref.read(trainingRepositoryProvider);
     await repo.recordGameSession(result, workoutId: current.workout.id);
 
+    final updatedCompletedIds = {
+      ...current.workout.completedGameIds,
+      result.gameId,
+    };
+    final updatedWorkout = current.workout.copyWith(
+      completedGameIds: updatedCompletedIds,
+      isCompleted: updatedCompletedIds.length >= current.totalGames,
+    );
     final updatedResults = [...current.completedResults, result];
-    final isDone = updatedResults.length >= current.totalGames;
+    final isDone = updatedWorkout.isCompleted;
 
     if (isDone) {
       await repo.markWorkoutCompleted(current.workout.id);
-      _ref
-        ..invalidate(todayWorkoutProvider)
-        ..invalidate(userStreakProvider)
-        ..invalidate(overallStatsProvider);
     }
 
+    _ref
+      ..invalidate(todayWorkoutProvider)
+      ..invalidate(userStreakProvider)
+      ..invalidate(overallStatsProvider)
+      ..invalidate(userSkillEstimatesProvider)
+      ..invalidate(difficultyAdjustmentsProvider);
+
     state = WorkoutSessionState(
-      workout: current.workout,
+      workout: updatedWorkout,
       currentGameIndex: current.currentGameIndex,
       completedResults: updatedResults,
       isCompleted: isDone,
     );
   }
 
-  /// Steps forward to the next game in the sequence.
+  /// Steps forward to the next uncompleted game in the sequence.
   CognitiveGame? advanceToNextGame() {
     final current = state;
     if (current == null) return null;
@@ -81,6 +108,7 @@ class WorkoutSessionNotifier extends StateNotifier<WorkoutSessionState?> {
         workout: current.workout,
         currentGameIndex: nextIndex,
         completedResults: current.completedResults,
+        isCompleted: current.isCompleted,
       );
       return state!.currentGame;
     }

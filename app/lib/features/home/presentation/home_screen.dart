@@ -244,8 +244,8 @@ class HomeScreen extends ConsumerWidget {
                         AppButton(
                           label: workout.isCompleted
                               ? 'Review Routine & Free Play'
-                              : (workout.completedGameIds.isNotEmpty
-                                  ? "Resume Today's Workout"
+                              : (workout.isPartiallyCompleted
+                                  ? "Resume Today's Workout (${workout.resumeGameIndex + 1}/${workout.games.length})"
                                   : "Start Today's Workout"),
                           icon: workout.isCompleted
                               ? Icons.check_circle_rounded
@@ -481,126 +481,197 @@ class HomeScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-        ),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: AppRadii.rTopXl,
-        ),
-        padding: AppSpacing.pXl,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.tokens.cardBorder,
-                  borderRadius: AppRadii.rFull,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: AppRadii.rTopXl,
+          ),
+          padding: AppSpacing.pXl,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: context.tokens.cardBorder,
+                    borderRadius: AppRadii.rFull,
+                  ),
                 ),
               ),
-            ),
-            AppSpacing.gapH24,
-            Text(
-              "Today's Guided Routine",
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            AppSpacing.gapH8,
-            Text(
-              '${workout.games.length} exercises • ~${workout.estimatedMinutes} minutes total duration',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            AppSpacing.gapH16,
-            Flexible(
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: workout.games.length,
-                separatorBuilder: (context, index) => AppSpacing.gapH12,
-                itemBuilder: (context, index) {
-                  final game = workout.games[index];
-                  final isDone = workout.completedGameIds.contains(game.id);
+              AppSpacing.gapH24,
+              Text(
+                "Today's Guided Routine",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              AppSpacing.gapH8,
+              Text(
+                '${workout.games.length} exercises • ~${workout.estimatedMinutes} minutes total duration',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              AppSpacing.gapH16,
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: workout.games.length,
+                  separatorBuilder: (context, index) => AppSpacing.gapH12,
+                  itemBuilder: (context, index) {
+                    final game = workout.games[index];
+                    final isDone = workout.completedGameIds.contains(game.id);
+                    final assignment = index < workout.assignments.length
+                        ? workout.assignments[index]
+                        : null;
 
-                  return AppCard(
-                    padding: AppSpacing.pMd,
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor: isDone
-                              ? context.tokens.mintContainer
-                              : context.tokens.subtleBackground,
-                          child: isDone
-                              ? Icon(
-                                  Icons.check,
-                                  size: 14,
-                                  color: context.tokens.onMintContainer,
-                                )
-                              : Text(
-                                  '${index + 1}',
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                ),
-                        ),
-                        AppSpacing.gapW12,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    return AppCard(
+                      padding: AppSpacing.pMd,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                game.title,
-                                style: Theme.of(context).textTheme.titleSmall,
+                              CircleAvatar(
+                                radius: 14,
+                                backgroundColor: isDone
+                                    ? context.tokens.mintContainer
+                                    : context.tokens.subtleBackground,
+                                child: isDone
+                                    ? Icon(
+                                        Icons.check,
+                                        size: 14,
+                                        color: context.tokens.onMintContainer,
+                                      )
+                                    : Text(
+                                        '${index + 1}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall,
+                                      ),
                               ),
-                              Text(
-                                '${game.domain.label} • ${game.durationMinutes} min',
-                                style: Theme.of(context).textTheme.bodySmall,
+                              AppSpacing.gapW12,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          game.title,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
+                                        ),
+                                        if (assignment != null) ...[
+                                          AppSpacing.gapW8,
+                                          AppBadge(
+                                            label: assignment
+                                                .assignedDifficulty.displayName
+                                                .toUpperCase(),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    Text(
+                                      '${game.domain.label} • ${game.durationMinutes} min',
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AppButton(
+                                label: isDone ? 'Replay' : 'Play',
+                                variant: isDone
+                                    ? AppButtonVariant.subtle
+                                    : AppButtonVariant.secondary,
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  if (game.route.isNotEmpty) {
+                                    context.go(game.route);
+                                  } else {
+                                    _openGamePreview(context, game);
+                                  }
+                                },
                               ),
                             ],
                           ),
-                        ),
-                        AppButton(
-                          label: isDone ? 'Replay' : 'Play',
-                          variant: isDone
-                              ? AppButtonVariant.subtle
-                              : AppButtonVariant.secondary,
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            if (game.route.isNotEmpty) {
-                              context.go(game.route);
-                            } else {
-                              _openGamePreview(context, game);
-                            }
-                          },
-                        ),
-                      ],
+                          if (assignment != null) ...[
+                            AppSpacing.gapH8,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.lightbulb_outline_rounded,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                AppSpacing.gapW8,
+                                Expanded(
+                                  child: Text(
+                                    assignment.selectionReason,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.navy700,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              AppSpacing.gapH16,
+              Text(
+                'NEUROPLAY training assessments reflect task-specific gameplay metrics and are not clinical diagnostics or IQ measures.',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary.withAlpha(180)
+                          : AppColors.navy700.withAlpha(180),
+                      fontStyle: FontStyle.italic,
                     ),
-                  );
+              ),
+              AppSpacing.gapH16,
+              AppButton(
+                label: workout.isCompleted
+                    ? 'Re-run Complete Routine'
+                    : (workout.isPartiallyCompleted
+                        ? 'Resume Guided Daily Routine (Game ${workout.resumeGameIndex + 1} of ${workout.games.length})'
+                        : 'Start Guided Daily Routine'),
+                icon: workout.isCompleted
+                    ? Icons.replay_rounded
+                    : Icons.play_arrow_rounded,
+                isFullWidth: true,
+                onPressed: () {
+                  ref
+                      .read(workoutSessionProvider.notifier)
+                      .startWorkout(workout);
+                  Navigator.of(context).pop();
+                  final targetGame = workout.games[workout.resumeGameIndex];
+                  if (targetGame.route.isNotEmpty) {
+                    context.go(targetGame.route);
+                  } else {
+                    _openGamePreview(context, targetGame);
+                  }
                 },
               ),
-            ),
-            AppSpacing.gapH24,
-            AppButton(
-              label: workout.isCompleted
-                  ? 'Re-run Complete Routine'
-                  : 'Start Guided Daily Routine',
-              icon: Icons.play_arrow_rounded,
-              isFullWidth: true,
-              onPressed: () {
-                ref.read(workoutSessionProvider.notifier).startWorkout(workout);
-                Navigator.of(context).pop();
-                final firstGame = workout.games.first;
-                if (firstGame.route.isNotEmpty) {
-                  context.go(firstGame.route);
-                } else {
-                  _openGamePreview(context, firstGame);
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

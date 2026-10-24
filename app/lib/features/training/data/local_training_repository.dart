@@ -13,6 +13,10 @@ class LocalTrainingRepository implements ITrainingRepository {
   }
 
   final Set<String> _completedGameIdsToday = {};
+  final Map<String, SkillEstimate> _skills = {};
+  final List<DifficultyAdjustment> _adjustments = [];
+  final List<Set<String>> _recentCombinations = [];
+
   UserStreak _streak = const UserStreak(
     currentStreak: 1,
     longestStreak: 3,
@@ -73,13 +77,31 @@ class LocalTrainingRepository implements ITrainingRepository {
     }
   }
 
+  DailyWorkout? _cachedTodayWorkout;
+  DateTime? _cachedWorkoutDate;
+
   @override
   Future<DailyWorkout> getTodayWorkout() async {
     final now = DateTime.now();
-    return WorkoutGenerator.generateDailyWorkout(
-      now,
-      completedGameIds: _completedGameIdsToday,
-    );
+    final today = DateTime(now.year, now.month, now.day);
+    if (_cachedTodayWorkout == null || _cachedWorkoutDate != today) {
+      _cachedTodayWorkout = WorkoutGenerator.generateDailyWorkout(
+        now,
+        completedGameIds: _completedGameIdsToday,
+        skillProfiles: _skills,
+        recentCombinations: _recentCombinations,
+      );
+      _cachedWorkoutDate = today;
+    } else {
+      final isDone = _cachedTodayWorkout!.games.isNotEmpty &&
+          _cachedTodayWorkout!.games
+              .every((g) => _completedGameIdsToday.contains(g.id));
+      _cachedTodayWorkout = _cachedTodayWorkout!.copyWith(
+        completedGameIds: _completedGameIdsToday,
+        isCompleted: isDone,
+      );
+    }
+    return _cachedTodayWorkout!;
   }
 
   @override
@@ -146,8 +168,22 @@ class LocalTrainingRepository implements ITrainingRepository {
       _completedGameIdsToday.add(result.gameId);
     }
 
+    // Adaptive difficulty evaluation
+    final currentSkill =
+        _skills[result.gameId] ?? SkillEstimate.initial(result.gameId);
+    final eval = AdaptiveDifficultyEngine.evaluate(
+      existingEstimate: currentSkill,
+      result: result,
+    );
+    _skills[result.gameId] = eval.updatedEstimate;
+    _adjustments.insert(0, eval.adjustment);
+
     final workout = await getTodayWorkout();
     final isWorkoutDone = workout.isCompleted;
+
+    if (isWorkoutDone) {
+      _recentCombinations.add(workout.games.map((g) => g.id).toSet());
+    }
 
     _streak = StreakCalculator.calculateOnActivity(
       current: _streak,
@@ -184,11 +220,31 @@ class LocalTrainingRepository implements ITrainingRepository {
     for (final game in workout.games) {
       _completedGameIdsToday.add(game.id);
     }
+    _recentCombinations.add(workout.games.map((g) => g.id).toSet());
     _streak = StreakCalculator.calculateOnActivity(
       current: _streak,
       now: DateTime.now(),
       completedWorkout: true,
     );
+  }
+
+  @override
+  Future<SkillEstimate> getSkillEstimate(String gameId) async =>
+      _skills[gameId] ?? SkillEstimate.initial(gameId);
+
+  @override
+  Future<Map<String, SkillEstimate>> getAllSkillEstimates() async =>
+      Map.unmodifiable(_skills);
+
+  @override
+  Future<List<DifficultyAdjustment>> getDifficultyAdjustmentHistory({
+    String? gameId,
+    int limit = 20,
+  }) async {
+    if (gameId != null) {
+      return _adjustments.where((a) => a.gameId == gameId).take(limit).toList();
+    }
+    return _adjustments.take(limit).toList();
   }
 
   CognitiveDomain _getDomainForGame(String gameId) {
