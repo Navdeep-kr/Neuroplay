@@ -4,7 +4,10 @@ import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/widgets/app_badge.dart';
 
-/// Standard top header for in-game sessions.
+/// Standard top HUD header for in-game sessions.
+///
+/// Features animated score rollup, live combo streak multiplier indicators,
+/// and smooth round progress tracks.
 class GameHeader extends StatelessWidget {
   const GameHeader({
     required this.title,
@@ -14,6 +17,7 @@ class GameHeader extends StatelessWidget {
     required this.onPause,
     super.key,
     this.isPractice = false,
+    this.comboStreak = 0,
   });
 
   final String title;
@@ -22,6 +26,7 @@ class GameHeader extends StatelessWidget {
   final int score;
   final VoidCallback onPause;
   final bool isPractice;
+  final int comboStreak;
 
   @override
   Widget build(BuildContext context) {
@@ -73,23 +78,90 @@ class GameHeader extends StatelessWidget {
                 ),
               ],
             ),
-            // Score counter
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: AppRadii.rFull,
-              ),
-              child: Text(
-                '$score pts',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.mint500,
+            Row(
+              children: [
+                // Live Combo Multiplier badge
+                if (comboStreak >= 2) ...[
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: comboStreak >= 4
+                            ? [const Color(0xFFF59E0B), const Color(0xFFEF4444)]
+                            : [AppColors.mint500, const Color(0xFF059669)],
+                      ),
+                      borderRadius: AppRadii.rFull,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (comboStreak >= 4
+                                  ? const Color(0xFFF59E0B)
+                                  : AppColors.mint500)
+                              .withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          comboStreak >= 4
+                              ? Icons.local_fire_department_rounded
+                              : Icons.bolt_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          'x$comboStreak STREAK',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AppSpacing.gapW8,
+                ],
+
+                // Animated Score Counter
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: score.toDouble()),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, animatedValue, child) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: AppRadii.rFull,
+                      border: Border.all(
+                        color: comboStreak >= 2
+                            ? AppColors.mint500.withValues(alpha: 0.6)
+                            : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Text(
+                      '${animatedValue.round()} pts',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.mint500,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

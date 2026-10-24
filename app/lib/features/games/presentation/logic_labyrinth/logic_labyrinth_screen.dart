@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
@@ -10,6 +11,8 @@ import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_countdown_overlay.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_feedback_effects.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
@@ -40,6 +43,8 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
   StreamSubscription<GameState>? _stateSubscription;
 
   GameResult? _finalResult;
+  bool _showCountdown = false;
+  int _shakeTrigger = 0;
 
   @override
   void initState() {
@@ -112,7 +117,7 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
         initialDifficulty: widget.initialDifficulty,
         onStart: ({required difficulty, required isPractice}) {
           _initSession(difficulty: difficulty, isPractice: isPractice);
-          _session.start();
+          setState(() => _showCountdown = true);
         },
       ),
     );
@@ -120,12 +125,30 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
 
   void _handleDirection(LabyrinthDirection direction) {
     if (_session.isFinished) return;
+    final engine = _session.engine as LogicLabyrinthGameEngine;
+    final oldPos = engine.roundState.playerPos;
+    final hadKey = engine.roundState.checkpointCollected;
+
     _session.dispatch(
       MoveLabyrinthAction(
         timestamp: _session.activeDuration,
         direction: direction,
       ),
     );
+
+    final newPos = engine.roundState.playerPos;
+    if (newPos == oldPos) {
+      // Hit wall
+      _shakeTrigger++;
+      SoundSynthesizer.playError();
+    } else {
+      if (!hadKey && engine.roundState.checkpointCollected) {
+        SoundSynthesizer.playSuccess(streak: 3);
+      } else {
+        SoundSynthesizer.playCountdown();
+      }
+    }
+
     setState(() {});
   }
 
@@ -175,9 +198,6 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     if (_finalResult != null) {
       final workoutState = ref.watch(workoutSessionProvider);
       final hasNext = workoutState != null &&
@@ -193,7 +213,8 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
             onPlayAgain: () {
               _initSession(
                 difficulty: _session.config.difficulty,
-                isPractice: false,
+                isPractice:
+                    (_session.config as LogicLabyrinthConfig).isPractice,
               );
               _session.start();
               setState(() {});
@@ -249,233 +270,295 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                GameHeader(
-                  title: _definition.name,
-                  currentRound: _session.state.currentRound,
-                  totalRounds: _session.state.totalRounds,
-                  score: _session.state.score,
-                  isPractice: config.isPractice,
-                  onPause: _handlePause,
-                ),
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Round info badges
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: Wrap(
-                              spacing: AppSpacing.sm,
-                              runSpacing: AppSpacing.xs,
-                              alignment: WrapAlignment.center,
-                              children: [
-                                AppBadge(
-                                  label: 'Steps: ${round.stepCount}',
-                                ),
-                                AppBadge(
-                                  label: 'Par: ${round.optimalPathLength}',
-                                  variant: AppBadgeVariant.mint,
-                                ),
-                                if (round.checkpoint != null)
-                                  AppBadge(
-                                    label: round.checkpointCollected
-                                        ? 'Key Collected'
-                                        : 'Collect Key First',
-                                    variant: round.checkpointCollected
-                                        ? AppBadgeVariant.success
-                                        : AppBadgeVariant.warning,
-                                    icon: round.checkpointCollected
-                                        ? Icons.check_circle_rounded
-                                        : Icons.star_rounded,
-                                  ),
-                              ],
-                            ),
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Column(
+                  children: [
+                    GameHeader(
+                      title: _definition.name,
+                      currentRound: _session.state.currentRound,
+                      totalRounds: _session.state.totalRounds,
+                      score: _session.state.score,
+                      isPractice: config.isPractice,
+                      onPause: _handlePause,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
                           ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Round info badges
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppSpacing.sm,
+                                ),
+                                child: Wrap(
+                                  spacing: AppSpacing.sm,
+                                  runSpacing: AppSpacing.xs,
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    AppBadge(
+                                      label: 'Steps: ${round.stepCount}',
+                                    ),
+                                    AppBadge(
+                                      label: 'Par: ${round.optimalPathLength}',
+                                      variant: AppBadgeVariant.mint,
+                                    ),
+                                    if (round.checkpoint != null)
+                                      AppBadge(
+                                        label: round.checkpointCollected
+                                            ? 'Key Collected'
+                                            : 'Collect Key First',
+                                        variant: round.checkpointCollected
+                                            ? AppBadgeVariant.success
+                                            : AppBadgeVariant.warning,
+                                        icon: round.checkpointCollected
+                                            ? Icons.check_circle_rounded
+                                            : Icons.star_rounded,
+                                      ),
+                                  ],
+                                ),
+                              ),
 
-                          // The Labyrinth Grid
-                          _buildMazeGrid(round, isDark),
+                              // Maze Board with error shake
+                              ShakeWidget(
+                                shakeTrigger: _shakeTrigger,
+                                child: _buildMazeBoard(context, round),
+                              ),
+                              AppSpacing.gapH16,
 
-                          AppSpacing.gapH16,
-
-                          // Directional Controls (D-Pad)
-                          _buildDPadControls(isDark),
-                        ],
+                              // Controls (D-pad & action buttons)
+                              _buildControls(context),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              // Focus Countdown Overlay
+              if (_showCountdown)
+                Positioned.fill(
+                  child: GameCountdownOverlay(
+                    onComplete: () {
+                      setState(() => _showCountdown = false);
+                      _session.start();
+                    },
                   ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMazeBoard(
+    BuildContext context,
+    LogicLabyrinthRoundState round,
+  ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 360, maxHeight: 360),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.darkCard
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: AppRadii.rLg,
+        border: Border.all(
+          color: AppColors.mint500.withValues(alpha: 0.35),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.mint500.withValues(alpha: 0.12),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(AppSpacing.xs),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final cellW = constraints.maxWidth / round.gridSize;
+            final cellH = constraints.maxHeight / round.gridSize;
+
+            return CustomPaint(
+              size: Size(constraints.maxWidth, constraints.maxHeight),
+              painter: _MazePainter(
+                round: round,
+                isDark: isDark,
+                cellWidth: cellW,
+                cellHeight: cellH,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControls(BuildContext context) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 240),
+        child: Column(
+          children: [
+            // Up Button
+            _buildDirectionButton(
+              icon: Icons.keyboard_arrow_up_rounded,
+              direction: LabyrinthDirection.up,
+              tooltip: 'Move Up (W or Arrow Up)',
+            ),
+            AppSpacing.gapH4,
+            // Left, Reset, Right Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDirectionButton(
+                  icon: Icons.keyboard_arrow_left_rounded,
+                  direction: LabyrinthDirection.left,
+                  tooltip: 'Move Left (A or Arrow Left)',
+                ),
+                AppSpacing.gapW12,
+                IconButton.filledTonal(
+                  icon: const Icon(Icons.restart_alt_rounded),
+                  tooltip: 'Reset to maze start (R)',
+                  onPressed: _handleReset,
+                ),
+                AppSpacing.gapW12,
+                _buildDirectionButton(
+                  icon: Icons.keyboard_arrow_right_rounded,
+                  direction: LabyrinthDirection.right,
+                  tooltip: 'Move Right (D or Arrow Right)',
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMazeGrid(LogicLabyrinthRoundState round, bool isDark) {
-    final size = round.gridSize;
-
-    return Semantics(
-      label:
-          'Labyrinth Grid size $size by $size. Player at (${round.playerPos.x}, ${round.playerPos.y})',
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 380, maxHeight: 380),
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : AppColors.pureWhite,
-          borderRadius: AppRadii.rLg,
-          border: Border.all(
-            color: isDark ? AppColors.navy700 : AppColors.slate200,
-            width: 2,
-          ),
-        ),
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: size * size,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: size,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
+            AppSpacing.gapH4,
+            // Down Button
+            _buildDirectionButton(
+              icon: Icons.keyboard_arrow_down_rounded,
+              direction: LabyrinthDirection.down,
+              tooltip: 'Move Down (S or Arrow Down)',
             ),
-            itemBuilder: (context, index) {
-              final x = index % size;
-              final y = index ~/ size;
-              final coord = GridCoordinate(x, y);
-
-              final isPlayer = coord == round.playerPos;
-              final isStart = coord == round.start;
-              final isTarget = coord == round.target;
-              final isWall = round.walls.contains(coord);
-              final isCheckpoint = coord == round.checkpoint;
-              final isVisited = round.visitedPath.contains(coord);
-
-              Color cellColor;
-              Widget? iconWidget;
-
-              if (isWall) {
-                cellColor = isDark ? AppColors.navy800 : AppColors.navy700;
-                iconWidget = Icon(
-                  Icons.block_rounded,
-                  size: 14,
-                  color: isDark ? AppColors.navy600 : AppColors.navy500,
-                );
-              } else if (isPlayer) {
-                cellColor = AppColors.mint500.withValues(alpha: 0.25);
-                iconWidget = Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.mint500,
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  child: const Icon(
-                    Icons.navigation_rounded,
-                    size: 16,
-                    color: AppColors.navy900,
-                  ),
-                );
-              } else if (isTarget) {
-                cellColor = isDark ? AppColors.navy800 : AppColors.slate100;
-                iconWidget = Icon(
-                  Icons.sports_score_rounded,
-                  size: 20,
-                  color: round.needsCheckpoint
-                      ? AppColors.navy400
-                      : AppColors.mint500,
-                );
-              } else if (isCheckpoint) {
-                cellColor = isDark ? AppColors.navy800 : AppColors.slate100;
-                iconWidget = Icon(
-                  Icons.star_rounded,
-                  size: 20,
-                  color: round.checkpointCollected
-                      ? AppColors.navy400
-                      : const Color(0xFFF59E0B),
-                );
-              } else if (isStart) {
-                cellColor = isDark ? AppColors.navy800 : AppColors.slate100;
-                iconWidget = const Icon(
-                  Icons.flag_rounded,
-                  size: 16,
-                  color: AppColors.mint500,
-                );
-              } else if (isVisited) {
-                cellColor = isDark
-                    ? AppColors.navy800.withValues(alpha: 0.6)
-                    : AppColors.mint50.withValues(alpha: 0.5);
-                iconWidget = Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark ? AppColors.navy600 : AppColors.mint200,
-                  ),
-                );
-              } else {
-                cellColor = isDark ? AppColors.navy800 : AppColors.slate100;
-              }
-
-              return Container(
-                decoration: BoxDecoration(
-                  color: cellColor,
-                  borderRadius: AppRadii.rSm,
-                ),
-                alignment: Alignment.center,
-                child: iconWidget,
-              );
-            },
-          ),
+          ],
         ),
-      ),
+      );
+
+  Widget _buildDirectionButton({
+    required IconData icon,
+    required LabyrinthDirection direction,
+    required String tooltip,
+  }) =>
+      IconButton.filled(
+        icon: Icon(icon, size: 28),
+        tooltip: tooltip,
+        onPressed: () => _handleDirection(direction),
+        style: IconButton.styleFrom(
+          backgroundColor: AppColors.mint500,
+          foregroundColor: AppColors.navy900,
+          minimumSize: const Size(52, 52),
+        ),
+      );
+}
+
+class _MazePainter extends CustomPainter {
+  const _MazePainter({
+    required this.round,
+    required this.isDark,
+    required this.cellWidth,
+    required this.cellHeight,
+  });
+
+  final LogicLabyrinthRoundState round;
+  final bool isDark;
+  final double cellWidth;
+  final double cellHeight;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final wallPaint = Paint()
+      ..color = isDark ? const Color(0xFF243048) : const Color(0xFFCBD5E1)
+      ..style = PaintingStyle.fill;
+
+    final pathPaint = Paint()
+      ..color = isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9)
+      ..style = PaintingStyle.fill;
+
+    // Draw grid cells
+    for (var r = 0; r < round.gridSize; r++) {
+      for (var c = 0; c < round.gridSize; c++) {
+        final rect = Rect.fromLTWH(
+          c * cellWidth,
+          r * cellHeight,
+          cellWidth,
+          cellHeight,
+        );
+        final isWall = round.walls.contains(GridCoordinate(c, r));
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            rect.deflate(1),
+            const Radius.circular(3),
+          ),
+          isWall ? wallPaint : pathPaint,
+        );
+      }
+    }
+
+    // Draw exit target
+    final exitRect = Rect.fromLTWH(
+      round.target.x * cellWidth,
+      round.target.y * cellHeight,
+      cellWidth,
+      cellHeight,
     );
+    final exitPaint = Paint()
+      ..color = const Color(0xFF10B981).withValues(alpha: 0.8)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(exitRect.center, cellWidth * 0.38, exitPaint);
+
+    // Draw checkpoint if present and not collected
+    if (round.checkpoint != null && !round.checkpointCollected) {
+      final cpRect = Rect.fromLTWH(
+        round.checkpoint!.x * cellWidth,
+        round.checkpoint!.y * cellHeight,
+        cellWidth,
+        cellHeight,
+      );
+      final cpPaint = Paint()
+        ..color = const Color(0xFFF59E0B)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(cpRect.center, cellWidth * 0.28, cpPaint);
+    }
+
+    // Draw player with glowing orb
+    final playerRect = Rect.fromLTWH(
+      round.playerPos.x * cellWidth,
+      round.playerPos.y * cellHeight,
+      cellWidth,
+      cellHeight,
+    );
+    final glowPaint = Paint()
+      ..color = const Color(0xFF818CF8).withValues(alpha: 0.4)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(playerRect.center, cellWidth * 0.42, glowPaint);
+
+    final playerPaint = Paint()
+      ..color = const Color(0xFF818CF8)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(playerRect.center, cellWidth * 0.3, playerPaint);
   }
 
-  Widget _buildDPadControls(bool isDark) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton.filledTonal(
-            icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 28),
-            tooltip: 'Move Up (W or Arrow Up)',
-            onPressed: () => _handleDirection(LabyrinthDirection.up),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton.filledTonal(
-                icon: const Icon(Icons.keyboard_arrow_left_rounded, size: 28),
-                tooltip: 'Move Left (A or Arrow Left)',
-                onPressed: () => _handleDirection(LabyrinthDirection.left),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              IconButton.outlined(
-                icon: const Icon(Icons.restart_alt_rounded, size: 20),
-                tooltip: 'Reset to maze start (R)',
-                onPressed: _handleReset,
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.keyboard_arrow_right_rounded, size: 28),
-                tooltip: 'Move Right (D or Arrow Right)',
-                onPressed: () => _handleDirection(LabyrinthDirection.right),
-              ),
-            ],
-          ),
-          IconButton.filledTonal(
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
-            tooltip: 'Move Down (S or Arrow Down)',
-            onPressed: () => _handleDirection(LabyrinthDirection.down),
-          ),
-        ],
-      );
+  @override
+  bool shouldRepaint(_MazePainter oldDelegate) =>
+      oldDelegate.round != round || oldDelegate.isDark != isDark;
 }

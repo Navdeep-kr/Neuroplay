@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
@@ -11,6 +12,8 @@ import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_countdown_overlay.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_feedback_effects.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
@@ -40,6 +43,9 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
   StreamSubscription<GameState>? _stateSubscription;
 
   GameResult? _finalResult;
+  bool _showCountdown = false;
+  int _comboStreak = 0;
+  int _shakeTrigger = 0;
 
   @override
   void initState() {
@@ -71,6 +77,7 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
       config: config,
     );
 
+    _comboStreak = 0;
     _finalResult = null;
     _stateSubscription = _session.stateStream.listen((state) {
       if (!mounted) return;
@@ -99,21 +106,20 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
       builder: (context) => GameTutorialDialog(
         title: _definition.name,
         category: _definition.category,
-        icon: Icons.swap_horiz_rounded,
+        icon: Icons.flash_on_rounded,
         instructions:
-            'A central symbol will appear with a Shape (Circle, Square, Triangle, Diamond) '
-            'and a Pattern (Solid, Striped, Dotted, Outline).\n\n'
-            'Check the current rule at the top. Match either by SHAPE or by PATTERN.\n\n'
-            'Be vigilant: the rule will switch periodically to challenge your mental flexibility!',
+            'A target symbol is presented alongside an active sorting rule: '
+            '"MATCH SHAPE" or "MATCH PATTERN".\n\n'
+            'Select the matching option as quickly and accurately as possible.',
         tips: const [
-          'Use keyboard keys [1], [2], [3] or tap the options directly.',
-          'Beware of foils: an option matching the inactive attribute is a distractor.',
-          'Faster accurate responses earn higher reaction speed multipliers.',
+          'Watch the ACTIVE RULE header closely — rules can switch unpredictably.',
+          'Use keyboard numbers 1, 2, 3 or tap directly on touchscreen/mouse.',
+          'Consistently fast accurate answers trigger rapid combo streak multipliers.',
         ],
         initialDifficulty: widget.initialDifficulty,
         onStart: ({required difficulty, required isPractice}) {
           _initSession(difficulty: difficulty, isPractice: isPractice);
-          _session.start();
+          setState(() => _showCountdown = true);
         },
       ),
     );
@@ -121,6 +127,23 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
 
   void _handleOptionSelected(int index) {
     if (_session.isFinished) return;
+
+    final engine = _session.engine as ReflexForgeGameEngine;
+    final trial = engine.trialState;
+
+    if (index >= 0 && index < trial.options.length) {
+      final isMatch = index == trial.correctIndex;
+
+      if (isMatch) {
+        _comboStreak++;
+        SoundSynthesizer.playSuccess(streak: _comboStreak);
+      } else {
+        _comboStreak = 0;
+        _shakeTrigger++;
+        SoundSynthesizer.playError();
+      }
+    }
+
     _session.dispatch(
       SelectReflexOptionAction(
         timestamp: _session.activeDuration,
@@ -231,72 +254,93 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                children: [
-                  // Header HUD
-                  GameHeader(
-                    title: _definition.name,
-                    currentRound: _session.state.currentRound,
-                    totalRounds: _session.state.totalRounds,
-                    score: _session.state.score,
-                    isPractice: config.isPractice,
-                    onPause: _handlePause,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
                   ),
-                  AppSpacing.gapH16,
-
-                  // Rule Banner with optional shift pill
-                  _buildRuleHeader(theme, trial),
-                  AppSpacing.gapH24,
-
-                  // Central Target Stimulus
-                  Expanded(
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 320),
-                        child: _buildStimulusCard(theme, trial.stimulus),
+                  child: Column(
+                    children: [
+                      // HUD Header with live combo streak
+                      GameHeader(
+                        title: _definition.name,
+                        currentRound: _session.state.currentRound,
+                        totalRounds: _session.state.totalRounds,
+                        score: _session.state.score,
+                        comboStreak: _comboStreak,
+                        isPractice: config.isPractice,
+                        onPause: _handlePause,
                       ),
-                    ),
-                  ),
-                  AppSpacing.gapH24,
+                      AppSpacing.gapH24,
 
-                  // Options Row
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        trial.options.length,
-                        (i) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                            ),
-                            child: _buildOptionButton(
-                              theme,
-                              index: i,
-                              symbol: trial.options[i],
+                      // Active Rule Banner with animated shift indicator
+                      _buildRuleHeader(theme, trial),
+                      AppSpacing.gapH24,
+
+                      // Target Stimulus Card with error shake
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 420),
+                            child: ShakeWidget(
+                              shakeTrigger: _shakeTrigger,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildStimulusCard(
+                                    theme,
+                                    trial.stimulus,
+                                  ),
+                                  AppSpacing.gapH24,
+                                  Text(
+                                    'Select the matching symbol based on the active rule:',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.navy500,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  AppSpacing.gapH12,
+                                  Row(
+                                    children: [
+                                      for (int i = 0;
+                                          i < trial.options.length;
+                                          i++) ...[
+                                        if (i > 0) AppSpacing.gapW12,
+                                        Expanded(
+                                          child: _buildOptionButton(
+                                            theme,
+                                            index: i,
+                                            symbol: trial.options[i],
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  AppSpacing.gapH16,
-                  Text(
-                    'Select the matching card (Keyboard 1, 2, 3)',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.navy500,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+
+              // Focus Countdown Overlay
+              if (_showCountdown)
+                Positioned.fill(
+                  child: GameCountdownOverlay(
+                    onComplete: () {
+                      setState(() => _showCountdown = false);
+                      _session.start();
+                    },
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -316,22 +360,30 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                 horizontal: AppSpacing.md,
                 vertical: 2,
               ),
-              decoration: const BoxDecoration(
-                color: AppColors.mint500,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B),
                 borderRadius: AppRadii.rFull,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
               child: const Text(
                 '⚡ RULE SHIFTED',
                 style: TextStyle(
                   color: AppColors.navy900,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w900,
                   fontSize: 11,
                   letterSpacing: 1,
                 ),
               ),
             ),
           ),
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,
@@ -340,9 +392,20 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: AppRadii.rFull,
             border: Border.all(
-              color: AppColors.mint500.withValues(alpha: 0.5),
+              color: trial.ruleShiftedThisRound
+                  ? const Color(0xFFF59E0B)
+                  : AppColors.mint500.withValues(alpha: 0.6),
               width: 1.5,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: (trial.ruleShiftedThisRound
+                        ? const Color(0xFFF59E0B)
+                        : AppColors.mint500)
+                    .withValues(alpha: 0.25),
+                blurRadius: 12,
+              ),
+            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -403,42 +466,52 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
   }) =>
       Semantics(
         label: 'Option ${index + 1}: ${symbol.label}',
-        child: Material(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: AppRadii.rLg,
-          child: InkWell(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: AppRadii.rLg,
-            onTap: () => _handleOptionSelected(index),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: AppBadge(
-                      label: '${index + 1}',
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: AppRadii.rLg,
+            child: InkWell(
+              borderRadius: AppRadii.rLg,
+              onTap: () => _handleOptionSelected(index),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: AppBadge(
+                        label: '${index + 1}',
+                      ),
                     ),
-                  ),
-                  AppSpacing.gapH8,
-                  _SymbolGraphic(symbol: symbol, size: 52),
-                  AppSpacing.gapH8,
-                  Text(
-                    symbol.shape.label,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                    AppSpacing.gapH8,
+                    _SymbolGraphic(symbol: symbol, size: 52),
+                    AppSpacing.gapH8,
+                    Text(
+                      symbol.shape.label,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    symbol.pattern.label,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.navy500,
-                      fontSize: 10,
+                    Text(
+                      symbol.pattern.label,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.navy500,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -455,63 +528,184 @@ class _SymbolGraphic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    IconData icon;
-    switch (symbol.shape) {
-      case ReflexShape.circle:
-        icon = Icons.circle;
-        break;
-      case ReflexShape.square:
-        icon = Icons.square_rounded;
-        break;
-      case ReflexShape.triangle:
-        icon = Icons.change_history_rounded;
-        break;
-      case ReflexShape.diamond:
-        icon = Icons.diamond_rounded;
-        break;
-    }
+    final color = _getSymbolColor(symbol.pattern);
 
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: _getPatternBackgroundColor(symbol.pattern),
-        borderRadius: AppRadii.rLg,
-        border: Border.all(
-          color: AppColors.navy900.withValues(alpha: 0.3),
-          width: symbol.pattern == ReflexPattern.outline ? 3 : 1,
+      child: CustomPaint(
+        painter: _SymbolPainter(
+          shape: symbol.shape,
+          pattern: symbol.pattern,
+          color: color,
         ),
-      ),
-      child: Icon(
-        icon,
-        size: size * 0.65,
-        color: _getShapeColor(symbol.pattern),
       ),
     );
   }
 
-  Color _getPatternBackgroundColor(ReflexPattern pattern) {
-    switch (pattern) {
-      case ReflexPattern.solid:
-        return AppColors.mint500.withValues(alpha: 0.25);
-      case ReflexPattern.striped:
-        return AppColors.slate300;
-      case ReflexPattern.dotted:
-        return AppColors.slate200;
-      case ReflexPattern.outline:
-        return Colors.transparent;
+  Color _getSymbolColor(ReflexPattern pattern) => switch (pattern) {
+        ReflexPattern.solid => AppColors.mint500,
+        ReflexPattern.striped => const Color(0xFF38BDF8),
+        ReflexPattern.dotted => const Color(0xFFF59E0B),
+        ReflexPattern.outline => const Color(0xFF818CF8),
+      };
+}
+
+class _SymbolPainter extends CustomPainter {
+  const _SymbolPainter({
+    required this.shape,
+    required this.pattern,
+    required this.color,
+  });
+
+  final ReflexShape shape;
+  final ReflexPattern pattern;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final strokePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 4;
+
+    switch (shape) {
+      case ReflexShape.circle:
+        _drawCircle(canvas, center, radius, paint, strokePaint);
+      case ReflexShape.square:
+        _drawSquare(canvas, center, radius, paint, strokePaint);
+      case ReflexShape.triangle:
+        _drawTriangle(canvas, center, radius, paint, strokePaint);
+      case ReflexShape.diamond:
+        _drawDiamond(canvas, center, radius, paint, strokePaint);
     }
   }
 
-  Color _getShapeColor(ReflexPattern pattern) {
-    switch (pattern) {
-      case ReflexPattern.solid:
-        return AppColors.mint500;
-      case ReflexPattern.striped:
-      case ReflexPattern.dotted:
-      case ReflexPattern.outline:
-        return AppColors.navy800;
+  void _drawCircle(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint fill,
+    Paint stroke,
+  ) {
+    if (pattern == ReflexPattern.solid) {
+      canvas.drawCircle(center, radius, fill);
+    } else {
+      canvas.drawCircle(center, radius, stroke);
+      _drawPattern(canvas, Rect.fromCircle(center: center, radius: radius));
     }
   }
+
+  void _drawSquare(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint fill,
+    Paint stroke,
+  ) {
+    final rect = Rect.fromCenter(
+      center: center,
+      width: radius * 1.8,
+      height: radius * 1.8,
+    );
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
+    if (pattern == ReflexPattern.solid) {
+      canvas.drawRRect(rrect, fill);
+    } else {
+      canvas.drawRRect(rrect, stroke);
+      _drawPattern(canvas, rect);
+    }
+  }
+
+  void _drawTriangle(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint fill,
+    Paint stroke,
+  ) {
+    final path = Path()
+      ..moveTo(center.dx, center.dy - radius)
+      ..lineTo(center.dx + radius, center.dy + radius)
+      ..lineTo(center.dx - radius, center.dy + radius)
+      ..close();
+
+    if (pattern == ReflexPattern.solid) {
+      canvas.drawPath(path, fill);
+    } else {
+      canvas.drawPath(path, stroke);
+      _drawPattern(
+        canvas,
+        Rect.fromCenter(
+          center: center,
+          width: radius * 2,
+          height: radius * 2,
+        ),
+      );
+    }
+  }
+
+  void _drawDiamond(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint fill,
+    Paint stroke,
+  ) {
+    final path = Path()
+      ..moveTo(center.dx, center.dy - radius)
+      ..lineTo(center.dx + radius, center.dy)
+      ..lineTo(center.dx, center.dy + radius)
+      ..lineTo(center.dx - radius, center.dy)
+      ..close();
+
+    if (pattern == ReflexPattern.solid) {
+      canvas.drawPath(path, fill);
+    } else {
+      canvas.drawPath(path, stroke);
+      _drawPattern(
+        canvas,
+        Rect.fromCenter(
+          center: center,
+          width: radius * 2,
+          height: radius * 2,
+        ),
+      );
+    }
+  }
+
+  void _drawPattern(Canvas canvas, Rect bounds) {
+    final patternPaint = Paint()
+      ..color = color.withValues(alpha: 0.6)
+      ..strokeWidth = 2;
+
+    if (pattern == ReflexPattern.striped) {
+      for (var x = bounds.left + 6; x < bounds.right; x += 10) {
+        canvas.drawLine(
+          Offset(x, bounds.top + 6),
+          Offset(x, bounds.bottom - 6),
+          patternPaint,
+        );
+      }
+    } else if (pattern == ReflexPattern.dotted) {
+      for (var x = bounds.left + 8; x < bounds.right; x += 12) {
+        for (var y = bounds.top + 8; y < bounds.bottom; y += 12) {
+          canvas.drawCircle(Offset(x, y), 2, patternPaint);
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SymbolPainter oldDelegate) =>
+      oldDelegate.shape != shape ||
+      oldDelegate.pattern != pattern ||
+      oldDelegate.color != color;
 }

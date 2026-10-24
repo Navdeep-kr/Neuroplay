@@ -138,7 +138,7 @@ class _GameVectorPainter extends CustomPainter {
       [0, 1],
       [1, 1],
       [2, 0],
-      [1, 2]
+      [1, 2],
     };
 
     for (var r = 0; r < 3; r++) {
@@ -161,8 +161,11 @@ class _GameVectorPainter extends CustomPainter {
             ).createShader(rect.outerRect);
           canvas
             ..drawRRect(rect, litPaint)
-            ..drawCircle(Offset(x + tileSize / 2, y + tileSize / 2), 3,
-                Paint()..color = const Color(0xCCFFFFFF));
+            ..drawCircle(
+              Offset(x + tileSize / 2, y + tileSize / 2),
+              3,
+              Paint()..color = const Color(0xCCFFFFFF),
+            );
         } else {
           final basePaint = Paint()
             ..color = const Color(0x99312E81)
@@ -210,7 +213,8 @@ class _GameVectorPainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: [Color(0xFFFBBF24), Color(0xFFEA580C)],
       ).createShader(
-          Rect.fromCenter(center: Offset(cx, cy), width: 44, height: 44));
+        Rect.fromCenter(center: Offset(cx, cy), width: 44, height: 44),
+      );
 
     final path = Path()
       ..moveTo(cx, cy - 24)
@@ -257,14 +261,34 @@ class _GameVectorPainter extends CustomPainter {
 
     const r = 16.0;
     canvas
-      ..drawArc(Rect.fromCircle(center: Offset(cx, cy), radius: r),
-          -math.pi / 4 + 0.3, math.pi / 2 - 0.6, false, reticlePaint)
-      ..drawArc(Rect.fromCircle(center: Offset(cx, cy), radius: r),
-          math.pi / 4 + 0.3, math.pi / 2 - 0.6, false, reticlePaint)
-      ..drawArc(Rect.fromCircle(center: Offset(cx, cy), radius: r),
-          3 * math.pi / 4 + 0.3, math.pi / 2 - 0.6, false, reticlePaint)
-      ..drawArc(Rect.fromCircle(center: Offset(cx, cy), radius: r),
-          -3 * math.pi / 4 + 0.3, math.pi / 2 - 0.6, false, reticlePaint)
+      ..drawArc(
+        Rect.fromCircle(center: Offset(cx, cy), radius: r),
+        -math.pi / 4 + 0.3,
+        math.pi / 2 - 0.6,
+        false,
+        reticlePaint,
+      )
+      ..drawArc(
+        Rect.fromCircle(center: Offset(cx, cy), radius: r),
+        math.pi / 4 + 0.3,
+        math.pi / 2 - 0.6,
+        false,
+        reticlePaint,
+      )
+      ..drawArc(
+        Rect.fromCircle(center: Offset(cx, cy), radius: r),
+        3 * math.pi / 4 + 0.3,
+        math.pi / 2 - 0.6,
+        false,
+        reticlePaint,
+      )
+      ..drawArc(
+        Rect.fromCircle(center: Offset(cx, cy), radius: r),
+        -3 * math.pi / 4 + 0.3,
+        math.pi / 2 - 0.6,
+        false,
+        reticlePaint,
+      )
       ..drawCircle(Offset(cx, cy), 4, Paint()..color = const Color(0xFF6EE7B7));
 
     final pPaint = Paint()..color = const Color(0xB3FBBF24);
@@ -307,9 +331,15 @@ class _GameVectorPainter extends CustomPainter {
     canvas
       ..drawCircle(Offset(cx - 16, cy), 6, nodePaint)
       ..drawCircle(
-          Offset(cx - 48, cy - 30), 5, Paint()..color = const Color(0xFFFBBF24))
+        Offset(cx - 48, cy - 30),
+        5,
+        Paint()..color = const Color(0xFFFBBF24),
+      )
       ..drawCircle(
-          Offset(cx + 48, cy - 24), 7, Paint()..color = const Color(0xFF00F0FF))
+        Offset(cx + 48, cy - 24),
+        7,
+        Paint()..color = const Color(0xFF00F0FF),
+      )
       ..drawCircle(Offset(cx + 48, cy - 24), 3, Paint()..color = Colors.white);
   }
 
@@ -448,32 +478,45 @@ class _NeuralCortexPainter extends CustomPainter {
       ..shader = const RadialGradient(
         colors: [Color(0xFF6EE7B7), Color(0xFF059669)],
       ).createShader(
-          Rect.fromCircle(center: Offset(cx, cy), radius: radius * 0.28));
+        Rect.fromCircle(center: Offset(cx, cy), radius: radius * 0.28),
+      );
     canvas.drawCircle(Offset(cx, cy), radius * 0.28, coreGlow);
 
     final brainPath = Path();
     final s = radius * 0.18;
     brainPath
       ..addArc(
-          Rect.fromCircle(
-              center: Offset(cx - s * 0.7, cy - s * 0.6), radius: s * 0.7),
-          -math.pi,
-          math.pi * 0.8)
+        Rect.fromCircle(
+          center: Offset(cx - s * 0.7, cy - s * 0.6),
+          radius: s * 0.7,
+        ),
+        -math.pi,
+        math.pi * 0.8,
+      )
       ..addArc(
-          Rect.fromCircle(
-              center: Offset(cx - s * 0.7, cy + s * 0.6), radius: s * 0.7),
-          math.pi * 0.2,
-          math.pi * 0.8)
+        Rect.fromCircle(
+          center: Offset(cx - s * 0.7, cy + s * 0.6),
+          radius: s * 0.7,
+        ),
+        math.pi * 0.2,
+        math.pi * 0.8,
+      )
       ..addArc(
-          Rect.fromCircle(
-              center: Offset(cx + s * 0.7, cy - s * 0.6), radius: s * 0.7),
-          -math.pi * 0.8,
-          math.pi * 0.8)
+        Rect.fromCircle(
+          center: Offset(cx + s * 0.7, cy - s * 0.6),
+          radius: s * 0.7,
+        ),
+        -math.pi * 0.8,
+        math.pi * 0.8,
+      )
       ..addArc(
-          Rect.fromCircle(
-              center: Offset(cx + s * 0.7, cy + s * 0.6), radius: s * 0.7),
-          0,
-          math.pi * 0.8);
+        Rect.fromCircle(
+          center: Offset(cx + s * 0.7, cy + s * 0.6),
+          radius: s * 0.7,
+        ),
+        0,
+        math.pi * 0.8,
+      );
 
     final brainPaint = Paint()
       ..color = Colors.white

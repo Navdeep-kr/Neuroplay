@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
@@ -11,6 +12,8 @@ import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_countdown_overlay.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_feedback_effects.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
@@ -40,6 +43,9 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
   StreamSubscription<GameState>? _stateSubscription;
 
   GameResult? _finalResult;
+  bool _showCountdown = false;
+  int _comboStreak = 0;
+  int _shakeTrigger = 0;
 
   @override
   void initState() {
@@ -72,6 +78,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
       config: config,
     );
 
+    _comboStreak = 0;
     _finalResult = null;
     _stateSubscription = _session.stateStream.listen((state) {
       if (!mounted) return;
@@ -111,7 +118,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
         initialDifficulty: widget.initialDifficulty,
         onStart: ({required difficulty, required isPractice}) {
           _initSession(difficulty: difficulty, isPractice: isPractice);
-          _session.start();
+          setState(() => _showCountdown = true);
         },
       ),
     );
@@ -121,6 +128,17 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
     if (_session.isFinished) return;
     final engine = _session.engine as WordWeaverGameEngine;
     if (engine.trialState.isAnswered) return;
+
+    final isCorrect =
+        optionWord == engine.trialState.question.correctAssociatedWord;
+    if (isCorrect) {
+      _comboStreak++;
+      SoundSynthesizer.playSuccess(streak: _comboStreak);
+    } else {
+      _comboStreak = 0;
+      _shakeTrigger++;
+      SoundSynthesizer.playError();
+    }
 
     _session.dispatch(
       SelectWordAssociationAction(
@@ -170,7 +188,6 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     if (_finalResult != null) {
       final workoutState = ref.watch(workoutSessionProvider);
@@ -187,7 +204,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
             onPlayAgain: () {
               _initSession(
                 difficulty: _session.config.difficulty,
-                isPractice: false,
+                isPractice: (_session.config as WordWeaverConfig).isPractice,
               );
               _session.start();
               setState(() {});
@@ -218,189 +235,173 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
     final engine = _session.engine as WordWeaverGameEngine;
     final config = _session.config as WordWeaverConfig;
     final trial = engine.trialState;
-    final q = trial.question;
 
     return CallbackShortcuts(
       bindings: {
-        if (q.options.isNotEmpty)
-          const SingleActivator(LogicalKeyboardKey.digit1): () =>
-              _handleChoice(q.options[0]),
-        if (q.options.length > 1)
-          const SingleActivator(LogicalKeyboardKey.digit2): () =>
-              _handleChoice(q.options[1]),
-        if (q.options.length > 2)
-          const SingleActivator(LogicalKeyboardKey.digit3): () =>
-              _handleChoice(q.options[2]),
-        if (q.options.length > 3)
-          const SingleActivator(LogicalKeyboardKey.digit4): () =>
-              _handleChoice(q.options[3]),
         const SingleActivator(LogicalKeyboardKey.escape): _handlePause,
+        if (trial.question.options.isNotEmpty)
+          const SingleActivator(LogicalKeyboardKey.digit1): () =>
+              _handleChoice(trial.question.options[0]),
+        if (trial.question.options.length > 1)
+          const SingleActivator(LogicalKeyboardKey.digit2): () =>
+              _handleChoice(trial.question.options[1]),
+        if (trial.question.options.length > 2)
+          const SingleActivator(LogicalKeyboardKey.digit3): () =>
+              _handleChoice(trial.question.options[2]),
+        if (trial.question.options.length > 3)
+          const SingleActivator(LogicalKeyboardKey.digit4): () =>
+              _handleChoice(trial.question.options[3]),
       },
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: [
-                GameHeader(
-                  title: _definition.name,
-                  currentRound: _session.state.currentRound,
-                  totalRounds: _session.state.totalRounds,
-                  score: _session.state.score,
-                  isPractice: config.isPractice,
-                  onPause: _handlePause,
-                ),
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.lg,
-                        vertical: AppSpacing.md,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Column(
+                    children: [
+                      GameHeader(
+                        title: _definition.name,
+                        currentRound: _session.state.currentRound,
+                        totalRounds: _session.state.totalRounds,
+                        score: _session.state.score,
+                        comboStreak: _comboStreak,
+                        isPractice: config.isPractice,
+                        onPause: _handlePause,
                       ),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 580),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Domain badge & streak
-                            Wrap(
-                              spacing: AppSpacing.sm,
-                              alignment: WrapAlignment.center,
-                              children: [
-                                AppBadge(
-                                  label: q.category.displayName,
-                                  variant: AppBadgeVariant.mint,
-                                ),
-                                if (engine.currentStreak > 1)
-                                  AppBadge(
-                                    label: '${engine.currentStreak} In a Row',
-                                    variant: AppBadgeVariant.success,
-                                    icon: Icons.local_fire_department_rounded,
-                                  ),
-                              ],
+                      AppSpacing.gapH24,
+
+                      // Anchor Word Card with error shake
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 480),
+                            child: ShakeWidget(
+                              shakeTrigger: _shakeTrigger,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildAnchorCard(theme, trial),
+                                  AppSpacing.gapH32,
+                                  _buildChoicesGrid(theme, trial),
+                                ],
+                              ),
                             ),
-
-                            AppSpacing.gapH24,
-
-                            // Anchor Word Card
-                            _buildAnchorCard(q, isDark),
-
-                            AppSpacing.gapH32,
-
-                            // 4 Choice Options
-                            _buildOptionsGrid(q, isDark),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // Focus Countdown Overlay
+              if (_showCountdown)
+                Positioned.fill(
+                  child: GameCountdownOverlay(
+                    onComplete: () {
+                      setState(() => _showCountdown = false);
+                      _session.start();
+                    },
+                  ),
+                ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildAnchorCard(WordWeaverQuestion q, bool isDark) => AppCard(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.xl,
-          ),
-          child: Column(
-            children: [
-              Text(
-                q.anchorWord,
-                style: TextStyle(
-                  fontSize: 28,
+  Widget _buildAnchorCard(ThemeData theme, WordWeaverTrialState trial) =>
+      AppCard(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.xl,
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.mint500.withValues(alpha: 0.12),
+                borderRadius: AppRadii.rFull,
+                border: Border.all(
+                  color: AppColors.mint500.withValues(alpha: 0.4),
+                ),
+              ),
+              child: Text(
+                trial.question.category.displayName.toUpperCase(),
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                  color: isDark ? Colors.white : AppColors.navy900,
+                  color: AppColors.mint500,
+                  letterSpacing: 1.2,
                 ),
-                textAlign: TextAlign.center,
               ),
-              AppSpacing.gapH8,
-              Text(
-                'Select the associated term from the same domain',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: isDark ? AppColors.navy400 : AppColors.navy600,
-                ),
-                textAlign: TextAlign.center,
+            ),
+            AppSpacing.gapH16,
+            Text(
+              trial.question.anchorWord,
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
               ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+            AppSpacing.gapH8,
+            Text(
+              'Select the associated term from the same domain',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.navy500,
+              ),
+            ),
+          ],
         ),
       );
 
-  Widget _buildOptionsGrid(WordWeaverQuestion q, bool isDark) =>
+  Widget _buildChoicesGrid(ThemeData theme, WordWeaverTrialState trial) =>
       GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: q.options.length,
+        itemCount: trial.question.options.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 2.3,
           crossAxisSpacing: AppSpacing.md,
           mainAxisSpacing: AppSpacing.md,
+          childAspectRatio: 2.3,
         ),
         itemBuilder: (context, index) {
-          final option = q.options[index];
-          final keyLabel = '${index + 1}';
-
+          final word = trial.question.options[index];
           return Semantics(
-            label: 'Option $keyLabel: $option',
-            button: true,
+            label: 'Option ${index + 1}: $word',
             child: Material(
-              color: Colors.transparent,
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: AppRadii.rLg,
               child: InkWell(
-                onTap: () => _handleChoice(option),
                 borderRadius: AppRadii.rLg,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkCard : AppColors.pureWhite,
-                    borderRadius: AppRadii.rLg,
-                    border: Border.all(
-                      color: isDark ? AppColors.navy700 : AppColors.slate200,
-                      width: 1.5,
-                    ),
-                  ),
+                onTap: () => _handleChoice(word),
+                child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Row(
                     children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color:
-                              isDark ? AppColors.navy800 : AppColors.slate100,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          keyLabel,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                isDark ? AppColors.navy400 : AppColors.navy600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
+                      AppBadge(label: '${index + 1}'),
                       Expanded(
-                        child: Text(
-                          option,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                            color: isDark ? Colors.white : AppColors.navy900,
+                        child: Center(
+                          child: Text(
+                            word,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],

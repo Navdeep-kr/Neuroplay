@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
@@ -10,6 +11,8 @@ import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/widgets/app_button.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_countdown_overlay.dart';
+import 'package:neuroplay/features/games/presentation/widgets/game_feedback_effects.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_header.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_pause_dialog.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dialog.dart';
@@ -40,6 +43,9 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
   Timer? _previewTimer;
 
   GameResult? _finalResult;
+  bool _showCountdown = false;
+  int _comboStreak = 0;
+  int _shakeTrigger = 0;
 
   @override
   void initState() {
@@ -74,6 +80,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
       config: config,
     );
 
+    _comboStreak = 0;
     _finalResult = null;
     _stateSubscription = _session.stateStream.listen((state) {
       if (!mounted) return;
@@ -115,8 +122,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
         initialDifficulty: widget.initialDifficulty,
         onStart: ({required difficulty, required isPractice}) {
           _initSession(difficulty: difficulty, isPractice: isPractice);
-          _session.start();
-          _schedulePreviewTimer();
+          setState(() => _showCountdown = true);
         },
       ),
     );
@@ -139,6 +145,22 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
   void _onTileTapped(int index) {
     final engine = _session.engine as MemoryMatrixGameEngine;
     if (!engine.roundState.isRecalling) return;
+
+    final isTarget = engine.roundState.targetIndices.contains(index);
+    final alreadySelected =
+        engine.roundState.selectedCorrectIndices.contains(index) ||
+            engine.roundState.selectedMistakeIndices.contains(index);
+
+    if (!alreadySelected) {
+      if (isTarget) {
+        _comboStreak++;
+        SoundSynthesizer.playSuccess(streak: _comboStreak);
+      } else {
+        _comboStreak = 0;
+        _shakeTrigger++;
+        SoundSynthesizer.playError();
+      }
+    }
 
     final wasMemorizing = engine.roundState.isMemorizing;
     _session.dispatch(
@@ -260,80 +282,100 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                children: [
-                  // Top HUD Header
-                  GameHeader(
-                    title: _definition.name,
-                    currentRound: _session.state.currentRound,
-                    totalRounds: _session.state.totalRounds,
-                    score: _session.state.score,
-                    isPractice: config.isPractice,
-                    onPause: _handlePause,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
                   ),
-                  AppSpacing.gapH24,
-
-                  // Phase Indicator Banner
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _buildPhaseBanner(theme, roundState),
-                  ),
-                  AppSpacing.gapH24,
-
-                  // Main Interactive Grid
-                  Expanded(
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: 420,
-                            maxHeight: 420,
-                          ),
-                          child: _buildGrid(theme, config, roundState),
-                        ),
+                  child: Column(
+                    children: [
+                      // Top HUD Header with live combo streak
+                      GameHeader(
+                        title: _definition.name,
+                        currentRound: _session.state.currentRound,
+                        totalRounds: _session.state.totalRounds,
+                        score: _session.state.score,
+                        comboStreak: _comboStreak,
+                        isPractice: config.isPractice,
+                        onPause: _handlePause,
                       ),
-                    ),
-                  ),
+                      AppSpacing.gapH24,
 
-                  // Bottom skip button for preview
-                  if (roundState.isMemorizing)
-                    Padding(
-                      padding: const EdgeInsets.only(top: AppSpacing.md),
-                      child: AppButton(
-                        label: 'Ready to Recall',
-                        icon: Icons.check_circle_outline_rounded,
-                        variant: AppButtonVariant.secondary,
-                        onPressed: () {
-                          _previewTimer?.cancel();
-                          _session.dispatch(
-                            BeginRecallAction(
-                              timestamp: _session.activeDuration,
+                      // Phase Indicator Banner
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _buildPhaseBanner(theme, roundState),
+                      ),
+                      AppSpacing.gapH24,
+
+                      // Main Interactive Grid with error shake physics
+                      Expanded(
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: 420,
+                                maxHeight: 420,
+                              ),
+                              child: ShakeWidget(
+                                shakeTrigger: _shakeTrigger,
+                                child: _buildGrid(theme, config, roundState),
+                              ),
                             ),
-                          );
-                          setState(() {});
-                        },
-                      ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.only(top: AppSpacing.md),
-                      child: Text(
-                        'Select the illuminated squares (${roundState.selectedCorrectIndices.length}/${roundState.targetIndices.length})',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.navy500,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+
+                      // Bottom skip button for preview
+                      if (roundState.isMemorizing)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.md),
+                          child: AppButton(
+                            label: 'Ready to Recall',
+                            icon: Icons.check_circle_outline_rounded,
+                            variant: AppButtonVariant.secondary,
+                            onPressed: () {
+                              _previewTimer?.cancel();
+                              _session.dispatch(
+                                BeginRecallAction(
+                                  timestamp: _session.activeDuration,
+                                ),
+                              );
+                              setState(() {});
+                            },
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.md),
+                          child: Text(
+                            'Select the illuminated squares (${roundState.selectedCorrectIndices.length}/${roundState.targetIndices.length})',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.navy500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+
+              // Cinematic Focus Countdown Overlay
+              if (_showCountdown)
+                Positioned.fill(
+                  child: GameCountdownOverlay(
+                    onComplete: () {
+                      setState(() => _showCountdown = false);
+                      _session.start();
+                      _schedulePreviewTimer();
+                    },
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -351,6 +393,9 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
         decoration: BoxDecoration(
           color: AppColors.mint500.withValues(alpha: 0.15),
           borderRadius: AppRadii.rFull,
+          border: Border.all(
+            color: AppColors.mint500.withValues(alpha: 0.4),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -428,16 +473,30 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
 
         final Color tileColor;
         final Widget? tileIcon;
+        final List<BoxShadow>? tileGlow;
 
         if (showHighlighted) {
           tileColor = AppColors.mint500;
+          tileGlow = [
+            BoxShadow(
+              color: AppColors.mint500.withValues(alpha: 0.5),
+              blurRadius: 14,
+              spreadRadius: 2,
+            ),
+          ];
           tileIcon = const Icon(
             Icons.star_rounded,
             color: AppColors.navy900,
             size: 28,
           );
         } else if (isSelectedMistake) {
-          tileColor = AppColors.error.withValues(alpha: 0.2);
+          tileColor = AppColors.error.withValues(alpha: 0.25);
+          tileGlow = [
+            BoxShadow(
+              color: AppColors.error.withValues(alpha: 0.35),
+              blurRadius: 10,
+            ),
+          ];
           tileIcon = const Icon(
             Icons.close_rounded,
             color: AppColors.error,
@@ -445,6 +504,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
           );
         } else {
           tileColor = theme.colorScheme.surfaceContainerHighest;
+          tileGlow = null;
           tileIcon = null;
         }
 
@@ -455,13 +515,23 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
           label: 'Grid tile row $row column $col'
               '${showHighlighted ? ', target tile' : ''}'
               '${isSelectedMistake ? ', mistake' : ''}',
-          child: Material(
-            color: tileColor,
-            borderRadius: AppRadii.rLg,
-            child: InkWell(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutBack,
+            decoration: BoxDecoration(
+              color: tileColor,
               borderRadius: AppRadii.rLg,
-              onTap: roundState.isRecalling ? () => _onTileTapped(index) : null,
-              child: Center(child: tileIcon),
+              boxShadow: tileGlow,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: AppRadii.rLg,
+              child: InkWell(
+                borderRadius: AppRadii.rLg,
+                onTap:
+                    roundState.isRecalling ? () => _onTileTapped(index) : null,
+                child: Center(child: tileIcon),
+              ),
             ),
           ),
         );
