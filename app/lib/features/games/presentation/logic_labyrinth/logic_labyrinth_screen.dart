@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
-import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/widgets/app_badge.dart';
@@ -19,7 +18,7 @@ import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dial
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
-/// Interactive playable screen for the Logic Labyrinth path-planning exercise.
+/// Highly visual and colorful playable screen for Logic Labyrinth.
 class LogicLabyrinthScreen extends ConsumerStatefulWidget {
   const LogicLabyrinthScreen({
     super.key,
@@ -54,8 +53,6 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
     if (!widget.startImmediately) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _showTutorialDialog());
-    } else {
-      _session.start();
     }
   }
 
@@ -76,6 +73,9 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
       definition: _definition,
       config: config,
     );
+
+    // Immediately start session so roundState is initialized
+    _session.start();
 
     _finalResult = null;
     _stateSubscription = _session.stateStream.listen((state) {
@@ -178,7 +178,6 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
             difficulty: _session.config.difficulty,
             isPractice: (_session.config as LogicLabyrinthConfig).isPractice,
           );
-          _session.start();
           setState(() {});
         },
         onQuit: () {
@@ -216,7 +215,6 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
                 isPractice:
                     (_session.config as LogicLabyrinthConfig).isPractice,
               );
-              _session.start();
               setState(() {});
             },
             onBackToLibrary: () {
@@ -350,7 +348,6 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
                   child: GameCountdownOverlay(
                     onComplete: () {
                       setState(() => _showCountdown = false);
-                      _session.start();
                     },
                   ),
                 ),
@@ -364,50 +361,44 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
   Widget _buildMazeBoard(
     BuildContext context,
     LogicLabyrinthRoundState round,
-  ) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 360, maxHeight: 360),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkCard
-            : theme.colorScheme.surfaceContainerHighest,
-        borderRadius: AppRadii.rLg,
-        border: Border.all(
-          color: AppColors.mint500.withValues(alpha: 0.35),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.mint500.withValues(alpha: 0.12),
-            blurRadius: 16,
+  ) =>
+      Container(
+        constraints: const BoxConstraints(maxWidth: 380, maxHeight: 380),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A),
+          borderRadius: AppRadii.rXxl,
+          border: Border.all(
+            color: const Color(0xFF06B6D4),
+            width: 2.5,
           ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final cellW = constraints.maxWidth / round.gridSize;
-            final cellH = constraints.maxHeight / round.gridSize;
-
-            return CustomPaint(
-              size: Size(constraints.maxWidth, constraints.maxHeight),
-              painter: _MazePainter(
-                round: round,
-                isDark: isDark,
-                cellWidth: cellW,
-                cellHeight: cellH,
-              ),
-            );
-          },
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF06B6D4).withValues(alpha: 0.25),
+              blurRadius: 24,
+              spreadRadius: 2,
+            ),
+          ],
         ),
-      ),
-    );
-  }
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cellW = constraints.maxWidth / round.gridSize;
+              final cellH = constraints.maxHeight / round.gridSize;
+
+              return CustomPaint(
+                size: Size(constraints.maxWidth, constraints.maxHeight),
+                painter: _MazePainter(
+                  round: round,
+                  cellWidth: cellW,
+                  cellHeight: cellH,
+                ),
+              );
+            },
+          ),
+        ),
+      );
 
   Widget _buildControls(BuildContext context) => ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 240),
@@ -434,6 +425,10 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
                   icon: const Icon(Icons.restart_alt_rounded),
                   tooltip: 'Reset to maze start (R)',
                   onPressed: _handleReset,
+                  style: IconButton.styleFrom(
+                    backgroundColor: const Color(0xFF1E293B),
+                    foregroundColor: const Color(0xFF94A3B8),
+                  ),
                 ),
                 AppSpacing.gapW12,
                 _buildDirectionButton(
@@ -464,9 +459,11 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
         tooltip: tooltip,
         onPressed: () => _handleDirection(direction),
         style: IconButton.styleFrom(
-          backgroundColor: AppColors.mint500,
-          foregroundColor: AppColors.navy900,
-          minimumSize: const Size(52, 52),
+          backgroundColor: const Color(0xFF10B981),
+          foregroundColor: const Color(0xFF0F172A),
+          minimumSize: const Size(54, 54),
+          elevation: 4,
+          shadowColor: const Color(0xFF10B981).withValues(alpha: 0.4),
         ),
       );
 }
@@ -474,24 +471,27 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
 class _MazePainter extends CustomPainter {
   const _MazePainter({
     required this.round,
-    required this.isDark,
     required this.cellWidth,
     required this.cellHeight,
   });
 
   final LogicLabyrinthRoundState round;
-  final bool isDark;
   final double cellWidth;
   final double cellHeight;
 
   @override
   void paint(Canvas canvas, Size size) {
     final wallPaint = Paint()
-      ..color = isDark ? const Color(0xFF243048) : const Color(0xFFCBD5E1)
+      ..color = const Color(0xFF1E293B)
       ..style = PaintingStyle.fill;
 
+    final wallBorderPaint = Paint()
+      ..color = const Color(0xFF334155)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
     final pathPaint = Paint()
-      ..color = isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9)
+      ..color = const Color(0xFF090D16)
       ..style = PaintingStyle.fill;
 
     // Draw grid cells
@@ -504,27 +504,38 @@ class _MazePainter extends CustomPainter {
           cellHeight,
         );
         final isWall = round.walls.contains(GridCoordinate(c, r));
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            rect.deflate(1),
-            const Radius.circular(3),
-          ),
-          isWall ? wallPaint : pathPaint,
+        final rrect = RRect.fromRectAndRadius(
+          rect.deflate(1.5),
+          const Radius.circular(4),
         );
+        if (isWall) {
+          canvas
+            ..drawRRect(rrect, wallPaint)
+            ..drawRRect(rrect, wallBorderPaint);
+        } else {
+          canvas.drawRRect(rrect, pathPaint);
+        }
       }
     }
 
-    // Draw exit target
+    // Draw exit target with glowing green portal rings
     final exitRect = Rect.fromLTWH(
       round.target.x * cellWidth,
       round.target.y * cellHeight,
       cellWidth,
       cellHeight,
     );
-    final exitPaint = Paint()
-      ..color = const Color(0xFF10B981).withValues(alpha: 0.8)
+    final exitGlow = Paint()
+      ..color = const Color(0xFF10B981).withValues(alpha: 0.35)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(exitRect.center, cellWidth * 0.38, exitPaint);
+    canvas.drawCircle(exitRect.center, cellWidth * 0.45, exitGlow);
+
+    final exitPaint = Paint()
+      ..shader = const RadialGradient(
+        colors: [Color(0xFF34D399), Color(0xFF059669)],
+      ).createShader(exitRect)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(exitRect.center, cellWidth * 0.35, exitPaint);
 
     // Draw checkpoint if present and not collected
     if (round.checkpoint != null && !round.checkpointCollected) {
@@ -534,13 +545,18 @@ class _MazePainter extends CustomPainter {
         cellWidth,
         cellHeight,
       );
+      final cpGlow = Paint()
+        ..color = const Color(0xFFF59E0B).withValues(alpha: 0.4)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(cpRect.center, cellWidth * 0.42, cpGlow);
+
       final cpPaint = Paint()
-        ..color = const Color(0xFFF59E0B)
+        ..color = const Color(0xFFFBBF24)
         ..style = PaintingStyle.fill;
       canvas.drawCircle(cpRect.center, cellWidth * 0.28, cpPaint);
     }
 
-    // Draw player with glowing orb
+    // Draw player with glowing cyan/indigo core
     final playerRect = Rect.fromLTWH(
       round.playerPos.x * cellWidth,
       round.playerPos.y * cellHeight,
@@ -548,17 +564,18 @@ class _MazePainter extends CustomPainter {
       cellHeight,
     );
     final glowPaint = Paint()
-      ..color = const Color(0xFF818CF8).withValues(alpha: 0.4)
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.4)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(playerRect.center, cellWidth * 0.42, glowPaint);
+    canvas.drawCircle(playerRect.center, cellWidth * 0.45, glowPaint);
 
     final playerPaint = Paint()
-      ..color = const Color(0xFF818CF8)
+      ..shader = const RadialGradient(
+        colors: [Color(0xFF00F5FF), Color(0xFF3B82F6)],
+      ).createShader(playerRect)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(playerRect.center, cellWidth * 0.3, playerPaint);
+    canvas.drawCircle(playerRect.center, cellWidth * 0.32, playerPaint);
   }
 
   @override
-  bool shouldRepaint(_MazePainter oldDelegate) =>
-      oldDelegate.round != round || oldDelegate.isDark != isDark;
+  bool shouldRepaint(_MazePainter oldDelegate) => oldDelegate.round != round;
 }

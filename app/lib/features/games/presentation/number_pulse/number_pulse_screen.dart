@@ -6,10 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
-import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
-import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
@@ -21,7 +19,7 @@ import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dial
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
-/// Interactive playable screen for Number Pulse mental arithmetic and sequence reasoning.
+/// Highly visual and colorful playable screen for Number Pulse arithmetic reasoning.
 class NumberPulseScreen extends ConsumerStatefulWidget {
   const NumberPulseScreen({
     super.key,
@@ -57,8 +55,6 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
     if (!widget.startImmediately) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _showTutorialDialog());
-    } else {
-      _session.start();
     }
   }
 
@@ -79,6 +75,9 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
       definition: _definition,
       config: config,
     );
+
+    // Immediately start session so trialState is initialized
+    _session.start();
 
     _comboStreak = 0;
     _finalResult = null;
@@ -169,7 +168,6 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
             difficulty: _session.config.difficulty,
             isPractice: (_session.config as NumberPulseConfig).isPractice,
           );
-          _session.start();
           setState(() {});
         },
         onQuit: () {
@@ -208,7 +206,6 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
                 difficulty: _session.config.difficulty,
                 isPractice: (_session.config as NumberPulseConfig).isPractice,
               );
-              _session.start();
               setState(() {});
             },
             onBackToLibrary: () {
@@ -278,42 +275,49 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
                       ),
                       AppSpacing.gapH24,
 
-                      // Category Pattern Badge
+                      // Category Pattern Badge with gradient
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.lg,
+                          horizontal: AppSpacing.xl,
                           vertical: AppSpacing.sm,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.mint500.withValues(alpha: 0.12),
-                          borderRadius: AppRadii.rFull,
-                          border: Border.all(
-                            color: AppColors.mint500.withValues(alpha: 0.4),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFA855F7), Color(0xFFEC4899)],
                           ),
+                          borderRadius: AppRadii.rFull,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFA855F7)
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 14,
+                            ),
+                          ],
                         ),
                         child: Text(
                           'PATTERN: ${trial.question.patternType.label.toUpperCase()}',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.1,
-                            color: AppColors.mint500,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            color: Colors.white,
+                            fontSize: 13,
                           ),
                         ),
                       ),
-                      AppSpacing.gapH24,
+                      AppSpacing.gapH12,
 
                       // Number sequence cards with error shake
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 520),
+                            constraints: const BoxConstraints(maxWidth: 540),
                             child: ShakeWidget(
                               shakeTrigger: _shakeTrigger,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   _buildSequenceView(theme, trial),
-                                  AppSpacing.gapH32,
+                                  AppSpacing.gapH16,
                                   _buildChoiceGrid(theme, trial),
                                 ],
                               ),
@@ -332,7 +336,6 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
                   child: GameCountdownOverlay(
                     onComplete: () {
                       setState(() => _showCountdown = false);
-                      _session.start();
                     },
                   ),
                 ),
@@ -349,33 +352,34 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
 
     return AppCard(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.lg,
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
       ),
       child: Column(
         children: [
-          Text(
-            'Complete the Sequence',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: AppColors.navy500,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1,
+          const Text(
+            'COMPLETE THE SEQUENCE',
+            style: TextStyle(
+              color: Color(0xFF94A3B8),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              fontSize: 12,
             ),
           ),
-          AppSpacing.gapH16,
+          AppSpacing.gapH12,
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                for (int i = 0; i < sequence.length; i++) ...[
+                for (var i = 0; i < sequence.length; i++) ...[
                   if (i > 0)
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 6),
+                      padding: EdgeInsets.symmetric(horizontal: 8),
                       child: Icon(
                         Icons.arrow_forward_rounded,
-                        size: 16,
-                        color: AppColors.navy400,
+                        size: 20,
+                        color: Color(0xFF64748B),
                       ),
                     ),
                   _buildSequenceTile(
@@ -399,19 +403,24 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
   }) {
     if (isMissing) {
       return Container(
-        width: 64,
-        height: 64,
+        width: 72,
+        height: 72,
         decoration: BoxDecoration(
-          color: AppColors.mint500.withValues(alpha: 0.15),
-          borderRadius: AppRadii.rLg,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF00F5FF), Color(0xFF10B981)],
+          ),
+          borderRadius: AppRadii.rXl,
           border: Border.all(
-            color: AppColors.mint500,
+            color: Colors.white,
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.mint500.withValues(alpha: 0.25),
-              blurRadius: 10,
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.5),
+              blurRadius: 18,
+              spreadRadius: 2,
             ),
           ],
         ),
@@ -419,9 +428,9 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           child: Text(
             '?',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 34,
               fontWeight: FontWeight.w900,
-              color: AppColors.mint500,
+              color: Color(0xFF0F172A),
             ),
           ),
         ),
@@ -429,20 +438,26 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
     }
 
     return Container(
-      width: 64,
-      height: 64,
+      width: 72,
+      height: 72,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: AppRadii.rLg,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+        ),
+        borderRadius: AppRadii.rXl,
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+          color: const Color(0xFF334155),
+          width: 1.5,
         ),
       ),
       child: Center(
         child: Text(
           value != null ? _numberFormat.format(value) : '',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
           ),
         ),
       ),
@@ -464,29 +479,69 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           final option = trial.question.options[index];
           return Semantics(
             label: 'Option ${index + 1}: $option',
-            child: Material(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: AppRadii.rLg,
-              child: InkWell(
-                borderRadius: AppRadii.rLg,
-                onTap: () => _handleChoice(option),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Row(
-                    children: [
-                      AppBadge(label: '${index + 1}'),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            _numberFormat.format(option),
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                ),
+                borderRadius: AppRadii.rXl,
+                border: Border.all(
+                  color: const Color(0xFF334155),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: AppRadii.rXl,
+                child: InkWell(
+                  borderRadius: AppRadii.rXl,
+                  onTap: () => _handleChoice(option),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFA855F7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              _numberFormat.format(option),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 24,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

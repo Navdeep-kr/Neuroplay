@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
-import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
-import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_button.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
@@ -20,7 +18,7 @@ import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dial
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
-/// Playable screen for the Focus Reactor selective attention exercise.
+/// Highly visual and colorful playable screen for Focus Reactor selective attention.
 class FocusReactorScreen extends ConsumerStatefulWidget {
   const FocusReactorScreen({
     super.key,
@@ -55,8 +53,6 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
     if (!widget.startImmediately) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _showTutorialDialog());
-    } else {
-      _session.start();
     }
   }
 
@@ -76,6 +72,9 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
       definition: _definition,
       config: config,
     );
+
+    // Immediately start engine so trialState is never uninitialized
+    _session.start();
 
     _comboStreak = 0;
     _finalResult = null;
@@ -111,7 +110,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
             'A target item will be designated at the top of the screen.\n\n'
             'Scan the item array below:\n'
             '• If the target is present, tap its slot (or press keys 1–4).\n'
-            '• If the target is ABSENT, tap "No Target Present" (or press Space).\n\n'
+            '• If the target is ABSENT, tap "Target Absent [Space]".\n\n'
             'Avoid impulse taps: distractors share shapes or markers to test your vigilance!',
         tips: const [
           'Correctly identifying absence earns extra precision points.',
@@ -192,7 +191,6 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
             difficulty: _session.config.difficulty,
             isPractice: (_session.config as FocusReactorConfig).isPractice,
           );
-          _session.start();
           setState(() {});
         },
         onQuit: () {
@@ -231,7 +229,6 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                 difficulty: _session.config.difficulty,
                 isPractice: (_session.config as FocusReactorConfig).isPractice,
               );
-              _session.start();
               setState(() {});
             },
             onBackToLibrary: () {
@@ -308,7 +305,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 440),
+                            constraints: const BoxConstraints(maxWidth: 480),
                             child: ShakeWidget(
                               shakeTrigger: _shakeTrigger,
                               child: GridView.builder(
@@ -321,7 +318,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                                       trial.displayedItems.length <= 4 ? 2 : 3,
                                   crossAxisSpacing: AppSpacing.md,
                                   mainAxisSpacing: AppSpacing.md,
-                                  childAspectRatio: 1.1,
+                                  childAspectRatio: 1.15,
                                 ),
                                 itemBuilder: (context, index) => _buildSlotCard(
                                   theme,
@@ -335,7 +332,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                       ),
                       AppSpacing.gapH16,
 
-                      // Bottom Action Button: No Target Present
+                      // Bottom Action Button: Target Absent
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 440),
                         child: AppButton(
@@ -347,10 +344,12 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                         ),
                       ),
                       AppSpacing.gapH12,
-                      Text(
+                      const Text(
                         'Tap target slot [1-4] or declare absence [Space]',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.navy500,
+                        style: TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -364,7 +363,6 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                   child: GameCountdownOverlay(
                     onComplete: () {
                       setState(() => _showCountdown = false);
-                      _session.start();
                     },
                   ),
                 ),
@@ -377,44 +375,65 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
 
   Widget _buildTargetSpecHeader(ThemeData theme, FocusItem target) => Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: AppColors.mint500.withValues(alpha: 0.12),
-          borderRadius: AppRadii.rFull,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+          ),
+          borderRadius: AppRadii.rXxl,
           border: Border.all(
-            color: AppColors.mint500.withValues(alpha: 0.5),
-            width: 1.5,
+            color: const Color(0xFF00F5FF),
+            width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.mint500.withValues(alpha: 0.2),
-              blurRadius: 14,
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.25),
+              blurRadius: 18,
             ),
           ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _FocusItemIcon(item: target, size: 28),
-            AppSpacing.gapW12,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF00F5FF)),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00F5FF).withValues(alpha: 0.35),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: _FocusItemIcon(item: target, size: 36),
+              ),
+            ),
+            AppSpacing.gapW16,
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   'SEEK TARGET',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    letterSpacing: 1.2,
-                    color: AppColors.mint500,
-                    fontWeight: FontWeight.w800,
+                  style: TextStyle(
+                    letterSpacing: 1.5,
+                    color: Color(0xFF00F5FF),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
                   ),
                 ),
                 Text(
                   '${target.shape.label} • ${target.marker.label}',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -434,17 +453,28 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: AppRadii.rLg,
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
             ),
+            borderRadius: AppRadii.rXl,
+            border: Border.all(
+              color: const Color(0xFF334155),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 12,
+              ),
+            ],
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: AppRadii.rLg,
+            borderRadius: AppRadii.rXl,
             child: InkWell(
-              borderRadius: AppRadii.rLg,
+              borderRadius: AppRadii.rXl,
               onTap: () => _handleSlotSelected(index),
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.sm),
@@ -453,26 +483,46 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                   children: [
                     Align(
                       alignment: Alignment.topLeft,
-                      child: AppBadge(label: '${index + 1}'),
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF00F5FF),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     Expanded(
                       child: Center(
-                        child: _FocusItemIcon(item: item, size: 44),
+                        child: _FocusItemIcon(item: item, size: 48),
                       ),
                     ),
                     Text(
                       item.shape.label,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                     ),
                     Text(
                       item.marker.label,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.navy500,
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
                         fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -511,10 +561,10 @@ class _FocusItemIcon extends StatelessWidget {
   }
 
   Color _getMarkerColor(FocusMarker marker) => switch (marker) {
-        FocusMarker.dot => AppColors.mint500,
+        FocusMarker.dot => const Color(0xFF10B981),
         FocusMarker.ring => const Color(0xFFF59E0B),
-        FocusMarker.stripe => const Color(0xFF38BDF8),
-        FocusMarker.plain => const Color(0xFF818CF8),
+        FocusMarker.stripe => const Color(0xFF00F5FF),
+        FocusMarker.plain => const Color(0xFFA855F7),
       };
 }
 
@@ -535,7 +585,7 @@ class _FocusItemPainter extends CustomPainter {
     final radius = size.width / 2 - 2;
 
     final basePaint = Paint()
-      ..color = color.withValues(alpha: 0.18)
+      ..color = color.withValues(alpha: 0.22)
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()

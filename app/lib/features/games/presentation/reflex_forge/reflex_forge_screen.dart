@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
-import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
-import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
@@ -20,7 +18,7 @@ import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dial
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
-/// Playable screen for the Reflex Forge cognitive task-switching exercise.
+/// Colorful, high-octane playable screen for Reflex Forge task-switching.
 class ReflexForgeScreen extends ConsumerStatefulWidget {
   const ReflexForgeScreen({
     super.key,
@@ -55,8 +53,6 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
     if (!widget.startImmediately) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _showTutorialDialog());
-    } else {
-      _session.start();
     }
   }
 
@@ -76,6 +72,9 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
       definition: _definition,
       config: config,
     );
+
+    // Immediately start session so engine state is fully initialized
+    _session.start();
 
     _comboStreak = 0;
     _finalResult = null;
@@ -112,8 +111,8 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             '"MATCH SHAPE" or "MATCH PATTERN".\n\n'
             'Select the matching option as quickly and accurately as possible.',
         tips: const [
-          'Watch the ACTIVE RULE header closely — rules can switch unpredictably.',
-          'Use keyboard numbers 1, 2, 3 or tap directly on touchscreen/mouse.',
+          'Watch the ACTIVE RULE header closely — rules can shift dynamically!',
+          'Use keyboard numbers 1, 2, 3 or tap directly on the screen.',
           'Consistently fast accurate answers trigger rapid combo streak multipliers.',
         ],
         initialDifficulty: widget.initialDifficulty,
@@ -172,7 +171,6 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             difficulty: _session.config.difficulty,
             isPractice: (_session.config as ReflexForgeConfig).isPractice,
           );
-          _session.start();
           setState(() {});
         },
         onQuit: () {
@@ -211,7 +209,6 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                 difficulty: _session.config.difficulty,
                 isPractice: (_session.config as ReflexForgeConfig).isPractice,
               );
-              _session.start();
               setState(() {});
             },
             onBackToLibrary: () {
@@ -274,17 +271,17 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                         isPractice: config.isPractice,
                         onPause: _handlePause,
                       ),
-                      AppSpacing.gapH24,
+                      AppSpacing.gapH12,
 
-                      // Active Rule Banner with animated shift indicator
+                      // Active Rule Banner with electric lighting
                       _buildRuleHeader(theme, trial),
-                      AppSpacing.gapH24,
+                      AppSpacing.gapH12,
 
                       // Target Stimulus Card with error shake
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 420),
+                            constraints: const BoxConstraints(maxWidth: 460),
                             child: ShakeWidget(
                               shakeTrigger: _shakeTrigger,
                               child: Column(
@@ -294,18 +291,19 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                                     theme,
                                     trial.stimulus,
                                   ),
-                                  AppSpacing.gapH24,
+                                  AppSpacing.gapH12,
                                   Text(
                                     'Select the matching symbol based on the active rule:',
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.navy500,
+                                      color: const Color(0xFF94A3B8),
+                                      fontWeight: FontWeight.w600,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
                                   AppSpacing.gapH12,
                                   Row(
                                     children: [
-                                      for (int i = 0;
+                                      for (var i = 0;
                                           i < trial.options.length;
                                           i++) ...[
                                         if (i > 0) AppSpacing.gapW12,
@@ -336,7 +334,6 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                   child: GameCountdownOverlay(
                     onComplete: () {
                       setState(() => _showCountdown = false);
-                      _session.start();
                     },
                   ),
                 ),
@@ -357,53 +354,64 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             padding: const EdgeInsets.only(bottom: AppSpacing.xs),
             child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: 2,
+                horizontal: AppSpacing.lg,
+                vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFF59E0B), Color(0xFFEF4444)],
+                ),
                 borderRadius: AppRadii.rFull,
                 boxShadow: [
                   BoxShadow(
                     color: const Color(0xFFF59E0B).withValues(alpha: 0.5),
-                    blurRadius: 10,
+                    blurRadius: 14,
                     spreadRadius: 2,
                   ),
                 ],
               ),
-              child: const Text(
-                '⚡ RULE SHIFTED',
-                style: TextStyle(
-                  color: AppColors.navy900,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 11,
-                  letterSpacing: 1,
-                ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.bolt_rounded, size: 16, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    '⚡ RULE SHIFTED',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
+            horizontal: AppSpacing.xl,
             vertical: AppSpacing.sm,
           ),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
+            gradient: LinearGradient(
+              colors: isShapeRule
+                  ? [const Color(0xFF10B981), const Color(0xFF047857)]
+                  : [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
+            ),
             borderRadius: AppRadii.rFull,
             border: Border.all(
-              color: trial.ruleShiftedThisRound
-                  ? const Color(0xFFF59E0B)
-                  : AppColors.mint500.withValues(alpha: 0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: (trial.ruleShiftedThisRound
-                        ? const Color(0xFFF59E0B)
-                        : AppColors.mint500)
-                    .withValues(alpha: 0.25),
-                blurRadius: 12,
+                color: (isShapeRule
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFF8B5CF6))
+                    .withValues(alpha: 0.4),
+                blurRadius: 16,
               ),
             ],
           ),
@@ -412,15 +420,17 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             children: [
               Icon(
                 isShapeRule ? Icons.category_rounded : Icons.texture_rounded,
-                size: 20,
-                color: AppColors.mint500,
+                size: 22,
+                color: Colors.white,
               ),
               AppSpacing.gapW8,
               Text(
                 'ACTIVE RULE: ${trial.rule.title.toUpperCase()}',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.1,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  letterSpacing: 1.2,
                 ),
               ),
             ],
@@ -432,27 +442,57 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
 
   Widget _buildStimulusCard(ThemeData theme, ReflexSymbol symbol) => AppCard(
         padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.md,
-          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.lg,
+          horizontal: AppSpacing.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'TARGET',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: AppColors.navy500,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w700,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFF06B6D4).withValues(alpha: 0.2),
+                borderRadius: AppRadii.rFull,
+                border: Border.all(color: const Color(0xFF06B6D4)),
+              ),
+              child: const Text(
+                'TARGET',
+                style: TextStyle(
+                  color: Color(0xFF00F5FF),
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+            AppSpacing.gapH16,
+            Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
+                    blurRadius: 20,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: _SymbolGraphic(symbol: symbol, size: 80),
               ),
             ),
             AppSpacing.gapH12,
-            _SymbolGraphic(symbol: symbol, size: 80),
-            AppSpacing.gapH8,
             Text(
               symbol.label,
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
               ),
             ),
           ],
@@ -469,17 +509,28 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: AppRadii.rLg,
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
             ),
+            borderRadius: AppRadii.rXl,
+            border: Border.all(
+              color: const Color(0xFF334155),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 10,
+              ),
+            ],
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: AppRadii.rLg,
+            borderRadius: AppRadii.rXl,
             child: InkWell(
-              borderRadius: AppRadii.rLg,
+              borderRadius: AppRadii.rXl,
               onTap: () => _handleOptionSelected(index),
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -488,25 +539,49 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                   children: [
                     Align(
                       alignment: Alignment.topLeft,
-                      child: AppBadge(
-                        label: '${index + 1}',
+                      child: Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF06B6D4),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF06B6D4)
+                                  .withValues(alpha: 0.5),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     AppSpacing.gapH8,
-                    _SymbolGraphic(symbol: symbol, size: 52),
+                    _SymbolGraphic(symbol: symbol, size: 54),
                     AppSpacing.gapH8,
                     Text(
                       symbol.shape.label,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     Text(
                       symbol.pattern.label,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.navy500,
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
                         fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -544,10 +619,10 @@ class _SymbolGraphic extends StatelessWidget {
   }
 
   Color _getSymbolColor(ReflexPattern pattern) => switch (pattern) {
-        ReflexPattern.solid => AppColors.mint500,
+        ReflexPattern.solid => const Color(0xFF10B981),
         ReflexPattern.striped => const Color(0xFF38BDF8),
         ReflexPattern.dotted => const Color(0xFFF59E0B),
-        ReflexPattern.outline => const Color(0xFF818CF8),
+        ReflexPattern.outline => const Color(0xFFA855F7),
       };
 }
 

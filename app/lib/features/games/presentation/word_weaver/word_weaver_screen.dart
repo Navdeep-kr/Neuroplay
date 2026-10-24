@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
-import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
-import 'package:neuroplay/core/widgets/app_badge.dart';
 import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
@@ -20,7 +18,7 @@ import 'package:neuroplay/features/games/presentation/widgets/game_tutorial_dial
 import 'package:neuroplay/features/training/data/training_repository.dart';
 import 'package:neuroplay/features/training/presentation/workout_session_controller.dart';
 
-/// Interactive playable screen for the Word Weaver semantic association exercise.
+/// Highly visual and colorful playable screen for Word Weaver semantic association.
 class WordWeaverScreen extends ConsumerStatefulWidget {
   const WordWeaverScreen({
     super.key,
@@ -55,8 +53,6 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
     if (!widget.startImmediately) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _showTutorialDialog());
-    } else {
-      _session.start();
     }
   }
 
@@ -77,6 +73,9 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
       definition: _definition,
       config: config,
     );
+
+    // Immediately start session so trialState is initialized
+    _session.start();
 
     _comboStreak = 0;
     _finalResult = null;
@@ -167,7 +166,6 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
             difficulty: _session.config.difficulty,
             isPractice: (_session.config as WordWeaverConfig).isPractice,
           );
-          _session.start();
           setState(() {});
         },
         onQuit: () {
@@ -206,7 +204,6 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                 difficulty: _session.config.difficulty,
                 isPractice: (_session.config as WordWeaverConfig).isPractice,
               );
-              _session.start();
               setState(() {});
             },
             onBackToLibrary: () {
@@ -280,7 +277,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 480),
+                            constraints: const BoxConstraints(maxWidth: 500),
                             child: ShakeWidget(
                               shakeTrigger: _shakeTrigger,
                               child: Column(
@@ -306,7 +303,6 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                   child: GameCountdownOverlay(
                     onComplete: () {
                       setState(() => _showCountdown = false);
-                      _session.start();
                     },
                   ),
                 ),
@@ -327,22 +323,28 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: 2,
+                horizontal: AppSpacing.lg,
+                vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: AppColors.mint500.withValues(alpha: 0.12),
-                borderRadius: AppRadii.rFull,
-                border: Border.all(
-                  color: AppColors.mint500.withValues(alpha: 0.4),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF38BDF8), Color(0xFF6366F1)],
                 ),
+                borderRadius: AppRadii.rFull,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                    blurRadius: 12,
+                  ),
+                ],
               ),
               child: Text(
                 trial.question.category.displayName.toUpperCase(),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.mint500,
-                  letterSpacing: 1.2,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: 1.4,
+                  fontSize: 11,
                 ),
               ),
             ),
@@ -352,14 +354,17 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
             AppSpacing.gapH8,
-            Text(
+            const Text(
               'Select the associated term from the same domain',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.navy500,
+              style: TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -381,30 +386,69 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
           final word = trial.question.options[index];
           return Semantics(
             label: 'Option ${index + 1}: $word',
-            child: Material(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: AppRadii.rLg,
-              child: InkWell(
-                borderRadius: AppRadii.rLg,
-                onTap: () => _handleChoice(word),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Row(
-                    children: [
-                      AppBadge(label: '${index + 1}'),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            word,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                ),
+                borderRadius: AppRadii.rXl,
+                border: Border.all(
+                  color: const Color(0xFF334155),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: AppRadii.rXl,
+                child: InkWell(
+                  borderRadius: AppRadii.rXl,
+                  onTap: () => _handleChoice(word),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF38BDF8),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                color: Color(0xFF0F172A),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              word,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
