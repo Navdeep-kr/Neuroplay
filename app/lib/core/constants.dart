@@ -29,4 +29,17 @@ abstract final class Tables {
   static const cognitiveIndices = 'cognitive_indices';
   static const userGameSkills = 'user_game_skills';
   static const difficultyAdjustments = 'difficulty_adjustments';
+  static const gameVersions = 'game_versions';
+  static const workoutPlans = 'workout_plans';
+  static const userXpEvents = 'user_xp_events';
+  static const userXpSummary = 'user_xp_summary';
+  static const achievements = 'achievements';
+  static const userAchievements = 'user_achievements';
+  static const userDailyActivity = 'user_daily_activity';
+  static const subscriptionEntitlements = 'subscription_entitlements';
+  static const subscriptionHistory = 'subscription_history';
+  static const featureFlags = 'feature_flags';
+  static const userFeatureOverrides = 'user_feature_overrides';
+  static const adminRoles = 'admin_roles';
+  static const adminAuditEvents = 'admin_audit_events';
 }
