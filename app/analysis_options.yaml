@@ -12,6 +12,7 @@ analyzer:
     - android/**
     - ios/**
     - web/**
+    - windows/**
 
 linter:
   rules:
