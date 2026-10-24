@@ -223,6 +223,21 @@ class ProfileScreen extends ConsumerWidget {
                           ],
                         ),
                       ],
+                      const Divider(),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.card_membership_outlined),
+                        title: Text(
+                          'Membership & Entitlements',
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        subtitle: Text(
+                          'Manage tier, restore purchases, or view feature matrix',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push(AppRoutes.subscription),
+                      ),
                     ],
                   ),
                 ),

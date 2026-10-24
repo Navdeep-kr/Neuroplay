@@ -20,6 +20,7 @@ import 'package:neuroplay/features/games/presentation/word_weaver/word_weaver_sc
 import 'package:neuroplay/features/home/presentation/home_screen.dart';
 import 'package:neuroplay/features/profile/presentation/profile_screen.dart';
 import 'package:neuroplay/features/progress/presentation/progress_screen.dart';
+import 'package:neuroplay/features/subscription/presentation/subscription_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNav');
 
@@ -105,6 +106,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'word-weaver',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const WordWeaverScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.subscription,
+        name: 'subscription',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SubscriptionScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,

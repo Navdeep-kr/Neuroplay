@@ -16,6 +16,7 @@ abstract final class AppRoutes {
   static const progress = '/progress';
   static const challenges = '/challenges';
   static const profile = '/profile';
+  static const subscription = '/subscription';
 }
 
 /// Supabase table names.
