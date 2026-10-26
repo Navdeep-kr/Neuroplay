@@ -268,90 +268,104 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Column(
-                  children: [
-                    GameHeader(
-                      title: _definition.name,
-                      currentRound: _session.state.currentRound,
-                      totalRounds: _session.state.totalRounds,
-                      score: _session.state.score,
-                      isPractice: config.isPractice,
-                      onPause: _handlePause,
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Round info badges
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: AppSpacing.sm,
-                                ),
-                                child: Wrap(
-                                  spacing: AppSpacing.sm,
-                                  runSpacing: AppSpacing.xs,
-                                  alignment: WrapAlignment.center,
-                                  children: [
-                                    AppBadge(
-                                      label: 'Steps: ${round.stepCount}',
-                                    ),
-                                    AppBadge(
-                                      label: 'Par: ${round.optimalPathLength}',
-                                      variant: AppBadgeVariant.mint,
-                                    ),
-                                    if (round.checkpoint != null)
+          backgroundColor: const Color(0xFF090D16),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.25),
+                radius: 1.3,
+                colors: [
+                  Color(0xFF041E26),
+                  Color(0xFF090D16),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Column(
+                    children: [
+                      GameHeader(
+                        title: _definition.name,
+                        currentRound: _session.state.currentRound,
+                        totalRounds: _session.state.totalRounds,
+                        score: _session.state.score,
+                        isPractice: config.isPractice,
+                        onPause: _handlePause,
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Round info badges
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: AppSpacing.sm,
+                                  ),
+                                  child: Wrap(
+                                    spacing: AppSpacing.sm,
+                                    runSpacing: AppSpacing.xs,
+                                    alignment: WrapAlignment.center,
+                                    children: [
                                       AppBadge(
-                                        label: round.checkpointCollected
-                                            ? 'Key Collected'
-                                            : 'Collect Key First',
-                                        variant: round.checkpointCollected
-                                            ? AppBadgeVariant.success
-                                            : AppBadgeVariant.warning,
-                                        icon: round.checkpointCollected
-                                            ? Icons.check_circle_rounded
-                                            : Icons.star_rounded,
+                                        label: 'Steps: ${round.stepCount}',
                                       ),
-                                  ],
+                                      AppBadge(
+                                        label:
+                                            'Par: ${round.optimalPathLength}',
+                                        variant: AppBadgeVariant.mint,
+                                      ),
+                                      if (round.checkpoint != null)
+                                        AppBadge(
+                                          label: round.checkpointCollected
+                                              ? 'Key Collected'
+                                              : 'Collect Key First',
+                                          variant: round.checkpointCollected
+                                              ? AppBadgeVariant.success
+                                              : AppBadgeVariant.warning,
+                                          icon: round.checkpointCollected
+                                              ? Icons.check_circle_rounded
+                                              : Icons.star_rounded,
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
 
-                              // Maze Board with error shake
-                              ShakeWidget(
-                                shakeTrigger: _shakeTrigger,
-                                child: _buildMazeBoard(context, round),
-                              ),
-                              AppSpacing.gapH16,
+                                // Maze Board with error shake
+                                ShakeWidget(
+                                  shakeTrigger: _shakeTrigger,
+                                  child: _buildMazeBoard(context, round),
+                                ),
+                                AppSpacing.gapH8,
 
-                              // Controls (D-pad & action buttons)
-                              _buildControls(context),
-                            ],
+                                // Controls (D-pad & action buttons)
+                                _buildControls(context),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Focus Countdown Overlay
-              if (_showCountdown)
-                Positioned.fill(
-                  child: GameCountdownOverlay(
-                    onComplete: () {
-                      setState(() => _showCountdown = false);
-                    },
+                    ],
                   ),
                 ),
-            ],
+
+                // Focus Countdown Overlay
+                if (_showCountdown)
+                  Positioned.fill(
+                    child: GameCountdownOverlay(
+                      onComplete: () {
+                        setState(() => _showCountdown = false);
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -363,17 +377,17 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
     LogicLabyrinthRoundState round,
   ) =>
       Container(
-        constraints: const BoxConstraints(maxWidth: 380, maxHeight: 380),
+        constraints: const BoxConstraints(maxWidth: 340, maxHeight: 340),
         decoration: BoxDecoration(
           color: const Color(0xFF0F172A),
           borderRadius: AppRadii.rXxl,
           border: Border.all(
-            color: const Color(0xFF06B6D4),
+            color: const Color(0xFF00F5FF),
             width: 2.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF06B6D4).withValues(alpha: 0.25),
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.25),
               blurRadius: 24,
               spreadRadius: 2,
             ),
@@ -459,11 +473,11 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
         tooltip: tooltip,
         onPressed: () => _handleDirection(direction),
         style: IconButton.styleFrom(
-          backgroundColor: const Color(0xFF10B981),
-          foregroundColor: const Color(0xFF0F172A),
+          backgroundColor: const Color(0xFF00F5FF),
+          foregroundColor: const Color(0xFF090D16),
           minimumSize: const Size(54, 54),
-          elevation: 4,
-          shadowColor: const Color(0xFF10B981).withValues(alpha: 0.4),
+          elevation: 6,
+          shadowColor: const Color(0xFF00F5FF).withValues(alpha: 0.5),
         ),
       );
 }
@@ -482,11 +496,11 @@ class _MazePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final wallPaint = Paint()
-      ..color = const Color(0xFF1E293B)
+      ..color = const Color(0xFF0F172A)
       ..style = PaintingStyle.fill;
 
     final wallBorderPaint = Paint()
-      ..color = const Color(0xFF334155)
+      ..color = const Color(0xFF06B6D4).withValues(alpha: 0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
 
@@ -526,16 +540,22 @@ class _MazePainter extends CustomPainter {
       cellHeight,
     );
     final exitGlow = Paint()
-      ..color = const Color(0xFF10B981).withValues(alpha: 0.35)
+      ..color = const Color(0xFF10B981).withValues(alpha: 0.45)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(exitRect.center, cellWidth * 0.45, exitGlow);
+    canvas.drawCircle(exitRect.center, cellWidth * 0.46, exitGlow);
+
+    final exitRing = Paint()
+      ..color = const Color(0xFF34D399)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(exitRect.center, cellWidth * 0.4, exitRing);
 
     final exitPaint = Paint()
       ..shader = const RadialGradient(
         colors: [Color(0xFF34D399), Color(0xFF059669)],
       ).createShader(exitRect)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(exitRect.center, cellWidth * 0.35, exitPaint);
+    canvas.drawCircle(exitRect.center, cellWidth * 0.32, exitPaint);
 
     // Draw checkpoint if present and not collected
     if (round.checkpoint != null && !round.checkpointCollected) {
@@ -546,14 +566,20 @@ class _MazePainter extends CustomPainter {
         cellHeight,
       );
       final cpGlow = Paint()
-        ..color = const Color(0xFFF59E0B).withValues(alpha: 0.4)
+        ..color = const Color(0xFFF59E0B).withValues(alpha: 0.5)
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(cpRect.center, cellWidth * 0.42, cpGlow);
+      canvas.drawCircle(cpRect.center, cellWidth * 0.45, cpGlow);
+
+      final cpRing = Paint()
+        ..color = const Color(0xFFFBBF24)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8;
+      canvas.drawCircle(cpRect.center, cellWidth * 0.38, cpRing);
 
       final cpPaint = Paint()
         ..color = const Color(0xFFFBBF24)
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(cpRect.center, cellWidth * 0.28, cpPaint);
+      canvas.drawCircle(cpRect.center, cellWidth * 0.26, cpPaint);
     }
 
     // Draw player with glowing cyan/indigo core
@@ -564,16 +590,22 @@ class _MazePainter extends CustomPainter {
       cellHeight,
     );
     final glowPaint = Paint()
-      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.4)
+      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(playerRect.center, cellWidth * 0.45, glowPaint);
+    canvas.drawCircle(playerRect.center, cellWidth * 0.48, glowPaint);
+
+    final playerRing = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawCircle(playerRect.center, cellWidth * 0.38, playerRing);
 
     final playerPaint = Paint()
       ..shader = const RadialGradient(
-        colors: [Color(0xFF00F5FF), Color(0xFF3B82F6)],
+        colors: [Colors.white, Color(0xFF00F5FF), Color(0xFF3B82F6)],
       ).createShader(playerRect)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(playerRect.center, cellWidth * 0.32, playerPaint);
+    canvas.drawCircle(playerRect.center, cellWidth * 0.30, playerPaint);
   }
 
   @override

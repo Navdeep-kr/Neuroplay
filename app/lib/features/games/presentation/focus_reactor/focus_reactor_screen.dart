@@ -275,98 +275,114 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Column(
-                    children: [
-                      // Top Header HUD with live combo streak
-                      GameHeader(
-                        title: _definition.name,
-                        currentRound: _session.state.currentRound,
-                        totalRounds: _session.state.totalRounds,
-                        score: _session.state.score,
-                        comboStreak: _comboStreak,
-                        isPractice: config.isPractice,
-                        onPause: _handlePause,
-                      ),
-                      AppSpacing.gapH16,
+          backgroundColor: const Color(0xFF090D16),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.2),
+                radius: 1.3,
+                colors: [
+                  Color(0xFF071F2C),
+                  Color(0xFF090D16),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Column(
+                      children: [
+                        // Top Header HUD with live combo streak
+                        GameHeader(
+                          title: _definition.name,
+                          currentRound: _session.state.currentRound,
+                          totalRounds: _session.state.totalRounds,
+                          score: _session.state.score,
+                          comboStreak: _comboStreak,
+                          isPractice: config.isPractice,
+                          onPause: _handlePause,
+                        ),
+                        AppSpacing.gapH16,
 
-                      // Target Specification Header with radar glow
-                      _buildTargetSpecHeader(theme, trial.targetItem),
-                      AppSpacing.gapH24,
+                        // Target Specification Header with radar glow
+                        _buildTargetSpecHeader(theme, trial.targetItem),
+                        AppSpacing.gapH24,
 
-                      // Displayed Item Grid with error shake
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 480),
-                            child: ShakeWidget(
-                              shakeTrigger: _shakeTrigger,
-                              child: GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: trial.displayedItems.length,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount:
-                                      trial.displayedItems.length <= 4 ? 2 : 3,
-                                  crossAxisSpacing: AppSpacing.md,
-                                  mainAxisSpacing: AppSpacing.md,
-                                  childAspectRatio: 1.15,
-                                ),
-                                itemBuilder: (context, index) => _buildSlotCard(
-                                  theme,
-                                  index: index,
-                                  item: trial.displayedItems[index],
+                        // Displayed Item Grid with error shake
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 480),
+                              child: ShakeWidget(
+                                shakeTrigger: _shakeTrigger,
+                                child: GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: trial.displayedItems.length,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount:
+                                        trial.displayedItems.length <= 4
+                                            ? 2
+                                            : 3,
+                                    crossAxisSpacing: AppSpacing.md,
+                                    mainAxisSpacing: AppSpacing.md,
+                                    childAspectRatio: 1.15,
+                                  ),
+                                  itemBuilder: (context, index) =>
+                                      _buildSlotCard(
+                                    theme,
+                                    index: index,
+                                    item: trial.displayedItems[index],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      AppSpacing.gapH16,
+                        AppSpacing.gapH16,
 
-                      // Bottom Action Button: Target Absent
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 440),
-                        child: AppButton(
-                          label: 'Target Absent [Space]',
-                          icon: Icons.not_interested_rounded,
-                          variant: AppButtonVariant.secondary,
-                          isFullWidth: true,
-                          onPressed: _handleNoTargetSelected,
+                        // Bottom Action Button: Target Absent
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 440),
+                          child: AppButton(
+                            label: 'Target Absent [Space]',
+                            icon: Icons.not_interested_rounded,
+                            variant: AppButtonVariant.secondary,
+                            isFullWidth: true,
+                            onPressed: _handleNoTargetSelected,
+                          ),
                         ),
-                      ),
-                      AppSpacing.gapH12,
-                      const Text(
-                        'Tap target slot [1-4] or declare absence [Space]',
-                        style: TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        AppSpacing.gapH12,
+                        const Text(
+                          'Tap target slot [1-4] or declare absence [Space]',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Focus Countdown Overlay
-              if (_showCountdown)
-                Positioned.fill(
-                  child: GameCountdownOverlay(
-                    onComplete: () {
-                      setState(() => _showCountdown = false);
-                    },
+                // Focus Countdown Overlay
+                if (_showCountdown)
+                  Positioned.fill(
+                    child: GameCountdownOverlay(
+                      onComplete: () {
+                        setState(() => _showCountdown = false);
+                      },
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -460,13 +476,13 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
             ),
             borderRadius: AppRadii.rXl,
             border: Border.all(
-              color: const Color(0xFF334155),
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.4),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 12,
+                color: const Color(0xFF00F5FF).withValues(alpha: 0.15),
+                blurRadius: 14,
               ),
             ],
           ),
@@ -486,9 +502,16 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                       child: Container(
                         width: 24,
                         height: 24,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF00F5FF),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00F5FF),
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF00F5FF)
+                                  .withValues(alpha: 0.6),
+                              blurRadius: 6,
+                            ),
+                          ],
                         ),
                         child: Center(
                           child: Text(

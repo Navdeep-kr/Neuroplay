@@ -281,122 +281,181 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Column(
-                    children: [
-                      // HUD Header with live combo streak
-                      GameHeader(
-                        title: _definition.name,
-                        currentRound: _session.state.currentRound,
-                        totalRounds: _session.state.totalRounds,
-                        score: _session.state.score,
-                        comboStreak: _comboStreak,
-                        isPractice: config.isPractice,
-                        onPause: _handlePause,
-                      ),
-                      AppSpacing.gapH24,
+          backgroundColor: const Color(0xFF090D16),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.2),
+                radius: 1.3,
+                colors: [
+                  Color(0xFF0F2338),
+                  Color(0xFF090D16),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Column(
+                      children: [
+                        // HUD Header with live combo streak
+                        GameHeader(
+                          title: _definition.name,
+                          currentRound: _session.state.currentRound,
+                          totalRounds: _session.state.totalRounds,
+                          score: _session.state.score,
+                          comboStreak: _comboStreak,
+                          isPractice: config.isPractice,
+                          onPause: _handlePause,
+                        ),
+                        AppSpacing.gapH24,
 
-                      // Phase Indicator Banner
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: _buildPhaseBanner(theme, roundState),
-                      ),
-                      AppSpacing.gapH24,
+                        // Phase Indicator Banner
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: _buildPhaseBanner(theme, roundState),
+                        ),
+                        AppSpacing.gapH24,
 
-                      // Main Interactive Colorful Grid Arena
-                      Expanded(
-                        child: Center(
-                          child: AspectRatio(
-                            aspectRatio: 1,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxWidth: 440,
-                                maxHeight: 440,
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.all(AppSpacing.md),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0F172A),
-                                  borderRadius: AppRadii.rXxl,
-                                  border: Border.all(
-                                    color: roundState.isMemorizing
-                                        ? const Color(0xFF06B6D4)
-                                        : const Color(0xFF334155),
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
+                        // Main Interactive Colorful Grid Arena
+                        Expanded(
+                          child: Center(
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 440,
+                                  maxHeight: 440,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(AppSpacing.md),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0F172A),
+                                    borderRadius: AppRadii.rXxl,
+                                    border: Border.all(
                                       color: roundState.isMemorizing
-                                          ? const Color(0xFF06B6D4)
-                                              .withValues(alpha: 0.25)
-                                          : Colors.black.withValues(alpha: 0.4),
-                                      blurRadius: 24,
-                                      spreadRadius: 2,
+                                          ? const Color(0xFF00F5FF)
+                                          : const Color(0xFF06B6D4),
+                                      width: 2.5,
                                     ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: (roundState.isMemorizing
+                                                ? const Color(0xFF00F5FF)
+                                                : const Color(0xFF06B6D4))
+                                            .withValues(alpha: 0.3),
+                                        blurRadius: 28,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
+                                  child: ShakeWidget(
+                                    shakeTrigger: _shakeTrigger,
+                                    child:
+                                        _buildGrid(theme, config, roundState),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Bottom action controls
+                        if (roundState.isMemorizing)
+                          Padding(
+                            padding: const EdgeInsets.only(top: AppSpacing.md),
+                            child: AppButton(
+                              label: 'Ready to Recall',
+                              icon: Icons.check_circle_outline_rounded,
+                              onPressed: () {
+                                _previewTimer?.cancel();
+                                _session.dispatch(
+                                  BeginRecallAction(
+                                    timestamp: _session.activeDuration,
+                                  ),
+                                );
+                                setState(() {});
+                              },
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.only(top: AppSpacing.md),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Select the illuminated squares (${roundState.selectedCorrectIndices.length}/${roundState.targetIndices.length})',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: const Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                AppSpacing.gapH8,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    for (var i = 0;
+                                        i < roundState.targetIndices.length;
+                                        i++)
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: i <
+                                                  roundState
+                                                      .selectedCorrectIndices
+                                                      .length
+                                              ? const Color(0xFF10B981)
+                                              : const Color(0xFF334155),
+                                          boxShadow: i <
+                                                  roundState
+                                                      .selectedCorrectIndices
+                                                      .length
+                                              ? [
+                                                  BoxShadow(
+                                                    color:
+                                                        const Color(0xFF10B981)
+                                                            .withValues(
+                                                      alpha: 0.6,
+                                                    ),
+                                                    blurRadius: 6,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                      ),
                                   ],
                                 ),
-                                child: ShakeWidget(
-                                  shakeTrigger: _shakeTrigger,
-                                  child: _buildGrid(theme, config, roundState),
-                                ),
-                              ),
+                              ],
                             ),
                           ),
-                        ),
-                      ),
-
-                      // Bottom action controls
-                      if (roundState.isMemorizing)
-                        Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.md),
-                          child: AppButton(
-                            label: 'Ready to Recall',
-                            icon: Icons.check_circle_outline_rounded,
-                            onPressed: () {
-                              _previewTimer?.cancel();
-                              _session.dispatch(
-                                BeginRecallAction(
-                                  timestamp: _session.activeDuration,
-                                ),
-                              );
-                              setState(() {});
-                            },
-                          ),
-                        )
-                      else
-                        Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.md),
-                          child: Text(
-                            'Select the illuminated squares (${roundState.selectedCorrectIndices.length}/${roundState.targetIndices.length})',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: const Color(0xFF94A3B8),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Cinematic Focus Countdown Overlay
-              if (_showCountdown)
-                Positioned.fill(
-                  child: GameCountdownOverlay(
-                    onComplete: () {
-                      setState(() => _showCountdown = false);
-                      _schedulePreviewTimer();
-                    },
+                // Cinematic Focus Countdown Overlay
+                if (_showCountdown)
+                  Positioned.fill(
+                    child: GameCountdownOverlay(
+                      onComplete: () {
+                        setState(() => _showCountdown = false);
+                        _schedulePreviewTimer();
+                      },
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -413,14 +472,18 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
         ),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
+            colors: [Color(0xFF00F5FF), Color(0xFF06B6D4)],
           ),
           borderRadius: AppRadii.rFull,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.8),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF06B6D4).withValues(alpha: 0.45),
-              blurRadius: 14,
-              spreadRadius: 1,
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.5),
+              blurRadius: 18,
+              spreadRadius: 2,
             ),
           ],
         ),
@@ -428,16 +491,16 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.visibility_rounded,
+              Icons.remove_red_eye_rounded,
               size: 20,
-              color: Colors.white,
+              color: Color(0xFF090D16),
             ),
             SizedBox(width: 8),
             Text(
               'MEMORIZE PATTERN',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
-                color: Colors.white,
+                color: Color(0xFF090D16),
                 letterSpacing: 1.2,
                 fontSize: 13,
               ),
@@ -457,10 +520,15 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
             colors: [Color(0xFF10B981), Color(0xFF059669)],
           ),
           borderRadius: AppRadii.rFull,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.8),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF10B981).withValues(alpha: 0.4),
-              blurRadius: 14,
+              color: const Color(0xFF10B981).withValues(alpha: 0.5),
+              blurRadius: 18,
+              spreadRadius: 2,
             ),
           ],
         ),

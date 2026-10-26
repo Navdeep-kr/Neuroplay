@@ -254,92 +254,105 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Column(
-                    children: [
-                      GameHeader(
-                        title: _definition.name,
-                        currentRound: _session.state.currentRound,
-                        totalRounds: _session.state.totalRounds,
-                        score: _session.state.score,
-                        comboStreak: _comboStreak,
-                        isPractice: config.isPractice,
-                        onPause: _handlePause,
-                      ),
-                      AppSpacing.gapH24,
-
-                      // Category Pattern Badge with gradient
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.xl,
-                          vertical: AppSpacing.sm,
+          backgroundColor: const Color(0xFF090D16),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.2),
+                radius: 1.3,
+                colors: [
+                  Color(0xFF230E38),
+                  Color(0xFF090D16),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Column(
+                      children: [
+                        GameHeader(
+                          title: _definition.name,
+                          currentRound: _session.state.currentRound,
+                          totalRounds: _session.state.totalRounds,
+                          score: _session.state.score,
+                          comboStreak: _comboStreak,
+                          isPractice: config.isPractice,
+                          onPause: _handlePause,
                         ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFA855F7), Color(0xFFEC4899)],
+                        AppSpacing.gapH24,
+
+                        // Category Pattern Badge with gradient
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.xl,
+                            vertical: AppSpacing.sm,
                           ),
-                          borderRadius: AppRadii.rFull,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFA855F7)
-                                  .withValues(alpha: 0.4),
-                              blurRadius: 14,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFA855F7), Color(0xFFEC4899)],
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          'PATTERN: ${trial.question.patternType.label.toUpperCase()}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                            color: Colors.white,
-                            fontSize: 13,
+                            borderRadius: AppRadii.rFull,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFA855F7)
+                                    .withValues(alpha: 0.4),
+                                blurRadius: 14,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'PATTERN: ${trial.question.patternType.label.toUpperCase()}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      ),
-                      AppSpacing.gapH12,
+                        AppSpacing.gapH12,
 
-                      // Number sequence cards with error shake
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 540),
-                            child: ShakeWidget(
-                              shakeTrigger: _shakeTrigger,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildSequenceView(theme, trial),
-                                  AppSpacing.gapH16,
-                                  _buildChoiceGrid(theme, trial),
-                                ],
+                        // Number sequence cards with error shake
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 540),
+                              child: ShakeWidget(
+                                shakeTrigger: _shakeTrigger,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildSequenceView(theme, trial),
+                                    AppSpacing.gapH16,
+                                    _buildChoiceGrid(theme, trial),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Focus Countdown Overlay
-              if (_showCountdown)
-                Positioned.fill(
-                  child: GameCountdownOverlay(
-                    onComplete: () {
-                      setState(() => _showCountdown = false);
-                    },
+                // Focus Countdown Overlay
+                if (_showCountdown)
+                  Positioned.fill(
+                    child: GameCountdownOverlay(
+                      onComplete: () {
+                        setState(() => _showCountdown = false);
+                      },
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -409,17 +422,17 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF00F5FF), Color(0xFF10B981)],
+            colors: [Color(0xFF00F5FF), Color(0xFFA855F7), Color(0xFFEC4899)],
           ),
           borderRadius: AppRadii.rXl,
           border: Border.all(
             color: Colors.white,
-            width: 2,
+            width: 2.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00F5FF).withValues(alpha: 0.5),
-              blurRadius: 18,
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.65),
+              blurRadius: 22,
               spreadRadius: 2,
             ),
           ],
@@ -428,9 +441,15 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           child: Text(
             '?',
             style: TextStyle(
-              fontSize: 34,
+              fontSize: 36,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF0F172A),
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  blurRadius: 8,
+                ),
+              ],
             ),
           ),
         ),
@@ -448,9 +467,15 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
         ),
         borderRadius: AppRadii.rXl,
         border: Border.all(
-          color: const Color(0xFF334155),
+          color: const Color(0xFFA855F7).withValues(alpha: 0.5),
           width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFA855F7).withValues(alpha: 0.15),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Center(
         child: Text(
@@ -488,13 +513,13 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
                 ),
                 borderRadius: AppRadii.rXl,
                 border: Border.all(
-                  color: const Color(0xFF334155),
+                  color: const Color(0xFFA855F7).withValues(alpha: 0.6),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 10,
+                    color: const Color(0xFFA855F7).withValues(alpha: 0.2),
+                    blurRadius: 12,
                   ),
                 ],
               ),
@@ -513,9 +538,18 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
                         Container(
                           width: 28,
                           height: 28,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFA855F7),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFA855F7), Color(0xFFEC4899)],
+                            ),
                             shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFA855F7)
+                                    .withValues(alpha: 0.6),
+                                blurRadius: 6,
+                              ),
+                            ],
                           ),
                           child: Center(
                             child: Text(

@@ -7,7 +7,6 @@ import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
-import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_countdown_overlay.dart';
@@ -251,93 +250,107 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Column(
-                    children: [
-                      // HUD Header with live combo streak
-                      GameHeader(
-                        title: _definition.name,
-                        currentRound: _session.state.currentRound,
-                        totalRounds: _session.state.totalRounds,
-                        score: _session.state.score,
-                        comboStreak: _comboStreak,
-                        isPractice: config.isPractice,
-                        onPause: _handlePause,
-                      ),
-                      AppSpacing.gapH12,
+          backgroundColor: const Color(0xFF090D16),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.3),
+                radius: 1.25,
+                colors: [
+                  Color(0xFF1E1035),
+                  Color(0xFF090D16),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Column(
+                      children: [
+                        // HUD Header with live combo streak
+                        GameHeader(
+                          title: _definition.name,
+                          currentRound: _session.state.currentRound,
+                          totalRounds: _session.state.totalRounds,
+                          score: _session.state.score,
+                          comboStreak: _comboStreak,
+                          isPractice: config.isPractice,
+                          onPause: _handlePause,
+                        ),
+                        AppSpacing.gapH12,
 
-                      // Active Rule Banner with electric lighting
-                      _buildRuleHeader(theme, trial),
-                      AppSpacing.gapH12,
+                        // Active Rule Banner with electric lighting
+                        _buildRuleHeader(theme, trial),
+                        AppSpacing.gapH12,
 
-                      // Target Stimulus Card with error shake
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 460),
-                            child: ShakeWidget(
-                              shakeTrigger: _shakeTrigger,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildStimulusCard(
-                                    theme,
-                                    trial.stimulus,
-                                  ),
-                                  AppSpacing.gapH12,
-                                  Text(
-                                    'Select the matching symbol based on the active rule:',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: const Color(0xFF94A3B8),
-                                      fontWeight: FontWeight.w600,
+                        // Target Stimulus Card with error shake
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 460),
+                              child: ShakeWidget(
+                                shakeTrigger: _shakeTrigger,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildStimulusCard(
+                                      theme,
+                                      trial.stimulus,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  AppSpacing.gapH12,
-                                  Row(
-                                    children: [
-                                      for (var i = 0;
-                                          i < trial.options.length;
-                                          i++) ...[
-                                        if (i > 0) AppSpacing.gapW12,
-                                        Expanded(
-                                          child: _buildOptionButton(
-                                            theme,
-                                            index: i,
-                                            symbol: trial.options[i],
+                                    AppSpacing.gapH12,
+                                    Text(
+                                      'Select the matching symbol based on the active rule:',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: const Color(0xFF94A3B8),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    AppSpacing.gapH12,
+                                    Row(
+                                      children: [
+                                        for (var i = 0;
+                                            i < trial.options.length;
+                                            i++) ...[
+                                          if (i > 0) AppSpacing.gapW12,
+                                          Expanded(
+                                            child: _buildOptionButton(
+                                              theme,
+                                              index: i,
+                                              symbol: trial.options[i],
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ],
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Focus Countdown Overlay
-              if (_showCountdown)
-                Positioned.fill(
-                  child: GameCountdownOverlay(
-                    onComplete: () {
-                      setState(() => _showCountdown = false);
-                    },
+                // Focus Countdown Overlay
+                if (_showCountdown)
+                  Positioned.fill(
+                    child: GameCountdownOverlay(
+                      onComplete: () {
+                        setState(() => _showCountdown = false);
+                      },
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -440,20 +453,38 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
     );
   }
 
-  Widget _buildStimulusCard(ThemeData theme, ReflexSymbol symbol) => AppCard(
+  Widget _buildStimulusCard(ThemeData theme, ReflexSymbol symbol) => Container(
         padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.lg,
-          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.lg,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A),
+          borderRadius: AppRadii.rXl,
+          border: Border.all(
+            color: const Color(0xFF00F5FF).withValues(alpha: 0.6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00F5FF).withValues(alpha: 0.25),
+              blurRadius: 20,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFF06B6D4).withValues(alpha: 0.2),
+                color: const Color(0xFF00F5FF).withValues(alpha: 0.2),
                 borderRadius: AppRadii.rFull,
-                border: Border.all(color: const Color(0xFF06B6D4)),
+                border: Border.all(
+                  color: const Color(0xFF00F5FF),
+                  width: 1.5,
+                ),
               ),
               child: const Text(
                 'TARGET',
@@ -465,29 +496,29 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                 ),
               ),
             ),
-            AppSpacing.gapH16,
+            AppSpacing.gapH12,
             Container(
-              width: 110,
-              height: 110,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color: const Color(0xFF0A0F1D),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                  color: const Color(0xFF00F5FF).withValues(alpha: 0.6),
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
-                    blurRadius: 20,
+                    color: const Color(0xFF00F5FF).withValues(alpha: 0.3),
+                    blurRadius: 16,
                   ),
                 ],
               ),
               child: Center(
-                child: _SymbolGraphic(symbol: symbol, size: 80),
+                child: _SymbolGraphic(symbol: symbol, size: 70),
               ),
             ),
-            AppSpacing.gapH12,
+            AppSpacing.gapH8,
             Text(
               symbol.label,
               style: theme.textTheme.titleMedium?.copyWith(
@@ -516,13 +547,13 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             ),
             borderRadius: AppRadii.rXl,
             border: Border.all(
-              color: const Color(0xFF334155),
+              color: const Color(0xFF06B6D4).withValues(alpha: 0.6),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.35),
-                blurRadius: 10,
+                color: const Color(0xFF06B6D4).withValues(alpha: 0.2),
+                blurRadius: 12,
               ),
             ],
           ),
@@ -543,13 +574,13 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                         width: 26,
                         height: 26,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF06B6D4),
+                          color: const Color(0xFF00F5FF),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF06B6D4)
-                                  .withValues(alpha: 0.5),
-                              blurRadius: 6,
+                              color: const Color(0xFF00F5FF)
+                                  .withValues(alpha: 0.6),
+                              blurRadius: 8,
                             ),
                           ],
                         ),

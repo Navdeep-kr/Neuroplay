@@ -7,7 +7,6 @@ import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/constants.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
-import 'package:neuroplay/core/widgets/app_card.dart';
 import 'package:neuroplay/features/games/domain/game_interface.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_completion_view.dart';
 import 'package:neuroplay/features/games/presentation/widgets/game_countdown_overlay.dart';
@@ -252,61 +251,74 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: Stack(
-            children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Column(
-                    children: [
-                      GameHeader(
-                        title: _definition.name,
-                        currentRound: _session.state.currentRound,
-                        totalRounds: _session.state.totalRounds,
-                        score: _session.state.score,
-                        comboStreak: _comboStreak,
-                        isPractice: config.isPractice,
-                        onPause: _handlePause,
-                      ),
-                      AppSpacing.gapH24,
+          backgroundColor: const Color(0xFF090D16),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.2),
+                radius: 1.3,
+                colors: [
+                  Color(0xFF0D1E3A),
+                  Color(0xFF090D16),
+                ],
+              ),
+            ),
+            child: Stack(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Column(
+                      children: [
+                        GameHeader(
+                          title: _definition.name,
+                          currentRound: _session.state.currentRound,
+                          totalRounds: _session.state.totalRounds,
+                          score: _session.state.score,
+                          comboStreak: _comboStreak,
+                          isPractice: config.isPractice,
+                          onPause: _handlePause,
+                        ),
+                        AppSpacing.gapH24,
 
-                      // Anchor Word Card with error shake
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500),
-                            child: ShakeWidget(
-                              shakeTrigger: _shakeTrigger,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildAnchorCard(theme, trial),
-                                  AppSpacing.gapH32,
-                                  _buildChoicesGrid(theme, trial),
-                                ],
+                        // Anchor Word Card with error shake
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 500),
+                              child: ShakeWidget(
+                                shakeTrigger: _shakeTrigger,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildAnchorCard(theme, trial),
+                                    AppSpacing.gapH24,
+                                    _buildChoicesGrid(theme, trial),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Focus Countdown Overlay
-              if (_showCountdown)
-                Positioned.fill(
-                  child: GameCountdownOverlay(
-                    onComplete: () {
-                      setState(() => _showCountdown = false);
-                    },
+                // Focus Countdown Overlay
+                if (_showCountdown)
+                  Positioned.fill(
+                    child: GameCountdownOverlay(
+                      onComplete: () {
+                        setState(() => _showCountdown = false);
+                      },
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -314,10 +326,25 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
   }
 
   Widget _buildAnchorCard(ThemeData theme, WordWeaverTrialState trial) =>
-      AppCard(
+      Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xl,
-          vertical: AppSpacing.xl,
+          vertical: AppSpacing.lg,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A),
+          borderRadius: AppRadii.rXl,
+          border: Border.all(
+            color: const Color(0xFF38BDF8).withValues(alpha: 0.6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
+              blurRadius: 24,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -328,12 +355,12 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
               ),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF38BDF8), Color(0xFF6366F1)],
+                  colors: [Color(0xFF00F5FF), Color(0xFF6366F1)],
                 ),
                 borderRadius: AppRadii.rFull,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                    color: const Color(0xFF00F5FF).withValues(alpha: 0.4),
                     blurRadius: 12,
                   ),
                 ],
@@ -342,7 +369,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                 trial.question.category.displayName.toUpperCase(),
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: Color(0xFF090D16),
                   letterSpacing: 1.4,
                   fontSize: 11,
                 ),
@@ -353,7 +380,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
               trial.question.anchorWord,
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1,
+                letterSpacing: 1.2,
                 color: Colors.white,
               ),
               textAlign: TextAlign.center,
@@ -395,13 +422,13 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                 ),
                 borderRadius: AppRadii.rXl,
                 border: Border.all(
-                  color: const Color(0xFF334155),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 10,
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.18),
+                    blurRadius: 12,
                   ),
                 ],
               ),
@@ -419,9 +446,18 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                         Container(
                           width: 28,
                           height: 28,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF38BDF8),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF00F5FF), Color(0xFF38BDF8)],
+                            ),
                             shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF00F5FF)
+                                    .withValues(alpha: 0.5),
+                                blurRadius: 6,
+                              ),
+                            ],
                           ),
                           child: Center(
                             child: Text(
