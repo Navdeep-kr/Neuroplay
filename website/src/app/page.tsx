@@ -29,7 +29,7 @@ export default function HomePage() {
             {/* CTAs */}
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/app"
+                href="/play"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-base shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:translate-y-[-1px]"
               >
                 <span>Start Training Now (Free Guest)</span>
@@ -157,13 +157,13 @@ export default function HomePage() {
               </div>
 
               <div className="pt-6 border-t border-slate-100 mt-6 flex items-center justify-between gap-3">
-                <a
-                  href={`/app/index.html#/games/${game.id}`}
+                <Link
+                  href={`/play?game=${game.id}`}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-bold shadow-xs transition-all hover:translate-y-[-1px]"
                 >
                   <span>Play {game.title}</span>
                   <ArrowRightIcon className="w-3.5 h-3.5" />
-                </a>
+                </Link>
                 <Link
                   href={`/games#${game.id}`}
                   className="text-xs font-bold text-slate-500 hover:text-blue-600 hover:underline transition-colors"
@@ -218,7 +218,7 @@ export default function HomePage() {
         </p>
         <div>
           <Link
-            href="/app"
+            href="/play"
             className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-base shadow-sm transition-all hover:translate-y-[-1px]"
           >
             <span>Launch NEUROPLAY</span>

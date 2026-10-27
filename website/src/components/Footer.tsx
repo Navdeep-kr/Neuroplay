@@ -45,7 +45,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/app" className="hover:text-blue-600 transition-colors">
+                <Link href="/play" className="hover:text-blue-600 transition-colors">
                   Web App
                 </Link>
               </li>

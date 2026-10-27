@@ -1,6 +1,5 @@
 {
   "buildCommand": "pnpm build",
-  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/app",

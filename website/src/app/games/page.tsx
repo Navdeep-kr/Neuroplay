@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ArrowRightIcon, CheckCircleIcon, SparklesIcon } from "@/components/Icons";
 import { GAMES_DATA } from "@/lib/constants";
 
@@ -54,13 +55,13 @@ export default function GamesPage() {
               </div>
 
               <div>
-                <a
-                  href={`/app/index.html#/games/${game.id}`}
+                <Link
+                  href={`/play?game=${game.id}`}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors shadow-xs hover:translate-y-[-1px]"
                 >
                   <span>Play {game.title}</span>
                   <ArrowRightIcon className="w-3.5 h-3.5" />
-                </a>
+                </Link>
               </div>
             </div>
 

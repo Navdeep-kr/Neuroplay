@@ -39,6 +39,13 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
   <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        for (var r of regs) { r.unregister(); }
+      });
+    }
+  </script>
+  <script>
     window.addEventListener('flutter-first-frame', function() {
       var loader = document.getElementById('app-loading');
       if (loader) loader.remove();

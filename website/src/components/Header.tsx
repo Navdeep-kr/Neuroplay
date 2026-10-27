@@ -64,7 +64,7 @@ export function Header() {
               Admin
             </Link>
             <Link
-              href="/app"
+              href="/play"
               className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               Launch Web App
@@ -74,7 +74,7 @@ export function Header() {
           {/* Mobile hamburger toggle */}
           <div className="flex md:hidden items-center gap-2">
             <Link
-              href="/app"
+              href="/play"
               className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-500"
             >
               App
@@ -116,7 +116,7 @@ export function Header() {
             ))}
             <div className="pt-4 border-t border-slate-200 space-y-2">
               <Link
-                href="/app"
+                href="/play"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-500 shadow-sm"
               >
