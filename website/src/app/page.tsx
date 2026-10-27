@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRightIcon, BrainIcon, CheckCircleIcon, ShieldCheckIcon, AccessibilityIcon, BoltIcon, AppleIcon, GooglePlayIcon, SparklesIcon } from "@/components/Icons";
-import { GAMES_DATA, SITE_CONFIG } from "@/lib/constants";
+import { GAMES_DATA } from "@/lib/constants";
 
 export default function HomePage() {
   return (

@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { BrainIcon } from "./Icons";
-import { SITE_CONFIG } from "@/lib/constants";
 
 export function Footer() {
   return (

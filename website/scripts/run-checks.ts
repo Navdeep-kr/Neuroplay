@@ -19,8 +19,9 @@ function test(name: string, fn: () => void) {
     fn();
     console.log(`  [PASS] ${name}`);
     passed++;
-  } catch (err: any) {
-    console.error(`  [FAIL] ${name}: ${err.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`  [FAIL] ${name}: ${message}`);
     failed++;
   }
 }

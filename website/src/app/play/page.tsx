@@ -1,30 +1,19 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from "react";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { GAMES_DATA } from "@/lib/constants";
-import { ArrowLeftIcon, SparklesIcon } from "@/components/Icons";
+import { ArrowLeftIcon } from "@/components/Icons";
 
 function PlayGameContent() {
   const searchParams = useSearchParams();
   const gameId = searchParams.get("game");
-  const [iframeSrc, setIframeSrc] = useState<string>("/app/index.html");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeGame, setActiveGame] = useState<(typeof GAMES_DATA)[0] | null>(null);
 
-  useEffect(() => {
-    if (gameId) {
-      const matched = GAMES_DATA.find((g) => g.id === gameId);
-      if (matched) {
-        setActiveGame(matched);
-      }
-      setIframeSrc(`/app/index.html#/games/${gameId}`);
-    } else {
-      setActiveGame(null);
-      setIframeSrc("/app/index.html#/home");
-    }
-  }, [gameId]);
+  // Derived values directly from query parameter
+  const activeGame = gameId ? GAMES_DATA.find((g) => g.id === gameId) ?? null : null;
+  const iframeSrc = gameId ? `/app/index.html#/games/${gameId}` : "/app/index.html#/home";
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
