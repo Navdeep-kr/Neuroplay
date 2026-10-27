@@ -72,7 +72,7 @@ export default function RootLayout({
         <OrganizationJsonLd />
         <SoftwareAppJsonLd />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 font-sans antialiased">
+      <body className="min-h-full flex flex-col bg-white text-slate-900 font-sans antialiased">
         <Header />
         <main id="main-content" className="flex-1 focus:outline-none">
           {children}

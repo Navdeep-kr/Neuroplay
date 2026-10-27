@@ -250,15 +250,15 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          backgroundColor: const Color(0xFF090D16),
+          backgroundColor: Colors.white,
           body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(0, -0.3),
                 radius: 1.25,
                 colors: [
-                  Color(0xFF1E1035),
-                  Color(0xFF090D16),
+                  Color(0xFFF8FAFC),
+                  Colors.white,
                 ],
               ),
             ),
@@ -281,6 +281,7 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                           comboStreak: _comboStreak,
                           isPractice: config.isPractice,
                           onPause: _handlePause,
+                          facultyColor: const Color(0xFF10B981),
                         ),
                         AppSpacing.gapH12,
 
@@ -307,7 +308,7 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
                                       'Select the matching symbol based on the active rule:',
                                       style:
                                           theme.textTheme.bodySmall?.copyWith(
-                                        color: const Color(0xFF94A3B8),
+                                        color: const Color(0xFF64748B),
                                         fontWeight: FontWeight.w600,
                                       ),
                                       textAlign: TextAlign.center,
@@ -459,15 +460,15 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
           horizontal: AppSpacing.lg,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
+          color: Colors.white,
           borderRadius: AppRadii.rXl,
           border: Border.all(
-            color: const Color(0xFF00F5FF).withValues(alpha: 0.6),
+            color: const Color(0xFF2563EB),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00F5FF).withValues(alpha: 0.25),
+              color: const Color(0xFF0F172A).withValues(alpha: 0.08),
               blurRadius: 20,
               spreadRadius: 1,
             ),
@@ -479,17 +480,17 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFF00F5FF).withValues(alpha: 0.2),
+                color: const Color(0xFFEFF6FF),
                 borderRadius: AppRadii.rFull,
                 border: Border.all(
-                  color: const Color(0xFF00F5FF),
+                  color: const Color(0xFF2563EB),
                   width: 1.5,
                 ),
               ),
               child: const Text(
                 'TARGET',
                 style: TextStyle(
-                  color: Color(0xFF00F5FF),
+                  color: Color(0xFF2563EB),
                   letterSpacing: 1.5,
                   fontWeight: FontWeight.w900,
                   fontSize: 11,
@@ -501,16 +502,16 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFF0A0F1D),
+                color: const Color(0xFFF8FAFC),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF00F5FF).withValues(alpha: 0.6),
-                  width: 2,
+                  color: const Color(0xFFCBD5E1),
+                  width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00F5FF).withValues(alpha: 0.3),
-                    blurRadius: 16,
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.1),
+                    blurRadius: 12,
                   ),
                 ],
               ),
@@ -523,7 +524,7 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
               symbol.label,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: const Color(0xFF0F172A),
               ),
             ),
           ],
@@ -537,87 +538,81 @@ class _ReflexForgeScreenState extends ConsumerState<ReflexForgeScreen> {
   }) =>
       Semantics(
         label: 'Option ${index + 1}: ${symbol.label}',
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-            ),
-            borderRadius: AppRadii.rXl,
-            border: Border.all(
-              color: const Color(0xFF06B6D4).withValues(alpha: 0.6),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF06B6D4).withValues(alpha: 0.2),
-                blurRadius: 12,
+        child: SpringTouchFeedback(
+          onTap: () => _handleOptionSelected(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFF8FAFC), Colors.white],
               ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: AppRadii.rXl,
-            child: InkWell(
               borderRadius: AppRadii.rXl,
-              onTap: () => _handleOptionSelected(index),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Container(
-                        width: 26,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00F5FF),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00F5FF)
-                                  .withValues(alpha: 0.6),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: const TextStyle(
-                              color: Color(0xFF0F172A),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                            ),
+              border: Border.all(
+                color: const Color(0xFFCBD5E1),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                const Color(0xFF2563EB).withValues(alpha: 0.4),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
                           ),
                         ),
                       ),
                     ),
-                    AppSpacing.gapH8,
-                    _SymbolGraphic(symbol: symbol, size: 54),
-                    AppSpacing.gapH8,
-                    Text(
-                      symbol.shape.label,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
+                  ),
+                  AppSpacing.gapH8,
+                  _SymbolGraphic(symbol: symbol, size: 54),
+                  AppSpacing.gapH8,
+                  Text(
+                    symbol.shape.label,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0F172A),
                     ),
-                    Text(
-                      symbol.pattern.label,
-                      style: const TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    symbol.pattern.label,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),

@@ -40,7 +40,7 @@ class AppCustomTokens extends ThemeExtension<AppCustomTokens> {
     subtleBackground: AppColors.darkSurface,
     mintContainer: AppColors.mint900,
     onMintContainer: AppColors.mint100,
-    statCardBackground: Color(0xFF131B2A),
+    statCardBackground: AppColors.darkCard,
     focusRingColor: AppColors.focusRingDark,
   );
 
@@ -116,7 +116,7 @@ abstract final class AppTheme {
       brightness: colorScheme.brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor:
-          isDark ? AppColors.darkCanvas : AppColors.slate50,
+          isDark ? AppColors.darkCanvas : AppColors.pureWhite,
       textTheme: textTheme,
       extensions: [tokens],
 

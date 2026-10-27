@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neuroplay/core/audio/sound_synthesizer.dart';
 import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
@@ -31,8 +32,34 @@ class AppButton extends StatefulWidget {
   State<AppButton> createState() => _AppButtonState();
 }
 
-class _AppButtonState extends State<AppButton> {
+class _AppButtonState extends State<AppButton>
+    with SingleTickerProviderStateMixin {
   bool _isFocused = false;
+  late final AnimationController _scaleController;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 70),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.96).animate(
+      CurvedAnimation(
+        parent: _scaleController,
+        curve: Curves.easeIn,
+        reverseCurve: Curves.easeOutBack,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,26 +135,38 @@ class _AppButtonState extends State<AppButton> {
                 ? Border.all(color: tokens.focusRingColor, width: 2)
                 : null,
           ),
-          child: Material(
-            color: isEnabled ? background : background.withAlpha(120),
-            shape: RoundedRectangleBorder(
-              borderRadius: AppRadii.rMd,
-              side: borderSide,
-            ),
-            child: InkWell(
-              onTap: isEnabled ? widget.onPressed : null,
-              borderRadius: AppRadii.rMd,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: 48, // WCAG touch target height
-                  minWidth: widget.isFullWidth ? double.infinity : 48,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Material(
+              color: isEnabled ? background : background.withAlpha(120),
+              shape: RoundedRectangleBorder(
+                borderRadius: AppRadii.rMd,
+                side: borderSide,
+              ),
+              child: InkWell(
+                onTap: isEnabled ? widget.onPressed : null,
+                onTapDown: isEnabled ? (_) => _scaleController.forward() : null,
+                onTapUp: isEnabled
+                    ? (_) {
+                        _scaleController.reverse();
+                        SoundSynthesizer.playClick();
+                      }
+                    : null,
+                onTapCancel:
+                    isEnabled ? () => _scaleController.reverse() : null,
+                borderRadius: AppRadii.rMd,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 48, // WCAG touch target height
+                    minWidth: widget.isFullWidth ? double.infinity : 48,
                   ),
-                  child: child,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: child,
+                  ),
                 ),
               ),
             ),

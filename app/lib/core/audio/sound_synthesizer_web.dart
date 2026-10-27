@@ -87,6 +87,16 @@ void platformPlayCountdown({required bool isFinal}) {
   } on Object catch (_) {}
 }
 
+void platformPlayClick() {
+  try {
+    _ensureInitialized();
+    _jsEval(
+      'if (window.__neuroplayAudio) window.__neuroplayAudio.playTone(1200, 0.03, "sine", 0.08);'
+          .toJS,
+    );
+  } on Object catch (_) {}
+}
+
 void platformPlayFanfare() {
   try {
     _ensureInitialized();

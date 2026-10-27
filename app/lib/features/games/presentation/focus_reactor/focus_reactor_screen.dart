@@ -275,15 +275,15 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          backgroundColor: const Color(0xFF090D16),
+          backgroundColor: Colors.white,
           body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(0, -0.2),
                 radius: 1.3,
                 colors: [
-                  Color(0xFF071F2C),
-                  Color(0xFF090D16),
+                  Color(0xFFF8FAFC),
+                  Colors.white,
                 ],
               ),
             ),
@@ -306,6 +306,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                           comboStreak: _comboStreak,
                           isPractice: config.isPractice,
                           onPause: _handlePause,
+                          facultyColor: const Color(0xFFF59E0B),
                         ),
                         AppSpacing.gapH16,
 
@@ -396,17 +397,17 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
         ),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+            colors: [Color(0xFFF8FAFC), Colors.white],
           ),
           borderRadius: AppRadii.rXxl,
           border: Border.all(
-            color: const Color(0xFF00F5FF),
-            width: 2,
+            color: const Color(0xFFF59E0B),
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00F5FF).withValues(alpha: 0.25),
-              blurRadius: 18,
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+              blurRadius: 16,
             ),
           ],
         ),
@@ -417,12 +418,12 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF00F5FF)),
+                border: Border.all(color: const Color(0xFFFDE68A), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00F5FF).withValues(alpha: 0.35),
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
                     blurRadius: 10,
                   ),
                 ],
@@ -440,7 +441,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                   'SEEK TARGET',
                   style: TextStyle(
                     letterSpacing: 1.5,
-                    color: Color(0xFF00F5FF),
+                    color: Color(0xFFD97706),
                     fontWeight: FontWeight.w900,
                     fontSize: 12,
                   ),
@@ -449,7 +450,7 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
                   '${target.shape.label} • ${target.marker.label}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -466,92 +467,87 @@ class _FocusReactorScreenState extends ConsumerState<FocusReactorScreen> {
       Semantics(
         label:
             'Slot ${index + 1}: ${item.shape.label} with ${item.marker.label}',
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-            ),
-            borderRadius: AppRadii.rXl,
-            border: Border.all(
-              color: const Color(0xFF00F5FF).withValues(alpha: 0.4),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00F5FF).withValues(alpha: 0.15),
-                blurRadius: 14,
+        child: SpringTouchFeedback(
+          onTap: () => _handleSlotSelected(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFF8FAFC), Colors.white],
               ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: AppRadii.rXl,
-            child: InkWell(
               borderRadius: AppRadii.rXl,
-              onTap: () => _handleSlotSelected(index),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00F5FF),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00F5FF)
-                                  .withValues(alpha: 0.6),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${index + 1}',
-                            style: const TextStyle(
-                              color: Color(0xFF0F172A),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 12,
-                            ),
+              border: Border.all(
+                color: const Color(0xFFCBD5E1),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                const Color(0xFF2563EB).withValues(alpha: 0.4),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
                           ),
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Center(
-                        child: _FocusItemIcon(item: item, size: 48),
-                      ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: _FocusItemIcon(item: item, size: 48),
                     ),
-                    Text(
-                      item.shape.label,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
+                  ),
+                  Text(
+                    item.shape.label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                      fontSize: 12,
                     ),
-                    Text(
-                      item.marker.label,
-                      style: const TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                  ),
+                  Text(
+                    item.marker.label,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                  ),
+                ],
               ),
             ),
           ),

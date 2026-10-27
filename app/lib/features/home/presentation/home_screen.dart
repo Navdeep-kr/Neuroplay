@@ -170,35 +170,18 @@ class HomeScreen extends ConsumerWidget {
                   // --- Prominent Hero: START TODAY'S WORKOUT ---
                   Container(
                     decoration: BoxDecoration(
-                      gradient: isDark
-                          ? const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF0F172A),
-                                Color(0xFF064E3B),
-                                Color(0xFF022C22),
-                              ],
-                            )
-                          : const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF064E3B),
-                                Color(0xFF065F46),
-                                Color(0xFF0F766E),
-                              ],
-                            ),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: const Color(0x5910B981),
+                        color: const Color(0xFFE2E8F0),
                         width: 1.5,
                       ),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x2610B981),
-                          blurRadius: 20,
-                          offset: Offset(0, 6),
+                          color:
+                              const Color(0xFF2563EB).withValues(alpha: 0.08),
+                          blurRadius: 24,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
@@ -234,7 +217,7 @@ class HomeScreen extends ConsumerWidget {
                                             style: theme.textTheme.labelMedium
                                                 ?.copyWith(
                                               fontWeight: FontWeight.w600,
-                                              color: const Color(0xFFE2E8F0),
+                                              color: const Color(0xFF64748B),
                                             ),
                                           ),
                                           if (workout.completedGameIds
@@ -244,7 +227,7 @@ class HomeScreen extends ConsumerWidget {
                                               '•   ${workout.completedGameIds.length}/${workout.games.length} completed',
                                               style: theme.textTheme.labelSmall
                                                   ?.copyWith(
-                                                color: const Color(0xFF6EE7B7),
+                                                color: const Color(0xFF059669),
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
@@ -256,7 +239,7 @@ class HomeScreen extends ConsumerWidget {
                                         style: theme.textTheme.headlineMedium
                                             ?.copyWith(
                                           fontWeight: FontWeight.w800,
-                                          color: Colors.white,
+                                          color: const Color(0xFF0F172A),
                                         ),
                                       ),
                                       AppSpacing.gapH8,
@@ -266,7 +249,7 @@ class HomeScreen extends ConsumerWidget {
                                             : workout.subtitle,
                                         style:
                                             theme.textTheme.bodyLarge?.copyWith(
-                                          color: const Color(0xFFCBD5E1),
+                                          color: const Color(0xFF64748B),
                                         ),
                                       ),
                                     ],
@@ -286,19 +269,19 @@ class HomeScreen extends ConsumerWidget {
                               children: workout.domains
                                   .map(
                                     (d) => Chip(
-                                      backgroundColor: const Color(0x990F172A),
+                                      backgroundColor: const Color(0xFFF8FAFC),
                                       side: const BorderSide(
-                                        color: Color(0x5910B981),
+                                        color: Color(0xFFE2E8F0),
                                       ),
                                       avatar: Icon(
                                         d.icon,
                                         size: 14,
-                                        color: const Color(0xFF34D399),
+                                        color: const Color(0xFF2563EB),
                                       ),
                                       label: Text(
                                         d.label,
                                         style: const TextStyle(
-                                          color: Color(0xFFF8FAFC),
+                                          color: Color(0xFF0F172A),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -476,9 +459,11 @@ class HomeScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
+                              AppSpacing.gapW8,
                               const Icon(
-                                Icons.chevron_right_rounded,
-                                size: 20,
+                                Icons.play_circle_fill_rounded,
+                                color: Color(0xFF14B8A6),
+                                size: 24,
                               ),
                             ],
                           ),
@@ -775,14 +760,14 @@ class _MetricCard extends StatelessWidget {
     Color iconColor;
     Color iconBg;
     if (title.contains('Brain')) {
-      iconColor = const Color(0xFF818CF8);
-      iconBg = const Color(0x40312E81);
+      iconColor = const Color(0xFF2563EB);
+      iconBg = const Color(0xFFEFF6FF);
     } else if (title.contains('Consistency')) {
       iconColor = const Color(0xFF10B981);
-      iconBg = const Color(0x40064E3B);
+      iconBg = const Color(0xFFECFDF5);
     } else {
-      iconColor = const Color(0xFFFBBF24);
-      iconBg = const Color(0x4078350F);
+      iconColor = const Color(0xFFF59E0B);
+      iconBg = const Color(0xFFFFFBEB);
     }
 
     return AppCard(

@@ -157,7 +157,7 @@ class _GamesLibraryScreenState extends ConsumerState<GamesLibraryScreen> {
                               crossAxisCount: 2,
                               crossAxisSpacing: AppSpacing.lg,
                               mainAxisSpacing: AppSpacing.lg,
-                              mainAxisExtent: 210,
+                              mainAxisExtent: 380,
                             ),
                             itemCount: filtered.length,
                             itemBuilder: (context, index) =>
@@ -192,20 +192,96 @@ class _GameCatalogCard extends StatelessWidget {
 
   final CognitiveGame game;
 
+  void _navigateToGame(BuildContext context) {
+    switch (game.slug) {
+      case 'memory-matrix':
+        context.push(AppRoutes.memoryMatrix);
+        break;
+      case 'reflex-forge':
+        context.push(AppRoutes.reflexForge);
+        break;
+      case 'focus-reactor':
+        context.push(AppRoutes.focusReactor);
+        break;
+      case 'logic-labyrinth':
+        context.push(AppRoutes.logicLabyrinth);
+        break;
+      case 'number-pulse':
+        context.push(AppRoutes.numberPulse);
+        break;
+      case 'word-weaver':
+        context.push(AppRoutes.wordWeaver);
+        break;
+      default:
+        _openPreviewModal(context);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return AppCard(
       padding: EdgeInsets.zero,
+      onTap: () => _navigateToGame(context),
+      semanticLabel: 'Play ${game.title} exercise',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Visual Game Art Illustration
-          GameArtworkIllustration(
-            slug: game.slug,
-            height: 120,
-            borderRadius: 0,
+          // Visual Game Art Illustration with Play Badge Overlay
+          Stack(
+            children: [
+              GameArtworkIllustration(
+                slug: game.slug,
+                height: 124,
+                borderRadius: 0,
+              ),
+              Positioned(
+                top: AppSpacing.sm,
+                right: AppSpacing.sm,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFE2E8F0),
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x140F172A),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.play_arrow_rounded,
+                        color: Color(0xFF2563EB),
+                        size: 16,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'PLAY NOW',
+                        style: TextStyle(
+                          color: Color(0xFF2563EB),
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           Padding(
             padding: AppSpacing.pLg,
@@ -253,38 +329,21 @@ class _GameCatalogCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium,
                 ),
-                AppSpacing.gapH12,
+                AppSpacing.gapH16,
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    AppButton(
-                      label: 'Play',
-                      icon: Icons.play_arrow_rounded,
-                      onPressed: () {
-                        switch (game.slug) {
-                          case 'memory-matrix':
-                            context.push(AppRoutes.memoryMatrix);
-                            break;
-                          case 'reflex-forge':
-                            context.push(AppRoutes.reflexForge);
-                            break;
-                          case 'focus-reactor':
-                            context.push(AppRoutes.focusReactor);
-                            break;
-                          case 'logic-labyrinth':
-                            context.push(AppRoutes.logicLabyrinth);
-                            break;
-                          case 'number-pulse':
-                            context.push(AppRoutes.numberPulse);
-                            break;
-                          case 'word-weaver':
-                            context.push(AppRoutes.wordWeaver);
-                            break;
-                          default:
-                            _openPreviewModal(context);
-                            break;
-                        }
-                      },
+                    Expanded(
+                      child: AppButton(
+                        label: 'Play Game',
+                        icon: Icons.play_arrow_rounded,
+                        onPressed: () => _navigateToGame(context),
+                      ),
+                    ),
+                    AppSpacing.gapW8,
+                    IconButton.outlined(
+                      icon: const Icon(Icons.info_outline_rounded, size: 20),
+                      tooltip: 'Game Instructions & Rules',
+                      onPressed: () => _openPreviewModal(context),
                     ),
                   ],
                 ),

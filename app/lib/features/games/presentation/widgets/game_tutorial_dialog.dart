@@ -50,8 +50,8 @@ class _GameTutorialDialogState extends State<GameTutorialDialog> {
     return Dialog(
       shape: const RoundedRectangleBorder(borderRadius: AppRadii.rXl),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: Padding(
+        constraints: const BoxConstraints(maxWidth: 480, maxHeight: 680),
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,

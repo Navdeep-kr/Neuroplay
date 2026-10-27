@@ -26,6 +26,12 @@ abstract final class SoundSynthesizer {
     platformPlayCountdown(isFinal: isFinal);
   }
 
+  /// Play crisp tactile micro-click on button/tile tap.
+  static void playClick() {
+    HapticFeedback.selectionClick();
+    platformPlayClick();
+  }
+
   /// Play celebratory multi-tone fanfare upon exercise completion.
   static void playFanfare() {
     HapticFeedback.heavyImpact();

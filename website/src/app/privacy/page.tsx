@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import type { Metadata } from "next";
 import { SparklesIcon } from "@/components/Icons";
 import { SITE_CONFIG } from "@/lib/constants";
@@ -13,11 +13,11 @@ export default function PrivacyPage() {
   return (
     <div className="py-12 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
       <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          <SparklesIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <SparklesIcon className="w-4 h-4 text-emerald-600" />
           <span>Data Sovereignty & Privacy</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
           Privacy Policy
         </h1>
         <p className="text-sm text-slate-500 font-mono">
@@ -25,9 +25,9 @@ export default function PrivacyPage() {
         </p>
       </div>
 
-      <div className="prose dark:prose-invert max-w-none space-y-8 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+      <div className="prose max-w-none space-y-8 text-sm sm:text-base text-slate-600 leading-relaxed">
         <section className="space-y-3">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-xl font-bold text-slate-900">
             1. Core Principles
           </h2>
           <p>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-xl font-bold text-slate-900">
             2. Data We Collect
           </h2>
           <ul className="list-disc pl-6 space-y-2">
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-xl font-bold text-slate-900">
             3. How We Use Cognitive Telemetry
           </h2>
           <p>
@@ -70,7 +70,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-xl font-bold text-slate-900">
             4. Self-Service Data Export & Account Deletion
           </h2>
           <p>
@@ -87,12 +87,12 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="text-xl font-bold text-slate-900">
             5. Contact Information
           </h2>
           <p>
             For privacy inquiries, reach our Data Protection Officer directly at{" "}
-            <a href={`mailto:${SITE_CONFIG.links.privacyEmail}`} className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline">
+            <a href={`mailto:${SITE_CONFIG.links.privacyEmail}`} className="text-emerald-600 font-semibold hover:underline">
               {SITE_CONFIG.links.privacyEmail}
             </a>.
           </p>

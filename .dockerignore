@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.gitignore
+.vscode
+.idea
+*.log
+app/build
+app/.dart_tool

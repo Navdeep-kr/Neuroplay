@@ -281,15 +281,15 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          backgroundColor: const Color(0xFF090D16),
+          backgroundColor: Colors.white,
           body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(0, -0.2),
                 radius: 1.3,
                 colors: [
-                  Color(0xFF0F2338),
-                  Color(0xFF090D16),
+                  Color(0xFFF8FAFC),
+                  Colors.white,
                 ],
               ),
             ),
@@ -322,7 +322,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
                         ),
                         AppSpacing.gapH24,
 
-                        // Main Interactive Colorful Grid Arena
+                        // Main Interactive Grid Arena (Calm Focus & Obsidian)
                         Expanded(
                           child: Center(
                             child: AspectRatio(
@@ -335,22 +335,20 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.all(AppSpacing.md),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0F172A),
+                                    color: Colors.white,
                                     borderRadius: AppRadii.rXxl,
                                     border: Border.all(
                                       color: roundState.isMemorizing
-                                          ? const Color(0xFF00F5FF)
-                                          : const Color(0xFF06B6D4),
-                                      width: 2.5,
+                                          ? const Color(0xFF2563EB)
+                                          : const Color(0xFF10B981),
+                                      width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: (roundState.isMemorizing
-                                                ? const Color(0xFF00F5FF)
-                                                : const Color(0xFF06B6D4))
-                                            .withValues(alpha: 0.3),
-                                        blurRadius: 28,
-                                        spreadRadius: 2,
+                                        color: const Color(0xFF0F172A)
+                                            .withValues(alpha: 0.08),
+                                        blurRadius: 20,
+                                        spreadRadius: 1,
                                       ),
                                     ],
                                   ),
@@ -392,7 +390,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
                                 Text(
                                   'Select the illuminated squares (${roundState.selectedCorrectIndices.length}/${roundState.targetIndices.length})',
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: const Color(0xFF94A3B8),
+                                    color: const Color(0xFF64748B),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -416,7 +414,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
                                                       .selectedCorrectIndices
                                                       .length
                                               ? const Color(0xFF10B981)
-                                              : const Color(0xFF334155),
+                                              : const Color(0xFFCBD5E1),
                                           boxShadow: i <
                                                   roundState
                                                       .selectedCorrectIndices
@@ -472,7 +470,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
         ),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF00F5FF), Color(0xFF06B6D4)],
+            colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
           ),
           borderRadius: AppRadii.rFull,
           border: Border.all(
@@ -481,7 +479,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00F5FF).withValues(alpha: 0.5),
+              color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
               blurRadius: 18,
               spreadRadius: 2,
             ),
@@ -493,14 +491,14 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
             Icon(
               Icons.remove_red_eye_rounded,
               size: 20,
-              color: Color(0xFF090D16),
+              color: Colors.white,
             ),
             SizedBox(width: 8),
             Text(
               'MEMORIZE PATTERN',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF090D16),
+                color: Colors.white,
                 letterSpacing: 1.2,
                 fontSize: 13,
               ),
@@ -573,6 +571,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
             roundState.selectedCorrectIndices.contains(index);
         final isSelectedMistake =
             roundState.selectedMistakeIndices.contains(index);
+        final alreadySelected = isSelectedCorrect || isSelectedMistake;
 
         final showHighlighted =
             (roundState.isMemorizing && isTarget) || isSelectedCorrect;
@@ -585,16 +584,16 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF00F5FF), Color(0xFF10B981)],
+              colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
             ),
             borderRadius: AppRadii.rLg,
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white.withValues(alpha: 0.9),
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF00F5FF).withValues(alpha: 0.6),
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.5),
                 blurRadius: 16,
                 spreadRadius: 2,
               ),
@@ -602,7 +601,7 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
           );
           tileIcon = const Icon(
             Icons.star_rounded,
-            color: Color(0xFF0F172A),
+            color: Colors.white,
             size: 32,
           );
         } else if (isSelectedMistake) {
@@ -610,13 +609,13 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFFEF4444), Color(0xFFB91C1C)],
+              colors: [Color(0xFFF87171), Color(0xFFDC2626)],
             ),
             borderRadius: AppRadii.rLg,
             border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFEF4444).withValues(alpha: 0.5),
+                color: const Color(0xFFF87171).withValues(alpha: 0.5),
                 blurRadius: 14,
               ),
             ],
@@ -631,11 +630,11 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+              colors: [Color(0xFFF8FAFC), Color(0xFFF1F5F9)],
             ),
             borderRadius: AppRadii.rLg,
             border: Border.all(
-              color: const Color(0xFF334155),
+              color: const Color(0xFFCBD5E1),
               width: 1.5,
             ),
           );
@@ -649,19 +648,14 @@ class _MemoryMatrixScreenState extends ConsumerState<MemoryMatrixScreen> {
           label: 'Grid tile row $row column $col'
               '${showHighlighted ? ', target tile' : ''}'
               '${isSelectedMistake ? ', mistake' : ''}',
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutBack,
-            decoration: decoration,
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: AppRadii.rLg,
-              child: InkWell(
-                borderRadius: AppRadii.rLg,
-                onTap:
-                    roundState.isRecalling ? () => _onTileTapped(index) : null,
-                child: Center(child: tileIcon),
-              ),
+          child: SpringTouchFeedback(
+            enabled: roundState.isRecalling && !alreadySelected,
+            onTap: roundState.isRecalling ? () => _onTileTapped(index) : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutBack,
+              decoration: decoration,
+              child: Center(child: tileIcon),
             ),
           ),
         );

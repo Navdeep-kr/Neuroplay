@@ -10,12 +10,24 @@ import 'package:neuroplay/features/auth/presentation/login_screen.dart';
 import 'package:neuroplay/features/auth/presentation/onboarding_screen.dart';
 import 'package:neuroplay/features/auth/presentation/register_screen.dart';
 import 'package:neuroplay/features/challenges/presentation/challenges_screen.dart';
+import 'package:neuroplay/features/games/presentation/constellation_recall/constellation_recall_screen.dart';
+import 'package:neuroplay/features/games/presentation/echo_sequence/echo_sequence_screen.dart';
+import 'package:neuroplay/features/games/presentation/flanker_strike/flanker_strike_screen.dart';
+import 'package:neuroplay/features/games/presentation/flow_math/flow_math_screen.dart';
 import 'package:neuroplay/features/games/presentation/focus_reactor/focus_reactor_screen.dart';
 import 'package:neuroplay/features/games/presentation/games_library_screen.dart';
 import 'package:neuroplay/features/games/presentation/logic_labyrinth/logic_labyrinth_screen.dart';
 import 'package:neuroplay/features/games/presentation/memory_matrix/memory_matrix_screen.dart';
 import 'package:neuroplay/features/games/presentation/number_pulse/number_pulse_screen.dart';
+import 'package:neuroplay/features/games/presentation/origami_unfold/origami_unfold_screen.dart';
+import 'package:neuroplay/features/games/presentation/prism_shift/prism_shift_screen.dart';
 import 'package:neuroplay/features/games/presentation/reflex_forge/reflex_forge_screen.dart';
+import 'package:neuroplay/features/games/presentation/scale_balance/scale_balance_screen.dart';
+import 'package:neuroplay/features/games/presentation/semantic_bridge/semantic_bridge_screen.dart';
+import 'package:neuroplay/features/games/presentation/tower_of_chronos/tower_of_chronos_screen.dart';
+import 'package:neuroplay/features/games/presentation/tracker_horizon/tracker_horizon_screen.dart';
+import 'package:neuroplay/features/games/presentation/trailblazer/trailblazer_screen.dart';
+import 'package:neuroplay/features/games/presentation/word_rapids/word_rapids_screen.dart';
 import 'package:neuroplay/features/games/presentation/word_weaver/word_weaver_screen.dart';
 import 'package:neuroplay/features/home/presentation/home_screen.dart';
 import 'package:neuroplay/features/profile/presentation/profile_screen.dart';
@@ -106,6 +118,78 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'word-weaver',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const WordWeaverScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.echoSequence,
+        name: 'echo-sequence',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const EchoSequenceScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.constellationRecall,
+        name: 'constellation-recall',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ConstellationRecallScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.trailblazer,
+        name: 'trailblazer',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TrailblazerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.prismShift,
+        name: 'prism-shift',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PrismShiftScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.trackerHorizon,
+        name: 'tracker-horizon',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TrackerHorizonScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.flankerStrike,
+        name: 'flanker-strike',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const FlankerStrikeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.scaleBalance,
+        name: 'scale-balance',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ScaleBalanceScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.flowMath,
+        name: 'flow-math',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const FlowMathScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.origamiUnfold,
+        name: 'origami-unfold',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const OrigamiUnfoldScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.towerOfChronos,
+        name: 'tower-of-chronos',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TowerOfChronosScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.semanticBridge,
+        name: 'semantic-bridge',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SemanticBridgeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.wordRapids,
+        name: 'word-rapids',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const WordRapidsScreen(),
       ),
       GoRoute(
         path: AppRoutes.subscription,

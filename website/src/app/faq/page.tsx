@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -19,14 +19,14 @@ export default function FaqPage() {
       <div className="py-12 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* Header */}
         <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            <SparklesIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <SparklesIcon className="w-4 h-4 text-emerald-600" />
             <span>Got Questions?</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Everything you need to know about NEUROPLAY&apos;s games, scientific foundations, data privacy, and adaptive algorithms.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function FaqPage() {
             return (
               <div
                 key={item.question}
-                className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-all"
+                className="rounded-2xl bg-white border border-slate-200 shadow-xs overflow-hidden transition-all"
               >
                 <button
                   type="button"
@@ -48,12 +48,12 @@ export default function FaqPage() {
                   aria-controls={`faq-answer-${idx}`}
                   id={`faq-question-${idx}`}
                 >
-                  <span className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">
+                  <span className="font-bold text-base sm:text-lg text-slate-900">
                     {item.question}
                   </span>
                   <span
                     className={`transform transition-transform text-slate-400 flex-shrink-0 ${
-                      isOpen ? "rotate-180 text-emerald-600 dark:text-emerald-400" : ""
+                      isOpen ? "rotate-180 text-emerald-600" : ""
                     }`}
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@ export default function FaqPage() {
                     id={`faq-answer-${idx}`}
                     role="region"
                     aria-labelledby={`faq-question-${idx}`}
-                    className="px-6 pb-6 sm:px-7 sm:pb-7 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800/80 pt-4"
+                    className="px-6 pb-6 sm:px-7 sm:pb-7 text-sm sm:text-base text-slate-600 leading-relaxed border-t border-slate-100 pt-4"
                   >
                     {item.answer}
                   </div>
@@ -78,11 +78,11 @@ export default function FaqPage() {
         </div>
 
         {/* Still have questions */}
-        <div className="p-8 rounded-3xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-center space-y-4">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+        <div className="p-8 rounded-3xl bg-slate-100 border border-slate-200 text-center space-y-4">
+          <h2 className="text-xl font-bold text-slate-900">
             Have a question that isn&apos;t answered here?
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+          <p className="text-sm text-slate-600 max-w-md mx-auto">
             Our support and research teams are always available to help with questions about accessibility, data privacy, or game mechanics.
           </p>
           <div className="pt-2">

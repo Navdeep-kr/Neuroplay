@@ -85,6 +85,162 @@ abstract final class WorkoutGenerator {
       difficulty: 'Intermediate',
       route: AppRoutes.wordWeaver,
     ),
+    CognitiveGame(
+      id: 'echo-sequence',
+      slug: 'echo-sequence',
+      title: 'Echo Sequence',
+      domain: CognitiveDomain.memory,
+      description:
+          'Dual N-Back working memory: recall positions and cues presented N steps back.',
+      instructions:
+          'Watch the sequence of flashing tiles. Tap Match when the current tile matches the one shown N steps earlier.',
+      durationMinutes: 3,
+      difficulty: 'Advanced',
+      route: AppRoutes.echoSequence,
+    ),
+    CognitiveGame(
+      id: 'constellation-recall',
+      slug: 'constellation-recall',
+      title: 'Constellation Recall',
+      domain: CognitiveDomain.memory,
+      description:
+          'Memorize celestial star configurations and identify relocated star coordinates.',
+      instructions:
+          'Observe the star pattern for 3 seconds. Tap the exact star that shifted after the screen resets.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.constellationRecall,
+    ),
+    CognitiveGame(
+      id: 'trailblazer',
+      slug: 'trailblazer',
+      title: 'Trailblazer',
+      domain: CognitiveDomain.flexibility,
+      description:
+          'Connect alternating number and letter nodes (1 -> A -> 2 -> B) with rapid precision.',
+      instructions:
+          'Tap scattered nodes in alternating order: 1, then A, then 2, then B, and so forth.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.trailblazer,
+    ),
+    CognitiveGame(
+      id: 'prism-shift',
+      slug: 'prism-shift',
+      title: 'Prism Shift',
+      domain: CognitiveDomain.flexibility,
+      description:
+          'Stroop-effect executive conflict: switch between matching ink color and printed word.',
+      instructions:
+          'Look at the rule header. Select either the written word or the font ink color depending on active rule.',
+      durationMinutes: 3,
+      difficulty: 'Advanced',
+      route: AppRoutes.prismShift,
+    ),
+    CognitiveGame(
+      id: 'tracker-horizon',
+      slug: 'tracker-horizon',
+      title: 'Tracker Horizon',
+      domain: CognitiveDomain.attention,
+      description:
+          'Multiple Object Tracking: follow designated moving targets across dynamic trajectories.',
+      instructions:
+          'Observe the highlighted spheres before they move. Keep your eye on them and tap them when movement stops.',
+      durationMinutes: 3,
+      difficulty: 'Advanced',
+      route: AppRoutes.trackerHorizon,
+    ),
+    CognitiveGame(
+      id: 'flanker-strike',
+      slug: 'flanker-strike',
+      title: 'Flanker Strike',
+      domain: CognitiveDomain.attention,
+      description:
+          'Eriksen Flanker task: indicate center arrow direction while ignoring distractor arrows.',
+      instructions:
+          'Look solely at the central arrow in the row. Swipe or tap left/right to match its orientation.',
+      durationMinutes: 2,
+      difficulty: 'Intermediate',
+      route: AppRoutes.flankerStrike,
+    ),
+    CognitiveGame(
+      id: 'scale-balance',
+      slug: 'scale-balance',
+      title: 'Scale Balance',
+      domain: CognitiveDomain.speed,
+      description:
+          'Quantitative magnitude comparison: evaluate arithmetic scales under rapid time pressure.',
+      instructions:
+          'Assess the math expressions on left and right pans. Tap the heavier side or Equal.',
+      durationMinutes: 2,
+      difficulty: 'Intermediate',
+      route: AppRoutes.scaleBalance,
+    ),
+    CognitiveGame(
+      id: 'flow-math',
+      slug: 'flow-math',
+      title: 'Flow Math',
+      domain: CognitiveDomain.speed,
+      description:
+          'Mental arithmetic constraint satisfaction: deduce missing operators to balance equations.',
+      instructions:
+          'Identify which mathematical operation (+, -, *, /) makes the equation true before time expires.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.flowMath,
+    ),
+    CognitiveGame(
+      id: 'origami-unfold',
+      slug: 'origami-unfold',
+      title: 'Origami Unfold',
+      domain: CognitiveDomain.problemSolving,
+      description:
+          'Spatial rotation & mental paper folding: predict hole locations when unfolded.',
+      instructions:
+          'Observe the folded sheet and hole punch. Choose which unfolded sheet matches the opened paper.',
+      durationMinutes: 3,
+      difficulty: 'Advanced',
+      route: AppRoutes.origamiUnfold,
+    ),
+    CognitiveGame(
+      id: 'tower-of-chronos',
+      slug: 'tower-of-chronos',
+      title: 'Tower of Chronos',
+      domain: CognitiveDomain.problemSolving,
+      description:
+          'Sequential planning: transfer disc stacks across three pegs to match the target goal.',
+      instructions:
+          'Tap source and destination pegs to move discs. Match the target tower using the fewest moves possible.',
+      durationMinutes: 3,
+      difficulty: 'Advanced',
+      route: AppRoutes.towerOfChronos,
+    ),
+    CognitiveGame(
+      id: 'semantic-bridge',
+      slug: 'semantic-bridge',
+      title: 'Semantic Bridge',
+      domain: CognitiveDomain.memory,
+      description:
+          'Remote association: discover the single unifying term connecting three disparate word cues.',
+      instructions:
+          'Read the three prompt words. Determine the single word that connects all three concepts.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.semanticBridge,
+    ),
+    CognitiveGame(
+      id: 'word-rapids',
+      slug: 'word-rapids',
+      title: 'Word Rapids',
+      domain: CognitiveDomain.speed,
+      description:
+          'Lexical agility: construct valid English words from incoming letter streams under time pressure.',
+      instructions:
+          'Select scrolling letter tiles to spell valid words. Submit longer words for massive bonus multipliers.',
+      durationMinutes: 3,
+      difficulty: 'Intermediate',
+      route: AppRoutes.wordRapids,
+    ),
   ];
 
   static const List<String> _workoutTitles = [

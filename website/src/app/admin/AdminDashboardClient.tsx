@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -45,13 +45,13 @@ export function AdminDashboardClient() {
   return (
     <div className="space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             Verified Admin Session
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
             NEUROPLAY Operations Console
           </h1>
         </div>
@@ -59,14 +59,14 @@ export function AdminDashboardClient() {
         <button
           type="button"
           onClick={handleLogout}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors"
         >
           Sign Out
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
         {(["games", "flags", "support", "audit"] as const).map((tab) => (
           <button
             key={tab}
@@ -74,8 +74,8 @@ export function AdminDashboardClient() {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-colors ${
               activeTab === tab
-                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             {tab === "games" ? "Game Configurations" : tab === "flags" ? "Feature Flags" : tab === "support" ? "Support Actions" : "Audit Events"}
@@ -85,15 +85,15 @@ export function AdminDashboardClient() {
 
       {/* Tab 1: Game Configurations */}
       {activeTab === "games" && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6">
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Active Cognitive Engine Registry</h2>
+            <h2 className="text-lg font-bold text-slate-900">Active Cognitive Engine Registry</h2>
             <p className="text-xs text-slate-500">Decoupled game engine versions and bounded difficulty configurations.</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 dark:border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
+              <thead className="border-b border-slate-200 text-xs text-slate-400 uppercase tracking-wider">
                 <tr>
                   <th className="pb-3 font-semibold">Game ID</th>
                   <th className="pb-3 font-semibold">Faculty</th>
@@ -102,15 +102,15 @@ export function AdminDashboardClient() {
                   <th className="pb-3 font-semibold">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100">
                 {GAMES_DATA.map((game) => (
-                  <tr key={game.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="py-3.5 font-semibold text-slate-900 dark:text-white">{game.title} <span className="text-xs text-slate-400 font-mono">({game.id})</span></td>
-                    <td className="py-3.5 text-slate-600 dark:text-slate-400">{game.faculty}</td>
-                    <td className="py-3.5 font-mono text-xs text-emerald-600 dark:text-emerald-400">v{game.version}</td>
-                    <td className="py-3.5 text-slate-600 dark:text-slate-400 text-xs">Level 1 - 10 (Bounded)</td>
+                  <tr key={game.id} className="hover:bg-slate-50">
+                    <td className="py-3.5 font-semibold text-slate-900">{game.title} <span className="text-xs text-slate-400 font-mono">({game.id})</span></td>
+                    <td className="py-3.5 text-slate-600">{game.faculty}</td>
+                    <td className="py-3.5 font-mono text-xs text-emerald-600">v{game.version}</td>
+                    <td className="py-3.5 text-slate-600 text-xs">Level 1 - 10 (Bounded)</td>
                     <td className="py-3.5">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
                         Active
                       </span>
                     </td>
@@ -124,9 +124,9 @@ export function AdminDashboardClient() {
 
       {/* Tab 2: Feature Flags */}
       {activeTab === "flags" && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6">
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Feature Flags Manager</h2>
+            <h2 className="text-lg font-bold text-slate-900">Feature Flags Manager</h2>
             <p className="text-xs text-slate-500">Toggle live features without requiring code deployments.</p>
           </div>
 
@@ -134,12 +134,12 @@ export function AdminDashboardClient() {
             {flags.map((flag) => (
               <div
                 key={flag.id}
-                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4"
+                className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4"
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">{flag.name}</h3>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <h3 className="font-bold text-sm text-slate-900">{flag.name}</h3>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-200 text-slate-600">
                       {flag.category}
                     </span>
                   </div>
@@ -152,7 +152,7 @@ export function AdminDashboardClient() {
                   className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                     flag.enabled
                       ? "bg-emerald-600 text-white hover:bg-emerald-500"
-                      : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300"
+                      : "bg-slate-200 text-slate-600 hover:bg-slate-300"
                   }`}
                 >
                   {flag.enabled ? "ENABLED" : "DISABLED"}
@@ -165,9 +165,9 @@ export function AdminDashboardClient() {
 
       {/* Tab 3: Support Actions */}
       {activeTab === "support" && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6">
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Customer Support & GDPR Telemetry Lookup</h2>
+            <h2 className="text-lg font-bold text-slate-900">Customer Support & GDPR Telemetry Lookup</h2>
             <p className="text-xs text-slate-500">Inspect user account sync status or verify telemetry export payloads.</p>
           </div>
 
@@ -177,7 +177,7 @@ export function AdminDashboardClient() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search user ID or email..."
-              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <button
               type="submit"
@@ -188,7 +188,7 @@ export function AdminDashboardClient() {
           </form>
 
           {supportResult && (
-            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 space-y-2">
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 space-y-2">
               <div className="font-bold">Lookup Result:</div>
               <div>{supportResult}</div>
             </div>
@@ -198,15 +198,15 @@ export function AdminDashboardClient() {
 
       {/* Tab 4: Audit Logs */}
       {activeTab === "audit" && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-6">
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Administrative Audit Event Log</h2>
+            <h2 className="text-lg font-bold text-slate-900">Administrative Audit Event Log</h2>
             <p className="text-xs text-slate-500">Immutable ledger of privileged operations and security events.</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 dark:border-slate-800 text-xs text-slate-400 uppercase tracking-wider">
+              <thead className="border-b border-slate-200 text-xs text-slate-400 uppercase tracking-wider">
                 <tr>
                   <th className="pb-3 font-semibold">Timestamp</th>
                   <th className="pb-3 font-semibold">Actor</th>
@@ -215,13 +215,13 @@ export function AdminDashboardClient() {
                   <th className="pb-3 font-semibold">Correlation ID</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-slate-100 text-xs">
                 {INITIAL_AUDIT_LOGS.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <tr key={log.id} className="hover:bg-slate-50">
                     <td className="py-3 text-slate-500 font-mono">{log.timestamp}</td>
-                    <td className="py-3 font-semibold text-slate-700 dark:text-slate-300">{log.actor}</td>
-                    <td className="py-3 font-mono text-emerald-600 dark:text-emerald-400 font-bold">{log.action}</td>
-                    <td className="py-3 text-slate-600 dark:text-slate-400">{log.details}</td>
+                    <td className="py-3 font-semibold text-slate-700">{log.actor}</td>
+                    <td className="py-3 font-mono text-emerald-600 font-bold">{log.action}</td>
+                    <td className="py-3 text-slate-600">{log.details}</td>
                     <td className="py-3 font-mono text-slate-400">{log.corrId}</td>
                   </tr>
                 ))}

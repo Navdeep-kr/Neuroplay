@@ -82,7 +82,7 @@ void main() {
     });
 
     test('targets lowest rating domain for growth when skills exist', () {
-      // Memory is high, Problem Solving is low
+      // Memory is high, Problem Solving is low across problem solving catalog
       final skills = {
         'memory-matrix': SkillEstimate(
           gameId: 'memory-matrix',
@@ -92,6 +92,18 @@ void main() {
         ),
         'logic-labyrinth': SkillEstimate(
           gameId: 'logic-labyrinth',
+          continuousRating: 30,
+          recommendedDifficulty: GameDifficulty.easy,
+          sampleCount: 8,
+        ),
+        'origami-unfold': SkillEstimate(
+          gameId: 'origami-unfold',
+          continuousRating: 30,
+          recommendedDifficulty: GameDifficulty.easy,
+          sampleCount: 8,
+        ),
+        'tower-of-chronos': SkillEstimate(
+          gameId: 'tower-of-chronos',
           continuousRating: 30,
           recommendedDifficulty: GameDifficulty.easy,
           sampleCount: 8,

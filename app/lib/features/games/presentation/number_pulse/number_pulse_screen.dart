@@ -254,15 +254,15 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          backgroundColor: const Color(0xFF090D16),
+          backgroundColor: Colors.white,
           body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(0, -0.2),
                 radius: 1.3,
                 colors: [
-                  Color(0xFF230E38),
-                  Color(0xFF090D16),
+                  Color(0xFFF8FAFC),
+                  Colors.white,
                 ],
               ),
             ),
@@ -284,6 +284,7 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
                           comboStreak: _comboStreak,
                           isPractice: config.isPractice,
                           onPause: _handlePause,
+                          facultyColor: const Color(0xFFEC4899),
                         ),
                         AppSpacing.gapH24,
 
@@ -422,18 +423,18 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF00F5FF), Color(0xFFA855F7), Color(0xFFEC4899)],
+            colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
           ),
           borderRadius: AppRadii.rXl,
           border: Border.all(
             color: Colors.white,
-            width: 2.5,
+            width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00F5FF).withValues(alpha: 0.65),
-              blurRadius: 22,
-              spreadRadius: 2,
+              color: const Color(0xFF3B82F6).withValues(alpha: 0.45),
+              blurRadius: 18,
+              spreadRadius: 1,
             ),
           ],
         ),
@@ -463,16 +464,16 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+          colors: [Color(0xFFF8FAFC), Colors.white],
         ),
         borderRadius: AppRadii.rXl,
         border: Border.all(
-          color: const Color(0xFFA855F7).withValues(alpha: 0.5),
+          color: const Color(0xFFCBD5E1),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFA855F7).withValues(alpha: 0.15),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.05),
             blurRadius: 10,
           ),
         ],
@@ -482,7 +483,7 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           value != null ? _numberFormat.format(value) : '',
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: const Color(0xFF0F172A),
           ),
         ),
       ),
@@ -504,78 +505,73 @@ class _NumberPulseScreenState extends ConsumerState<NumberPulseScreen> {
           final option = trial.question.options[index];
           return Semantics(
             label: 'Option ${index + 1}: $option',
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                ),
-                borderRadius: AppRadii.rXl,
-                border: Border.all(
-                  color: const Color(0xFFA855F7).withValues(alpha: 0.6),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFA855F7).withValues(alpha: 0.2),
-                    blurRadius: 12,
+            child: SpringTouchFeedback(
+              onTap: () => _handleChoice(option),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFF8FAFC), Colors.white],
                   ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: AppRadii.rXl,
-                child: InkWell(
                   borderRadius: AppRadii.rXl,
-                  onTap: () => _handleChoice(option),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
+                  border: Border.all(
+                    color: const Color(0xFFCBD5E1),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                      blurRadius: 10,
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFA855F7), Color(0xFFEC4899)],
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFA855F7)
-                                    .withValues(alpha: 0.6),
-                                blurRadius: 6,
-                              ),
-                            ],
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFEC4899), Color(0xFFDB2777)],
                           ),
-                          child: Center(
-                            child: Text(
-                              '${index + 1}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                              ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFEC4899)
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              _numberFormat.format(option),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 24,
-                                color: Colors.white,
-                              ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            _numberFormat.format(option),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 24,
+                              color: Color(0xFF0F172A),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

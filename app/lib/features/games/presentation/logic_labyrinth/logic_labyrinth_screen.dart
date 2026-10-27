@@ -268,15 +268,15 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          backgroundColor: const Color(0xFF090D16),
+          backgroundColor: Colors.white,
           body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(0, -0.25),
                 radius: 1.3,
                 colors: [
-                  Color(0xFF041E26),
-                  Color(0xFF090D16),
+                  Color(0xFFF8FAFC),
+                  Colors.white,
                 ],
               ),
             ),
@@ -292,6 +292,7 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
                         score: _session.state.score,
                         isPractice: config.isPractice,
                         onPause: _handlePause,
+                        facultyColor: const Color(0xFF6366F1),
                       ),
                       Expanded(
                         child: Center(
@@ -468,16 +469,28 @@ class _LogicLabyrinthScreenState extends ConsumerState<LogicLabyrinthScreen> {
     required LabyrinthDirection direction,
     required String tooltip,
   }) =>
-      IconButton.filled(
-        icon: Icon(icon, size: 28),
-        tooltip: tooltip,
-        onPressed: () => _handleDirection(direction),
-        style: IconButton.styleFrom(
-          backgroundColor: const Color(0xFF00F5FF),
-          foregroundColor: const Color(0xFF090D16),
-          minimumSize: const Size(54, 54),
-          elevation: 6,
-          shadowColor: const Color(0xFF00F5FF).withValues(alpha: 0.5),
+      Tooltip(
+        message: tooltip,
+        child: SpringTouchFeedback(
+          onTap: () => _handleDirection(direction),
+          child: Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: const Color(0xFF3B82F6),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF3B82F6).withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(icon, size: 28, color: Colors.white),
+            ),
+          ),
         ),
       );
 }
@@ -496,16 +509,16 @@ class _MazePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final wallPaint = Paint()
-      ..color = const Color(0xFF0F172A)
+      ..color = const Color(0xFFF1F5F9)
       ..style = PaintingStyle.fill;
 
     final wallBorderPaint = Paint()
-      ..color = const Color(0xFF06B6D4).withValues(alpha: 0.4)
+      ..color = const Color(0xFFCBD5E1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
 
     final pathPaint = Paint()
-      ..color = const Color(0xFF090D16)
+      ..color = Colors.white
       ..style = PaintingStyle.fill;
 
     // Draw grid cells
@@ -582,7 +595,7 @@ class _MazePainter extends CustomPainter {
       canvas.drawCircle(cpRect.center, cellWidth * 0.26, cpPaint);
     }
 
-    // Draw player with glowing cyan/indigo core
+    // Draw player with glowing ultramarine core
     final playerRect = Rect.fromLTWH(
       round.playerPos.x * cellWidth,
       round.playerPos.y * cellHeight,
@@ -590,7 +603,7 @@ class _MazePainter extends CustomPainter {
       cellHeight,
     );
     final glowPaint = Paint()
-      ..color = const Color(0xFF00F5FF).withValues(alpha: 0.5)
+      ..color = const Color(0xFF3B82F6).withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(playerRect.center, cellWidth * 0.48, glowPaint);
 
@@ -602,7 +615,7 @@ class _MazePainter extends CustomPainter {
 
     final playerPaint = Paint()
       ..shader = const RadialGradient(
-        colors: [Colors.white, Color(0xFF00F5FF), Color(0xFF3B82F6)],
+        colors: [Colors.white, Color(0xFF60A5FA), Color(0xFF2563EB)],
       ).createShader(playerRect)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(playerRect.center, cellWidth * 0.30, playerPaint);

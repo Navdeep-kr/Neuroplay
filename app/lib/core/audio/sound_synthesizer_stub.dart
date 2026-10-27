@@ -11,6 +11,10 @@ void platformPlayCountdown({required bool isFinal}) {
   // Graceful fallback
 }
 
+void platformPlayClick() {
+  // Graceful fallback
+}
+
 void platformPlayFanfare() {
   // Graceful fallback
 }

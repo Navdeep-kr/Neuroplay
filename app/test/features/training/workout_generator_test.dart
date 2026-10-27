@@ -4,11 +4,10 @@ import 'package:neuroplay/features/training/domain/workout_generator.dart';
 
 void main() {
   group('WorkoutGenerator Unit Tests', () {
-    test(
-        'catalog contains all six original playable games with distinct domains',
+    test('catalog contains all 18 playable games across the cognitive domains',
         () {
       final catalog = WorkoutGenerator.catalog;
-      expect(catalog.length, 6);
+      expect(catalog.length, 18);
 
       final gameIds = catalog.map((g) => g.id).toSet();
       expect(
@@ -20,6 +19,18 @@ void main() {
           'logic-labyrinth',
           'number-pulse',
           'word-weaver',
+          'echo-sequence',
+          'constellation-recall',
+          'trailblazer',
+          'prism-shift',
+          'tracker-horizon',
+          'flanker-strike',
+          'scale-balance',
+          'flow-math',
+          'origami-unfold',
+          'tower-of-chronos',
+          'semantic-bridge',
+          'word-rapids',
         ]),
       );
 

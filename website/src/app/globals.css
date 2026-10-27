@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #f8fafc;
+  --background: #ffffff;
   --foreground: #0f172a;
   --card-bg: #ffffff;
   --card-border: #e2e8f0;
-  --mint: #10b981;
-  --mint-hover: #059669;
-  --mint-light: #ecfdf5;
+  --mint: #2563eb;
+  --mint-hover: #1d4ed8;
+  --mint-light: #eff6ff;
   --navy: #0f172a;
   --navy-muted: #64748b;
 }
@@ -26,15 +28,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0f17;
-    --foreground: #f8fafc;
-    --card-bg: #131b2a;
-    --card-border: #243048;
-    --mint: #10b981;
-    --mint-hover: #34d399;
-    --mint-light: #064e3b;
-    --navy: #f8fafc;
-    --navy-muted: #94a3b8;
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --mint: #2563eb;
+    --mint-hover: #1d4ed8;
+    --mint-light: #eff6ff;
+    --navy: #0f172a;
+    --navy-muted: #64748b;
   }
 }
 
@@ -64,6 +66,6 @@ body {
 
 /* Focus styles for keyboard navigation */
 :focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }

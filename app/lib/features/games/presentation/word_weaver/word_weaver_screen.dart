@@ -251,15 +251,15 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          backgroundColor: const Color(0xFF090D16),
+          backgroundColor: Colors.white,
           body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(0, -0.2),
                 radius: 1.3,
                 colors: [
-                  Color(0xFF0D1E3A),
-                  Color(0xFF090D16),
+                  Color(0xFFF8FAFC),
+                  Colors.white,
                 ],
               ),
             ),
@@ -281,6 +281,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                           comboStreak: _comboStreak,
                           isPractice: config.isPractice,
                           onPause: _handlePause,
+                          facultyColor: const Color(0xFF06B6D4),
                         ),
                         AppSpacing.gapH24,
 
@@ -355,13 +356,13 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
               ),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF00F5FF), Color(0xFF6366F1)],
+                  colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
                 ),
                 borderRadius: AppRadii.rFull,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00F5FF).withValues(alpha: 0.4),
-                    blurRadius: 12,
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                    blurRadius: 10,
                   ),
                 ],
               ),
@@ -369,7 +370,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
                 trial.question.category.displayName.toUpperCase(),
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF090D16),
+                  color: Colors.white,
                   letterSpacing: 1.4,
                   fontSize: 11,
                 ),
@@ -381,7 +382,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.2,
-                color: Colors.white,
+                color: const Color(0xFF0F172A),
               ),
               textAlign: TextAlign.center,
             ),
@@ -389,7 +390,7 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
             const Text(
               'Select the associated term from the same domain',
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Color(0xFF64748B),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -413,78 +414,73 @@ class _WordWeaverScreenState extends ConsumerState<WordWeaverScreen> {
           final word = trial.question.options[index];
           return Semantics(
             label: 'Option ${index + 1}: $word',
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                ),
-                borderRadius: AppRadii.rXl,
-                border: Border.all(
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF38BDF8).withValues(alpha: 0.18),
-                    blurRadius: 12,
+            child: SpringTouchFeedback(
+              onTap: () => _handleChoice(word),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFF8FAFC), Colors.white],
                   ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: AppRadii.rXl,
-                child: InkWell(
                   borderRadius: AppRadii.rXl,
-                  onTap: () => _handleChoice(word),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF00F5FF), Color(0xFF38BDF8)],
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF00F5FF)
-                                    .withValues(alpha: 0.5),
-                                blurRadius: 6,
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${index + 1}',
-                              style: const TextStyle(
-                                color: Color(0xFF0F172A),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              word,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ],
+                  border: Border.all(
+                    color: const Color(0xFFCBD5E1),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                      blurRadius: 10,
                     ),
+                  ],
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF06B6D4)
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            word,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              color: Color(0xFF0F172A),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

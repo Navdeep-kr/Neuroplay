@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:neuroplay/core/theme/app_colors.dart';
 import 'package:neuroplay/core/theme/app_radii.dart';
 import 'package:neuroplay/core/theme/app_spacing.dart';
 import 'package:neuroplay/core/widgets/app_badge.dart';
@@ -18,6 +17,7 @@ class GameHeader extends StatelessWidget {
     super.key,
     this.isPractice = false,
     this.comboStreak = 0,
+    this.facultyColor = const Color(0xFF2563EB),
   });
 
   final String title;
@@ -27,6 +27,7 @@ class GameHeader extends StatelessWidget {
   final VoidCallback onPause;
   final bool isPractice;
   final int comboStreak;
+  final Color facultyColor;
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +41,22 @@ class GameHeader extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.85),
+        color: Colors.white,
         borderRadius: AppRadii.rXl,
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: const Color(0xFFE2E8F0),
+          width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 16,
+            color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+            blurRadius: 18,
             offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: facultyColor.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -61,14 +68,24 @@ class GameHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.pause_circle_outline_rounded),
-                    iconSize: 28,
-                    color: const Color(0xFF00F5FF),
-                    tooltip: 'Pause game (Esc)',
-                    onPressed: onPause,
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(Icons.pause_rounded),
+                      iconSize: 22,
+                      color: facultyColor,
+                      tooltip: 'Pause game (Esc)',
+                      onPressed: onPause,
+                    ),
                   ),
-                  AppSpacing.gapW8,
+                  AppSpacing.gapW12,
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -77,7 +94,7 @@ class GameHeader extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
-                          color: Colors.white,
+                          color: const Color(0xFF0F172A),
                         ),
                       ),
                       Row(
@@ -85,7 +102,7 @@ class GameHeader extends StatelessWidget {
                           Text(
                             'Round $currentRound of $totalRounds',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: const Color(0xFF94A3B8),
+                              color: const Color(0xFF64748B),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -109,7 +126,7 @@ class GameHeader extends StatelessWidget {
                       duration: const Duration(milliseconds: 250),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
-                        vertical: 3,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -118,15 +135,18 @@ class GameHeader extends StatelessWidget {
                                   const Color(0xFFF59E0B),
                                   const Color(0xFFEF4444),
                                 ]
-                              : [AppColors.mint500, const Color(0xFF059669)],
+                              : [
+                                  facultyColor,
+                                  facultyColor.withValues(alpha: 0.8),
+                                ],
                         ),
                         borderRadius: AppRadii.rFull,
                         boxShadow: [
                           BoxShadow(
                             color: (comboStreak >= 4
                                     ? const Color(0xFFF59E0B)
-                                    : AppColors.mint500)
-                                .withValues(alpha: 0.4),
+                                    : facultyColor)
+                                .withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 1,
                           ),
@@ -142,7 +162,7 @@ class GameHeader extends StatelessWidget {
                             size: 14,
                             color: Colors.white,
                           ),
-                          const SizedBox(width: 2),
+                          const SizedBox(width: 3),
                           Text(
                             'x$comboStreak STREAK',
                             style: const TextStyle(
@@ -170,20 +190,19 @@ class GameHeader extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                          colors: [Color(0xFFF8FAFC), Colors.white],
                         ),
                         borderRadius: AppRadii.rFull,
                         border: Border.all(
                           color: comboStreak >= 2
-                              ? const Color(0xFF00F5FF)
-                              : const Color(0xFF334155),
+                              ? facultyColor
+                              : const Color(0xFFE2E8F0),
                           width: 1.5,
                         ),
                         boxShadow: comboStreak >= 2
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFF00F5FF)
-                                      .withValues(alpha: 0.3),
+                                  color: facultyColor.withValues(alpha: 0.18),
                                   blurRadius: 10,
                                 ),
                               ]
@@ -192,17 +211,17 @@ class GameHeader extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.stars_rounded,
                             size: 16,
-                            color: Color(0xFF00F5FF),
+                            color: facultyColor,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '${animatedValue.round()} pts',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF00F5FF),
+                              color: facultyColor,
                             ),
                           ),
                         ],
@@ -219,9 +238,8 @@ class GameHeader extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: const Color(0xFF1E293B),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(Color(0xFF00F5FF)),
+              backgroundColor: const Color(0xFFF1F5F9),
+              valueColor: AlwaysStoppedAnimation<Color>(facultyColor),
             ),
           ),
         ],
