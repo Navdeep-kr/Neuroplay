@@ -47,10 +47,15 @@ class _GameTutorialDialogState extends State<GameTutorialDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
+
     return Dialog(
       shape: const RoundedRectangleBorder(borderRadius: AppRadii.rXl),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480, maxHeight: 680),
+        constraints: BoxConstraints(
+          maxWidth: 480,
+          maxHeight: screenHeight * 0.88,
+        ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(

@@ -10,6 +10,10 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  if (pathname?.startsWith("/play")) {
+    return null;
+  }
+
   return (
     <>
       {/* Accessible skip link */}

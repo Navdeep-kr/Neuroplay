@@ -66,57 +66,63 @@ class GameHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.pause_rounded),
-                      iconSize: 22,
-                      color: facultyColor,
-                      tooltip: 'Pause game (Esc)',
-                      onPressed: onPause,
-                    ),
-                  ),
-                  AppSpacing.gapW12,
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.4,
-                          color: const Color(0xFF0F172A),
-                        ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
                       ),
-                      Row(
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.pause_rounded),
+                        iconSize: 22,
+                        color: facultyColor,
+                        tooltip: 'Pause game (Esc)',
+                        onPressed: onPause,
+                      ),
+                    ),
+                    AppSpacing.gapW12,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Round $currentRound of $totalRounds',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: const Color(0xFF64748B),
-                              fontWeight: FontWeight.w600,
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                              color: const Color(0xFF0F172A),
                             ),
                           ),
-                          if (isPractice) ...[
-                            AppSpacing.gapW8,
-                            const AppBadge(
-                              label: 'Practice',
-                            ),
-                          ],
+                          Row(
+                            children: [
+                              Text(
+                                'Round $currentRound of $totalRounds',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: const Color(0xFF64748B),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              if (isPractice) ...[
+                                AppSpacing.gapW8,
+                                const AppBadge(
+                                  label: 'Practice',
+                                ),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
               Row(
                 children: [
