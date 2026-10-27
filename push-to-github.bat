@@ -6,39 +6,30 @@ title NEUROPLAY - Push to GitHub
 set "PATH=C:\Users\HP\AppData\Local\Programs\Git\cmd;%PATH%"
 
 echo ===============================================================================
-echo                      NEUROPLAY - GITHUB UPLOADER
+echo                      NEUROPLAY - PUSH TO GITHUB
 echo ===============================================================================
 echo.
-echo Please create a new empty repository on https://github.com/new first.
-echo (Do NOT initialize it with README, .gitignore, or license)
+echo [*] Target Repository: https://github.com/Navdeep-kr/Neuroplay.git
 echo.
-set /p REPO_URL="Paste your GitHub Repository URL (e.g., https://github.com/user/repo.git): "
-
-if "%REPO_URL%"=="" (
-    echo [ERROR] No URL provided. Exiting...
-    pause
-    exit /b 1
-)
-
-echo.
-echo [*] Connecting to %REPO_URL%...
 git remote remove origin 2>nul
-git remote add origin %REPO_URL%
+git remote add origin https://github.com/Navdeep-kr/Neuroplay.git
 git branch -M main
 
 echo [*] Pushing project to GitHub...
-echo (If prompted, sign in via the GitHub browser pop-up)
+echo (A GitHub login window may pop up in your browser. Please click "Sign in / Authorize")
 echo.
+
 git push -u origin main
 
 if %ERRORLEVEL% EQU 0 (
     echo.
     echo ===============================================================================
-    echo [SUCCESS] Your project has been uploaded to GitHub!
+    echo [SUCCESS] Your project has been uploaded to GitHub successfully!
+    echo View it at: https://github.com/Navdeep-kr/Neuroplay
     echo ===============================================================================
 ) else (
     echo.
-    echo [!] Push failed. Please check the error message above.
+    echo [!] Push failed or was cancelled. If you see an authentication prompt, please sign in.
 )
 
 echo.
